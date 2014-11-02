@@ -1,0 +1,29 @@
+{
+    "name": "ttek/tk-domtemplate",
+    "type": "library",
+    "description": "A PHP DOM Template library using XML/HTML files for templates",
+    "keywords": ["Dom", "tropotek", "dom-template"],
+    "time":  "2011-12-09",
+    "license": "MIT",
+    "version": "trunk",
+    "authors": [
+        {
+            "name": "Michael Mifsud",
+            "email": "info@tropotek.com.au",
+            "homepage": "http://www.tropotek.com/"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "Dom\\": ""
+        }
+    },
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-trunk": "1.2.x-dev"
+        }
+    }
+}

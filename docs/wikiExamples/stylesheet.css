@@ -1,0 +1,87 @@
+body {
+  font-size: 80%;
+  padding: 0px 0px 0px 0px;
+  background-color: #CCC;
+  text-align: center;
+}
+
+div#content {
+  width: 800px;
+  margin: 0px auto;
+  background-color: #FFF;
+  padding: 5px 15px;
+  text-align: left;
+}
+pre {
+  border: 1px dashed #000;
+  padding: 4px 8px;
+  background-color: #EEE;
+  text-align: left;
+  overflow: auto;
+}
+
+.downloadH2 {
+  text-align: center;
+}
+.download {
+  text-align: center;
+  width: 200px;
+  margin: 0px auto;
+  padding: 10px;
+  background-color: #CCC;
+}
+
+.copyright {
+  text-align: right;
+}
+td.label {
+  vertical-align: top;
+  padding-top: 5px;
+}
+.formError {
+  border: 1px solid #F00;
+  padding: 2px;
+  margin: 2px;
+  color: #F00;
+}
+.notice {
+  border: 1px solid #090;
+  padding: 2px;
+  margin: 2px;
+  color: #090;
+}
+
+
+div.poll {
+  float: right;
+  width: 230px;
+  border: 2px solid #333;
+  padding: 4px 8px;
+  background-color: #EEE;
+}
+div.poll .title {
+  text-align: center;
+  font-size: 120%;
+  font-weight: bold;
+  border-bottom: 1px solid #333;
+  margin-bottom: 10px;
+  padding: 4px;
+}
+div.poll .question {
+  font-weight: bold;
+  text-align: center;
+  font-size: 90%;
+  margin-bottom: 10px;
+  padding: 4px;
+  border-bottom: 1px solid #333;
+}
+div.poll .pollForm {
+  
+}
+
+
+
+
+
+
+
