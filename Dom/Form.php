@@ -795,11 +795,11 @@ class FormSelect extends FormElement
     {
         $foundNodes = array();
         if ($node->nodeType == XML_ELEMENT_NODE) {
-            if ($node->nodeName == 'option' && $child->hasAttribute('selected')) {
+            if ($node->nodeName == 'option' && $node->hasAttribute('selected')) {
                 return $node;
             }
             foreach ($node->childNodes as $child) {
-                $fNode = $this->findOption($child, '');
+                $fNode = $this->findSelected($child);
                 if ($fNode != null) {
                     $foundNodes[] = $fNode;
                 }
