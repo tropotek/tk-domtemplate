@@ -36,7 +36,7 @@ class Template
      *   Node Name = 'module': All \DOMElements with the name <module></module> will be captured
      *   Attr Name = '@attr-name': All \DOMElements containing the attr name 'attr-name' will be captured
      *
-     * This can be set statticly <b>after</b> the session is set.
+     * This can be set staticily <b>after</b> the session is set.
      *
      * @var \DOMElement[]
      */
