@@ -1233,7 +1233,7 @@ class Template
         $contentNode = self::makeContentNode($html);
         $contentNode = $contentNode->firstChild;
         $contentNode = $elementDoc->importNode($contentNode, true);
-        if ($element->hasAttributes() && $preserveAttr) {
+        if ($element->hasAttributes() && $preserveAttr && $contentNode->nodeType == \XML_ELEMENT_NODE) {
             foreach ($element->attributes as $attr) {
                 $contentNode->setAttribute($attr->nodeName, $attr->nodeValue);
             }
