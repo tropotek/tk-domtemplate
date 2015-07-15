@@ -1,8 +1,8 @@
 {
-    "name": "ttek/tk-domtemplate",
+    "name": "fvas/tk-domtemplate",
     "type": "library",
     "description": "A PHP DOM Template library using XML/HTML files for templates",
-    "keywords": ["Dom", "tropotek", "dom-template"],
+    "keywords": ["Dom", "fvas", "dom-template"],
     "time":  "2011-12-09",
     "license": "MIT",
     "version": "trunk",

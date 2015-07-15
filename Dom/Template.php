@@ -1765,9 +1765,10 @@ class Repeat extends Template
      * to is original location in the parent template.
      *
      * @param string $var
+     * @param Template $destRepeat
      * @return \DOMElement The inserted node
      */
-    public function appendRepeat($var = '')
+    public function appendRepeat($var = '', Template $destRepeat = null)
     {
         if (!$this->isWritable()) {
             return;
@@ -1776,9 +1777,15 @@ class Repeat extends Template
         $this->repeatParent->setHeaderList(array_merge($this->repeatParent->getHeaderList(), $this->getHeaderList()));
 
         $appendNode = $this->repeatNode;
-        if ($var && $this->repeatParent) {
-            $appendNode = $this->repeatParent->getVarElement($var);
+        if ($var) {
+            if ($this->repeatParent) {
+                $appendNode = $this->repeatParent->getVarElement($var);
+            }
+            if ($destRepeat && $destRepeat->getVarElement($var)) {
+                $appendNode = $destRepeat->getVarElement($var);
+            }
         }
+
         $insertNode = $appendNode->ownerDocument->importNode($this->getDocument()->documentElement, true);
 
         if ($appendNode->parentNode) {
@@ -1799,19 +1806,26 @@ class Repeat extends Template
      * to is original location in the parent template.
      *
      * @param string $var
+     * @param Template $destRepeat
      * @return \DOMElement The inserted node
      */
-    public function prependRepeat($var = '')
+    public function prependRepeat($var = '', Template $destRepeat = null)
     {
         if (!$this->isWritable()) {
             return;
         }
         $this->repeatParent->setHeaderList(array_merge($this->repeatParent->getHeaderList(), $this->getHeaderList()));
         $appendNode = $this->repeatNode;
-        if ($var && $this->repeatParent) {
-            $appendNode = $this->repeatParent->getVarElement($var);
+        if ($var) {
+            if ($this->repeatParent) {
+                $appendNode = $this->repeatParent->getVarElement($var);
+            }
+            if ($destRepeat && $destRepeat->getVarElement($var)) {
+                $appendNode = $destRepeat->getVarElement($var);
+            }
         }
         $insertNode = $appendNode->ownerDocument->importNode($this->getDocument()->documentElement, true);
+
         return $insertNode;
     }
 
@@ -1829,8 +1843,19 @@ class Repeat extends Template
      * get the parent template this repeat belongs to.
      *
      * @return Template
+     * @deprecated
      */
     public function getTemplate()
+    {
+        return $this->getParentTemplate();
+    }
+
+    /**
+     * get the parent template this repeat belongs to.
+     *
+     * @return Template
+     */
+    public function getParentTemplate()
     {
         return $this->repeatParent;
     }
