@@ -18,7 +18,7 @@ Installation
 
 1. Clone the repository and include the Dom folder files into your PHP
    project or autoloader (PSR0 compatable).
-2. Use composer and include the package "dom-template": "~1.0"
+2. Use composer and include the package "ttek/tk-domtemplate": "~2.0"
 
 You should now be able to use the template classes.
 
