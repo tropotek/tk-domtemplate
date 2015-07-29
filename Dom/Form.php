@@ -14,7 +14,6 @@ namespace Dom;
  * The form package currently does not fully support element arrays.
  * It can be done but it is not fully supported or tested.
  *
- * @package \Dom
  */
 class Form
 {
@@ -25,22 +24,22 @@ class Form
     protected $form = null;
 
     /**
-     * An Array of \Dom\FormElement objects
-     * @var \Dom\FormElement[]
+     * An Array of FormElement objects
+     * @var array FormElement
      */
     protected $elements = array();
 
     /**
-     * @var \Dom\Template
+     * @var Template
      */
     protected $parent = null;
 
     /**
      * __construct
      *
-     * @param DOMElement $form
-     * @param array $element An array of form elements
-     * @param \Dom_Template $parent The parent object
+     * @param \DOMElement $form
+     * @param array $elements An array of form elements
+     * @param Template $parent The parent object
      */
     public function __construct($form, $elements, $parent)
     {
@@ -50,19 +49,21 @@ class Form
     }
 
     /**
-     * Set/unset the checkboxes and radioboxes.
-     * <b>NOTE:</b> This is called by \Dom_FormInputElement<br>
+     * Set/unset the checkboxes and radio boxes.
+     * <b>NOTE:</b> This is called by FormInput<br\>
      *   $value is not required for checkboxes
      *
      * @param string $name
      * @param string $value
+     * @return $this
      */
     public function setCheckedByValue($name, $value = '')
     {
         if (!isset($this->elements[$name])) {
-            return;
+            return $this;
         }
         $elements = $this->elements[$name];
+        /** @var \DomElement $element */
         foreach ($elements as $element) {
             if ($value !== null && ($element->getAttribute('value') == $value)) {
                 $element->setAttribute('checked', 'checked');
@@ -70,14 +71,15 @@ class Form
                 $element->removeAttribute('checked');
             }
         }
+        return $this;
     }
 
     /**
      * Return the form element with the name.
      *
      * @param string $name
-     * @param int $i optioinal index for multiple elements
-     * @return \Dom\FormElement
+     * @param int $i (optional) index for multiple elements
+     * @return FormElement
      */
     public function getFormElement($name, $i = 0)
     {
@@ -98,7 +100,7 @@ class Form
 
     /**
      * Get an array of form elements with the name value
-     * Used for radioboxes and multi select lists
+     * Used for radio boxes and multi select lists
      *
      * @param string $name
      * @return array
@@ -153,13 +155,15 @@ class Form
      * Set a URL that defines where to send the data when
      *  the submit button is pushed.
      *
-     * @param string $action
+     * @param string $value
+     * @return $this
      */
     public function setAction($value)
     {
         if ($this->form != null) {
             $this->form->setAttribute('action', Template::objectToString($value));
         }
+        return $this;
     }
 
     /**
@@ -171,13 +175,15 @@ class Form
      *   <li>'post'</li>
      * </ul>
      *
-     * @param string $method
+     * @param string $value
+     * @return $this
      */
     public function setMethod($value)
     {
         if ($this->form != null) {
             $this->form->setAttribute('method', Template::objectToString($value));
         }
+        return $this;
     }
 
     /**
@@ -190,13 +196,15 @@ class Form
      *   <li>'_top'</li>
      * </ul>
      *
-     * @param string $target
+     * @param string $value
+     * @return $this
      */
     public function setTarget($value)
     {
         if ($this->form != null) {
             $this->form->setAttribute('target', Template::objectToString($value));
         }
+        return $this;
     }
 
     /**
@@ -204,6 +212,7 @@ class Form
      *
      * @param string $name
      * @param string $value
+     * @return $this
      */
     public function appendHiddenElement($name, $value)
     {
@@ -216,31 +225,32 @@ class Form
             $this->form->appendChild($node);
             $this->form->appendChild($nl);
         }
+        return $this;
     }
 
     /**
      * Get an array of the hidden elements in this form
      *
-     * @return \Dom\FormInputElement[]
+     * @return FormInput[]
      */
     public function getHiddenElements()
     {
         $arr = array();
+        /** @var \DomElement $element */
         foreach ($this->elements as $element) {
             $type = $element->nodeName;
             $inputType = $element->getAttribute('type');
             if ($type == 'input' && $inputType == 'hidden') {
-                $arr[] = new FormInputElement($element, $this);
+                $arr[] = new FormInput($element, $this);
             }
         }
         return $arr;
     }
 
     /**
-     * Get the form name.
+     * Get the form Name Attribute.
      *
      * @return string
-     * @deprecated HTML5 this is no-longer valid XHTML. use getId()
      */
     public function getName()
     {
@@ -251,7 +261,7 @@ class Form
     }
 
     /**
-     * Get the note id attribute value if available
+     * Get the form id attribute
      *
      * @return string
      */
@@ -275,7 +285,7 @@ class Form
 
     /**
      * Check if a repeat,choice,var,form (template property) exists.
-     * @param string $property
+     *
      * @param string $key
      * @return bool
      */
@@ -301,7 +311,7 @@ class Form
 /**
  * All form elements must use this class/interface.
  *
- * @package \Dom
+ *
  */
 abstract class FormElement
 {
@@ -313,7 +323,7 @@ abstract class FormElement
     protected $element = null;
 
     /**
-     * @var \Dom\Form
+     * @var Form
      */
     protected $form = null;
 
@@ -321,7 +331,7 @@ abstract class FormElement
      * __construct
      *
      * @param \DOMElement $element
-     * @param \Dom\Form $form
+     * @param Form $form
      */
     public function __construct($element, $form = null)
     {
@@ -332,11 +342,13 @@ abstract class FormElement
     /**
      * Set the name of this element
      *
-     * @param string name
+     * @param string $name
+     * @return $this
      */
     public function setName($name)
     {
         $this->element->setAttribute('name', $name);
+        return $this;
     }
 
     /**
@@ -362,7 +374,7 @@ abstract class FormElement
     /**
      * Get the parent DOM form object
      *
-     * @return \Dom\Form
+     * @return Form
      */
     public function getForm()
     {
@@ -372,7 +384,7 @@ abstract class FormElement
     /**
      * Get the Element's Template
      *
-     * @return \Dom\Template
+     * @return Template
      */
     public function getTemplate()
     {
@@ -392,15 +404,14 @@ abstract class FormElement
      *  o textarea => the content of the textarea
      *
      * @param string $value
-     * @return \Dom\FormElement
+     * @return FormElement
      */
     abstract function setValue($value);
 
     /**
      * Return the value of the element, or the selected value.
      *
-     * @return mixed A string or an array of strings for
-     *    multiple select elements
+     * @return string|array A string or an array of strings for multiple select elements
      */
     abstract function getValue();
 
@@ -415,11 +426,14 @@ abstract class FormElement
     }
 
     /**
-     * Disable this allement, add a disable attribute to the node
+     * Disable this element, adds a disable attribute to the node
+     *
+     * @return $this
      */
     public function disable()
     {
         $this->element->setAttribute('disabled', 'disabled');
+        return $this;
     }
 
     /**
@@ -435,16 +449,21 @@ abstract class FormElement
 
     /**
      * Set the attribute name and value
-     * @param string name
-     * @param string value
+     *
+     * @param string $name
+     * @param string $value
+     * @return $this
      */
     public function setAttribute($name, $value)
     {
         $this->element->setAttribute($name, $value);
+        return $this;
     }
 
     /**
      * Set the name of this element
+     *
+     * @param string $name
      * @return string
      */
     public function getAttribute($name)
@@ -456,7 +475,6 @@ abstract class FormElement
 /**
  * A class that handle a forms input element.
  *
- * @package \Dom
  */
 class FormInput extends FormElement
 {
@@ -465,6 +483,7 @@ class FormInput extends FormElement
      * Set the checked attribute of an element
      *
      * @param bool $b
+     * @return $this
      */
     public function setChecked($b)
     {
@@ -473,6 +492,7 @@ class FormInput extends FormElement
         } else {
             $this->element->removeAttribute('checked');
         }
+        return $this;
     }
 
     /**
@@ -489,7 +509,7 @@ class FormInput extends FormElement
      * Set the value of this form element.
      *
      * @param string $value
-     * @return \Dom\FormInput
+     * @return FormInput
      */
     public function setValue($value)
     {
@@ -502,7 +522,7 @@ class FormInput extends FormElement
     }
 
     /**
-     * Return the value of theis form element
+     * Return the value of this form element
      *
      * @return string
      */
@@ -516,7 +536,7 @@ class FormInput extends FormElement
 /**
  * A class that handles a forms textarea element.
  *
- * @package \Dom
+ *
  */
 class FormTextarea extends FormElement
 {
@@ -549,7 +569,6 @@ class FormTextarea extends FormElement
 /**
  * A class that handle a forms select element.
  *
- * @package \Dom
  */
 class FormSelect extends FormElement
 {
@@ -576,8 +595,8 @@ class FormSelect extends FormElement
      * If no value is supplied the text parameter is used as the value.
      *
      * NOTE: Ensure no comment nodes are in the select's node tree.
-     * @param string The text shown in the dropdown
-     * @param string The value for the select option
+     * @param string $text The text shown in the dropdown
+     * @param string $value The value for the select option
      * @param string $optGroup Use this optgroup if it exists
      * @return \DOMElement
      */
@@ -619,7 +638,7 @@ class FormSelect extends FormElement
      * Append an 'OptGroup' to the base node or the optGroup
      *
      *
-     * @param string The label for the optGroup
+     * @param string $label The label for the optGroup
      * @param string $optGroup Append to this optgroup if it exists
      * @return \DOMElement
      */
@@ -648,8 +667,8 @@ class FormSelect extends FormElement
     /**
      * Set the selected value of the form element
      *
-     * @param mixed $value A string for single, an array for multiple
-     * @return \Dom\FormSelect
+     * @param string|array $value A string for single, an array for multiple
+     * @return $this
      */
     public function setValue($value)
     {
@@ -701,28 +720,31 @@ class FormSelect extends FormElement
     /**
      * Clear this 'select' element of all its 'option' elements.
      *
+     * @return $this
      */
     public function removeOptions()
     {
         while ($this->element != null && $this->element->hasChildNodes()) {
             $this->element->removeChild($this->element->childNodes->item(0));
         }
+        return $this;
     }
 
     /**
      * Clear all selected elements
      *
+     * @return $this
      */
     public function clearSelected()
     {
         $this->clearSelectedFunction($this->element);
+        return $this;
     }
 
     /**
      * Find the opt group node with the name
      *
      * @param \DOMElement $node
-     * @param string $name
      * @return \DOMElement
      */
     private function clearSelectedFunction($node)
@@ -735,6 +757,7 @@ class FormSelect extends FormElement
                 $this->clearSelectedFunction($child);
             }
         }
+        return $this;
     }
 
     /**
@@ -821,10 +844,11 @@ class FormSelect extends FormElement
 
     /**
      * Set the select list to handle multiple selections
-     * <b>NOTE:</b> When multiple is dissabled and multiple elements are selected
+     * <b>NOTE:</b> When multiple is disabled and multiple elements are selected
      *  it behaviour is unknown and browser specific.
      *
      * @param bool $b
+     * @return $this
      */
     public function enableMultiple($b)
     {
@@ -833,12 +857,13 @@ class FormSelect extends FormElement
         } else {
             $this->element->removeAttribute('multiple');
         }
+        return $this;
     }
 
     /**
      * Return if this is a multiple select or not.
      *
-     * @return bool Returns true if muliple selects are allowed
+     * @return bool Returns true if multiple selects are allowed
      */
     public function isMultiple()
     {

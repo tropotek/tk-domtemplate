@@ -7,8 +7,7 @@
 namespace Dom;
 
 /**
- * \Dom\Exception
- * 
- * @package Dom
+ * Dom Template Exception
+ *
  */
 class Exception extends \Exception { }
