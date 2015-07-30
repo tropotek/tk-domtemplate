@@ -7,6 +7,10 @@
  */
 namespace Dom;
 
+use Dom\Form\Element;
+use Dom\Form\Input;
+use Dom\Form\Select;
+use Dom\Form\Textarea;
 
 /**
  * The form package make an API available for rendering a form and its elements
@@ -24,8 +28,8 @@ class Form
     protected $form = null;
 
     /**
-     * An Array of FormElement objects
-     * @var array FormElement
+     * An Array of Element objects
+     * @var array Element
      */
     protected $elements = array();
 
@@ -50,7 +54,7 @@ class Form
 
     /**
      * Set/unset the checkboxes and radio boxes.
-     * <b>NOTE:</b> This is called by FormInput<br\>
+     * <b>NOTE:</b> This is called by Input<br\>
      *   $value is not required for checkboxes
      *
      * @param string $name
@@ -79,7 +83,7 @@ class Form
      *
      * @param string $name
      * @param int $i (optional) index for multiple elements
-     * @return FormElement
+     * @return Element
      */
     public function getFormElement($name, $i = 0)
     {
@@ -89,11 +93,11 @@ class Form
         $element = $this->elements[$name][$i];
         $type = $element->nodeName;
         if ($type == 'input') {
-            return new FormInput($element, $this);
+            return new Input($element, $this);
         } elseif ($type == 'textarea') {
-            return new FormTextarea($element, $this);
+            return new Textarea($element, $this);
         } elseif ($type == 'select') {
-            return new FormSelect($element, $this);
+            return new Select($element, $this);
         }
         return null;
     }
@@ -116,13 +120,13 @@ class Form
             $element = $this->elements[$name][$i];
             $type = $element->nodeName;
             if ($type == 'input') {
-                $nodeList[] = new FormInput($element, $this);
+                $nodeList[] = new Input($element, $this);
             } else {
                 if ($type == 'textarea') {
-                    $nodeList[] = new FormTextarea($element, $this);
+                    $nodeList[] = new Textarea($element, $this);
                 } else {
                     if ($type == 'select') {
-                        $nodeList[] = new FormSelect($element, $this);
+                        $nodeList[] = new Select($element, $this);
                     }
                 }
             }
@@ -231,7 +235,7 @@ class Form
     /**
      * Get an array of the hidden elements in this form
      *
-     * @return FormInput[]
+     * @return Input[]
      */
     public function getHiddenElements()
     {
@@ -241,7 +245,7 @@ class Form
             $type = $element->nodeName;
             $inputType = $element->getAttribute('type');
             if ($type == 'input' && $inputType == 'hidden') {
-                $arr[] = new FormInput($element, $this);
+                $arr[] = new Input($element, $this);
             }
         }
         return $arr;
@@ -300,7 +304,7 @@ class Form
     /**
      * Get the parent template for this form
      *
-     * @return \Dom\Template
+     * @return Template
      */
     public function getTemplate()
     {
@@ -308,565 +312,3 @@ class Form
     }
 }
 
-/**
- * All form elements must use this class/interface.
- *
- *
- */
-abstract class FormElement
-{
-
-    /**
-     * This could be a single \DOMElement or an array of \DOMElement
-     * @var \DOMElement
-     */
-    protected $element = null;
-
-    /**
-     * @var Form
-     */
-    protected $form = null;
-
-    /**
-     * __construct
-     *
-     * @param \DOMElement $element
-     * @param Form $form
-     */
-    public function __construct($element, $form = null)
-    {
-        $this->element = $element;
-        $this->form = $form;
-    }
-
-    /**
-     * Set the name of this element
-     *
-     * @param string $name
-     * @return $this
-     */
-    public function setName($name)
-    {
-        $this->element->setAttribute('name', $name);
-        return $this;
-    }
-
-    /**
-     * Get the name of this element
-     *
-     * @return string The name of this element.
-     */
-    public function getName()
-    {
-        return $this->element->getAttribute('name');
-    }
-
-    /**
-     * Get the \DomElement node for this form element
-     *
-     * @return \DOMElement
-     */
-    public function getNode()
-    {
-        return $this->element;
-    }
-
-    /**
-     * Get the parent DOM form object
-     *
-     * @return Form
-     */
-    public function getForm()
-    {
-        return $this->form;
-    }
-
-    /**
-     * Get the Element's Template
-     *
-     * @return Template
-     */
-    public function getTemplate()
-    {
-        if ($this->form) {
-            return $this->form->getTemplate();
-        }
-        return null;
-    }
-
-    /**
-     * Set the value of a form element.
-     *
-     * Set value behaves different for different elements:
-     *  o input => This is the element value attribute
-     *  o checkbox/radio => The value to check/select
-     *  o select => The value of the option to be selected
-     *  o textarea => the content of the textarea
-     *
-     * @param string $value
-     * @return FormElement
-     */
-    abstract function setValue($value);
-
-    /**
-     * Return the value of the element, or the selected value.
-     *
-     * @return string|array A string or an array of strings for multiple select elements
-     */
-    abstract function getValue();
-
-    /**
-     * Return the form element type attribute
-     *
-     * @return string
-     */
-    public function getType()
-    {
-        return $this->element->getAttribute('type');
-    }
-
-    /**
-     * Disable this element, adds a disable attribute to the node
-     *
-     * @return $this
-     */
-    public function disable()
-    {
-        $this->element->setAttribute('disabled', 'disabled');
-        return $this;
-    }
-
-    /**
-     * get the disabled state of this node
-     *
-     * @return bool
-     */
-    public function isDisabled()
-    {
-        return $this->element->hasAttribute('disabled');
-
-    }
-
-    /**
-     * Set the attribute name and value
-     *
-     * @param string $name
-     * @param string $value
-     * @return $this
-     */
-    public function setAttribute($name, $value)
-    {
-        $this->element->setAttribute($name, $value);
-        return $this;
-    }
-
-    /**
-     * Set the name of this element
-     *
-     * @param string $name
-     * @return string
-     */
-    public function getAttribute($name)
-    {
-        return $this->element->getAttribute($name);
-    }
-}
-
-/**
- * A class that handle a forms input element.
- *
- */
-class FormInput extends FormElement
-{
-
-    /**
-     * Set the checked attribute of an element
-     *
-     * @param bool $b
-     * @return $this
-     */
-    public function setChecked($b)
-    {
-        if ($b) {
-            $this->element->setAttribute('checked', 'checked');
-        } else {
-            $this->element->removeAttribute('checked');
-        }
-        return $this;
-    }
-
-    /**
-     * Get the checked state of this element
-     *
-     * @return bool
-     */
-    public function isChecked()
-    {
-        return $this->element->hasAttribute('checked');
-    }
-
-    /**
-     * Set the value of this form element.
-     *
-     * @param string $value
-     * @return FormInput
-     */
-    public function setValue($value)
-    {
-        if ($this->getType() == 'checkbox' || $this->getType() == 'radio') {
-            $this->form->setCheckedByValue($this->getName(), Template::objectToString($value));
-        } else {
-            $this->element->setAttribute('value', Template::objectToString($value));
-        }
-        return $this;
-    }
-
-    /**
-     * Return the value of this form element
-     *
-     * @return string
-     */
-    public function getValue()
-    {
-        return $this->element->getAttribute('value');
-    }
-
-}
-
-/**
- * A class that handles a forms textarea element.
- *
- *
- */
-class FormTextarea extends FormElement
-{
-
-    /**
-     * Set the value of this form element
-     *
-     * @param string $value
-     * @return \Dom\FormTextarea
-     */
-    public function setValue($value)
-    {
-        $dom = $this->element->ownerDocument;
-        $textNode = $dom->createTextNode($value);
-        $this->element->appendChild($textNode);
-        return $this;
-    }
-
-    /**
-     * Get the current text in the textarea
-     *
-     * @return string
-     */
-    public function getValue()
-    {
-        return $this->element->nodeValue;
-    }
-}
-
-/**
- * A class that handle a forms select element.
- *
- */
-class FormSelect extends FormElement
-{
-
-    /**
-     * set to false to add spaces (&#160; or &nbsp;)
-     * @var bool
-     */
-    private $useTextNode = true;
-
-    /**
-     * Use Text Nodes, Set to True by default
-     *
-     * @param bool $b
-     */
-    public function useTextNodes($b)
-    {
-        $this->useTextNode = $b;
-    }
-
-    /**
-     * Append an 'Option' to this 'Select' object
-     *
-     * If no value is supplied the text parameter is used as the value.
-     *
-     * NOTE: Ensure no comment nodes are in the select's node tree.
-     * @param string $text The text shown in the dropdown
-     * @param string $value The value for the select option
-     * @param string $optGroup Use this optgroup if it exists
-     * @return \DOMElement
-     */
-    public function appendOption($text, $value = null, $optGroup = '')
-    {
-        $doc = $this->element->ownerDocument;
-        $nl = $doc->createTextNode("\n");
-        $option = $doc->createElement('option');
-        if ($value === null) {
-            $option->setAttribute('value', $text);
-        } else {
-            $option->setAttribute('value', Template::objectToString($value));
-        }
-
-        if ($this->useTextNode) {
-            $text_el = $doc->createTextNode($text);
-            $option->appendChild($text_el);
-        } else {
-            $text = preg_replace('/&( )/', '&amp; ', $text);
-            $option->nodeValue = $text;
-        }
-
-        $optGroupNode = null;
-        if ($optGroup != null) {
-            $optGroupNode = $this->findOptGroup($this->element, $optGroup);
-        }
-        if ($optGroupNode != null) {
-            $optGroupNode->appendChild($nl);
-            $optGroupNode->appendChild($option);
-        } else {
-            $this->element->appendChild($nl);
-            $this->element->appendChild($option);
-        }
-
-        return $option;
-    }
-
-    /**
-     * Append an 'OptGroup' to the base node or the optGroup
-     *
-     *
-     * @param string $label The label for the optGroup
-     * @param string $optGroup Append to this optgroup if it exists
-     * @return \DOMElement
-     */
-    public function appendOptGroup($label, $optGroup = '')
-    {
-        $doc = $this->element->ownerDocument;
-        $nl = $doc->createTextNode("\n");
-        $option = $doc->createElement('optgroup');
-
-        $option->setAttribute('label', $label);
-
-        $optGroupNode = null;
-        if ($optGroup != null) {
-            $optGroupNode = $this->findOptGroup($this->element, $optGroup);
-        }
-        if ($optGroupNode != null) {
-            $optGroupNode->appendChild($nl);
-            $optGroupNode->appendChild($option);
-        } else {
-            $this->element->appendChild($nl);
-            $this->element->appendChild($option);
-        }
-        return $option;
-    }
-
-    /**
-     * Set the selected value of the form element
-     *
-     * @param string|array $value A string for single, an array for multiple
-     * @return $this
-     */
-    public function setValue($value)
-    {
-        if (is_array($value)) {
-            if ($this->isMultiple()) {
-                foreach ($value as $v) {
-                    $option = $this->findOption($this->element, $v);
-                    if ($option != null) {
-                        $option->setAttribute('selected', 'selected');
-                    }
-                }
-            } else {
-                $option = $this->findOption($this->element, $value[0]);
-                if ($option != null) {
-                    $option->setAttribute('selected', 'selected');
-                }
-            }
-        } else {
-            if (!$this->isMultiple()) {
-                $this->clearSelected();
-            }
-            $option = $this->findOption($this->element, $value);
-            if ($option != null) {
-                $option->setAttribute('selected', 'selected');
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * Return the selected value,
-     * Will return an array if  multiple select is enabled.
-     *
-     * @return \DOMNode Returns null if nothing selected.
-     */
-    public function getValue()
-    {
-        $selected = $this->findSelected($this->element);
-        if (count($selected) > 0) {
-            if ($this->isMultiple()) {
-                return $selected;
-            } else {
-                return $selected[0];
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Clear this 'select' element of all its 'option' elements.
-     *
-     * @return $this
-     */
-    public function removeOptions()
-    {
-        while ($this->element != null && $this->element->hasChildNodes()) {
-            $this->element->removeChild($this->element->childNodes->item(0));
-        }
-        return $this;
-    }
-
-    /**
-     * Clear all selected elements
-     *
-     * @return $this
-     */
-    public function clearSelected()
-    {
-        $this->clearSelectedFunction($this->element);
-        return $this;
-    }
-
-    /**
-     * Find the opt group node with the name
-     *
-     * @param \DOMElement $node
-     * @return \DOMElement
-     */
-    private function clearSelectedFunction($node)
-    {
-        if ($node->nodeType == \XML_ELEMENT_NODE) {
-            if ($node->nodeName == 'option' && $node->hasAttribute('selected')) {
-                $node->removeAttribute('selected');
-            }
-            foreach ($node->childNodes as $child) {
-                $this->clearSelectedFunction($child);
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * Find the opt group node with the name
-     *
-     * @param \DOMElement $node
-     * @param string $name
-     * @return \DOMElement
-     */
-    public function findOptGroup($node, $name)
-    {
-        $foundNode = null;
-        if ($node->nodeType == \XML_ELEMENT_NODE) {
-            if ($node->nodeName == 'optgroup' && $node->getAttribute('label') == $name) {
-                return $node;
-            }
-            foreach ($node->childNodes as $child) {
-                $fNode = $this->findOptGroup($child, $name);
-                if ($fNode != null) {
-                    $foundNode = $fNode;
-                }
-            }
-        }
-        return $foundNode;
-    }
-
-    /**
-     * Find an option node
-     *
-     * @param \DOMElement $node
-     * @param string $value
-     * @return \DOMElement
-     */
-    public function findOption($node, $value)
-    {
-        $foundNode = null;
-        if ($node->nodeType == \XML_ELEMENT_NODE) {
-            if ($node->nodeName == 'option' && $node->getAttribute('value') == $value) {
-                return $node;
-            }
-            foreach ($node->childNodes as $child) {
-                $fNode = $this->findOption($child, $value);
-                if ($fNode != null) {
-                    $foundNode = $fNode;
-                }
-            }
-        }
-        return $foundNode;
-    }
-
-    /**
-     * Find the selected values to this select box
-     *
-     * @param \DOMElement $node
-     * @return array
-     */
-    public function findSelected($node)
-    {
-        $foundNodes = array();
-        if ($node->nodeType == XML_ELEMENT_NODE) {
-            if ($node->nodeName == 'option' && $node->hasAttribute('selected')) {
-                return $node;
-            }
-            foreach ($node->childNodes as $child) {
-                $fNode = $this->findSelected($child);
-                if ($fNode != null) {
-                    $foundNodes[] = $fNode;
-                }
-            }
-        }
-        return $foundNodes;
-    }
-
-    /**
-     * Check if the opt group exists
-     *
-     * @param string $name
-     * @return bool
-     */
-    public function optGroupExists($name)
-    {
-        return $this->findOptGroup($this->element, $name) != null;
-    }
-
-    /**
-     * Set the select list to handle multiple selections
-     * <b>NOTE:</b> When multiple is disabled and multiple elements are selected
-     *  it behaviour is unknown and browser specific.
-     *
-     * @param bool $b
-     * @return $this
-     */
-    public function enableMultiple($b)
-    {
-        if ($b) {
-            $this->element->setAttribute('multiple', 'multiple');
-        } else {
-            $this->element->removeAttribute('multiple');
-        }
-        return $this;
-    }
-
-    /**
-     * Return if this is a multiple select or not.
-     *
-     * @return bool Returns true if multiple selects are allowed
-     */
-    public function isMultiple()
-    {
-        return $this->element->hasAttribute('multiple');
-    }
-}

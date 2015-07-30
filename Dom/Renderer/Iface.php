@@ -7,7 +7,7 @@
 namespace Dom;
 
 /**
- * A \DomTemplate Renderer interface
+ * Template Renderer interface
  *
  * @package Dom
  */

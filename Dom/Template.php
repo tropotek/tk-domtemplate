@@ -931,7 +931,7 @@ class Template
      * In the form of:
      *  <$elementName $attributes[$key]="$attributes[$key].$value">$value</$elementName>
      *
-     * NOTE: Only allows unique headers. An md5 hash is refrenced from all input parameters.
+     * NOTE: Only allows unique headers. An md5 hash is referenced from all input parameters.
      *  Any duplicate headers are discarded.
      *
      * @param string $elementName

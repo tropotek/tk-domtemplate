@@ -4,7 +4,9 @@
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  */
-namespace Dom;
+namespace Dom\Renderer;
+
+use Dom\Template;
 
 /**
  * For classes that render dom templates.
@@ -19,14 +21,13 @@ namespace Dom;
  * be a new template and will have to be inserted into its parent using the \Dom_Template::insertTemplate()
  * method.
  *
- * @package Dom
  * @TODO: This object is currently under development and may change..
  */
-class ObjectRenderer implements RendererInterface
+class AutoRenderer implements RendererInterface
 {
 
     /**
-     * @var \Dom\Template
+     * @var Template
      */
     protected $template = null;
 
@@ -40,7 +41,7 @@ class ObjectRenderer implements RendererInterface
      * Constructor
      *
      * @param array $data
-     * @param \Dom\Template $template
+     * @param Template $template
      */
     public function __construct($template = null, $data = null)
     {
@@ -56,7 +57,7 @@ class ObjectRenderer implements RendererInterface
     /**
      * Test if an array key exists in the renderer data list
      *
-     * @param string $key
+     * @param $name
      * @return bool
      */
     public function exists($name)
@@ -89,11 +90,10 @@ class ObjectRenderer implements RendererInterface
 
     /**
      * Execute the renderer.
-     * This method can optionally return a \Dom_Template
+     * This method can optionally return a Template Object
      * or HTML/XML string depending on your framework requirements
      *
-     * @param \Dom\Template $template
-     * @return \Dom\Template | string
+     * @return Template | string
      */
     public function show()
     {
@@ -112,11 +112,12 @@ class ObjectRenderer implements RendererInterface
     }
 
 
-
     /**
      * Render all vars found in the template
      *
-     * @param \Dom\Template $template
+     * @param Template    $template
+     * @param string|null $varVal
+     * @return $this
      */
     protected function showRepeat($template, $varVal = null)
     {
@@ -132,12 +133,15 @@ class ObjectRenderer implements RendererInterface
                 }
             }
         }
+        return $this;
     }
 
     /**
      * Render all vars found in the template
      *
-     * @param \Dom\Template $template
+     * @param Template $template
+     * @param string|null $varVal
+     * @return $this
      */
     protected function showChoice($template, $varVal = null)
     {
@@ -148,12 +152,16 @@ class ObjectRenderer implements RendererInterface
                 $template->setChoice($paramStr);
             }
         }
+        return $this;
     }
 
     /**
      * Render all vars found in the template
      *
-     * @param \Dom\Template $template
+     * @param Template    $template
+     * @param string|null $varVal
+     * @return $this
+     * @throws Exception
      */
     protected function showVars($template, $varVal = null)
     {
@@ -190,14 +198,15 @@ class ObjectRenderer implements RendererInterface
                     $template->appendText($paramStr, $paramValue);
             }
         }
-
+        return $this;
     }
 
     /**
      * getParameter
      *
      * @param string $rawParam
-     * @param mixed $varval
+     * @param string|null $varVal
+     * @return mixed
      */
     protected function getParameter($rawParam, $varVal = null)
     {
@@ -251,7 +260,7 @@ class ObjectRenderer implements RendererInterface
     }
 
     /**
-     * Get the string from an ojbect/array/string...
+     * Get the string from an object/array/string...
      *
      * @param mixed $val
      * @param int $i Used to get the index from an array Default 0 the first item
@@ -279,16 +288,16 @@ class ObjectRenderer implements RendererInterface
     }
 
 
-
-
     /**
      * Set a new template for this renderer.
      *
-     * @param \Dom\Template $template
+     * @param Template $template
+     * @return $this
      */
     public function setTemplate($template)
     {
         $this->template = $template;
+        return $this;
     }
 
     /**
@@ -297,7 +306,7 @@ class ObjectRenderer implements RendererInterface
      * to get a template if non exsits.
      * Use this for objects that use internal templates.
      *
-     * @return \Dom\Template
+     * @return Template
      */
     public function getTemplate()
     {
@@ -326,21 +335,22 @@ class ObjectRenderer implements RendererInterface
 
 
     /**
-     * toString
+     * Parse the template with the supplied params
      *
+     * @param array $params
      * @return string
      */
-    public function toString($arr = null)
+    public function toString($params = null)
     {
         $str = "";
         $ext = true;
-        if (!$arr) {
+        if (!$params) {
             $ext = false;
-            $arr = (array)$this->data;
+            $params = (array)$this->data;
         }
 
-        ksort($arr);
-        foreach ($arr as $k => $v) {
+        ksort($params);
+        foreach ($params as $k => $v) {
             if (is_object($v)) {
                 $str .= "[$k] => {" . get_class($v) . "}\n";
             } elseif (is_array($v)) {

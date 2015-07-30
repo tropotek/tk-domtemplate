@@ -6,6 +6,8 @@
  */
 namespace Dom;
 
+use Dom\Template;
+
 /**
  * For classes that render dom templates.
  *
@@ -19,13 +21,13 @@ namespace Dom;
  * be a new template and will have to be inserted into its parent using the \Dom_Template::insertTemplate()
  * method.
  *
- * @package Dom
+ *
  */
 abstract class Renderer implements RendererInterface
 {
 
     /**
-     * @var \Dom\Template
+     * @var Template
      */
     protected $template = null;
 
@@ -35,7 +37,7 @@ abstract class Renderer implements RendererInterface
     /**
      * Set a new template for this renderer.
      *
-     * @param \Dom\Template $template
+     * @param Template $template
      */
     public function setTemplate($template)
     {
@@ -45,10 +47,10 @@ abstract class Renderer implements RendererInterface
     /**
      * Get the template
      * This method will try to call the magic method __makeTemplate
-     * to get a template if non exsits.
+     * to get a template if non exits.
      * Use this for objects that use internal templates.
      *
-     * @return \Dom\Template
+     * @return Template
      */
     public function getTemplate()
     {
