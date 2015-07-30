@@ -1,9 +1,4 @@
 <?php
-/*
- * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
- */
 namespace Dom;
 
 use Dom\Template;
@@ -22,6 +17,9 @@ use Dom\Template;
  * method.
  *
  *
+ * @author Michael Mifsud <info@tropotek.com>
+ * @link http://www.tropotek.com/
+ * @license Copyright 2007 Michael Mifsud
  */
 abstract class Renderer implements RendererInterface
 {

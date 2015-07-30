@@ -1,15 +1,12 @@
 <?php
-/*
- * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
- */
 namespace Dom;
 
 /**
  * Template Renderer interface
  *
- * @package Dom
+ * @author Michael Mifsud <info@tropotek.com>
+ * @link http://www.tropotek.com/
+ * @license Copyright 2007 Michael Mifsud
  */
 interface RendererInterface
 {

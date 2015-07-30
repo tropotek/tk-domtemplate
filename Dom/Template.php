@@ -1,10 +1,4 @@
 <?php
-/*
- * @author Michael Mifsud
- * @author Darryl Ross
- * @link http://www.domtemplate.com/
- * @license Copyright 2007
- */
 
 namespace Dom;
 
@@ -23,6 +17,10 @@ namespace Dom;
  *   template system has been optimized for speed and there is a
  *   feeling that caching will introduce non required overhead.
  *
+ * @author Michael Mifsud
+ * @author Darryl Ross
+ * @link http://www.domtemplate.com/
+ * @license Copyright 2007
  */
 class Template
 {

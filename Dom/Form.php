@@ -1,10 +1,4 @@
 <?php
-/*
- * @author Michael Mifsud
- * @author Darryl Ross
- * @link http://www.domtemplate.com/
- * @license Copyright 2007
- */
 namespace Dom;
 
 use Dom\Form\Element;
@@ -18,6 +12,10 @@ use Dom\Form\Textarea;
  * The form package currently does not fully support element arrays.
  * It can be done but it is not fully supported or tested.
  *
+ * @author Michael Mifsud
+ * @author Darryl Ross
+ * @link http://www.domtemplate.com/
+ * @license Copyright 2007
  */
 class Form
 {

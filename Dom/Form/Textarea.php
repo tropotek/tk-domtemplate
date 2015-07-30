@@ -1,10 +1,4 @@
 <?php
-/*
- * @author Michael Mifsud
- * @author Darryl Ross
- * @link http://www.domtemplate.com/
- * @license Copyright 2007
- */
 namespace Dom\Form;
 
 use Dom\Form;
@@ -15,6 +9,10 @@ use Dom\Template;
  * A class that handles a forms textarea element.
  *
  *
+ * @author Michael Mifsud
+ * @author Darryl Ross
+ * @link http://www.domtemplate.com/
+ * @license Copyright 2007
  */
 class Textarea extends Element
 {

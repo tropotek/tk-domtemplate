@@ -1,9 +1,4 @@
 <?php
-/*
- * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
- */
 namespace Dom\Renderer;
 
 use Dom\Template;
@@ -22,6 +17,9 @@ use Dom\Template;
  * method.
  *
  * @TODO: This object is currently under development and may change..
+ * @author Michael Mifsud <info@tropotek.com>
+ * @link http://www.tropotek.com/
+ * @license Copyright 2007 Michael Mifsud
  */
 class AutoRenderer implements RendererInterface
 {

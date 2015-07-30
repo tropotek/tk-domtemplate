@@ -1,10 +1,4 @@
 <?php
-/*
- * @author Michael Mifsud
- * @author Darryl Ross
- * @link http://www.domtemplate.com/
- * @license Copyright 2007
- */
 namespace Dom\Form;
 
 use Dom\Form;
@@ -13,6 +7,10 @@ use Dom\Template;
 /**
  * A class that handle a forms select element.
  *
+ * @author Michael Mifsud
+ * @author Darryl Ross
+ * @link http://www.domtemplate.com/
+ * @license Copyright 2007
  */
 class Select extends Element
 {

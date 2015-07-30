@@ -1,10 +1,4 @@
 <?php
-/*
- * @author Michael Mifsud
- * @author Darryl Ross
- * @link http://www.domtemplate.com/
- * @license Copyright 2007
- */
 namespace Dom\Form;
 
 use Dom\Form;
@@ -14,6 +8,10 @@ use Dom\Template;
  * All form elements must use this class/interface.
  *
  *
+ * @author Michael Mifsud
+ * @author Darryl Ross
+ * @link http://www.domtemplate.com/
+ * @license Copyright 2007
  */
 abstract class Element
 {
