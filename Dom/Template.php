@@ -14,8 +14,6 @@ namespace Dom;
  * NOTE: `var` names should begin with '__' because they are
  *   considered reserved for the template system's internal functions.
  *
- *
- *
  * Caching: After long discussions and a number of tests regarding
  *   the caching of templates, it has been decided to not implement
  *   caching at this level. Developers can implement their own method
