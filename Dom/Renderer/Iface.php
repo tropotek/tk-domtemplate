@@ -1,5 +1,5 @@
 <?php
-namespace Dom;
+namespace Dom\Renderer;
 
 /**
  * Template Renderer interface
@@ -8,7 +8,7 @@ namespace Dom;
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  */
-interface RendererInterface
+interface Iface
 {
 
     /**

@@ -48,6 +48,20 @@ class Form
         $this->form = $form;
         $this->parent = $parent;
         $this->elements = $elements;
+
+    }
+
+    /**
+     * Has the form been submitted
+     *
+     * @return bool
+     */
+    public function isSubmitted()
+    {
+        if (isset($_REQUEST['domform-'.$this->getId()])) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -85,7 +99,7 @@ class Form
      */
     public function getFormElement($name, $i = 0)
     {
-        if (!$this->elementExists($name)) {
+        if (!$this->formElementExists($name)) {
             return null;
         }
         $element = $this->elements[$name][$i];
@@ -109,7 +123,7 @@ class Form
      */
     public function getFormElementList($name)
     {
-        if (!$this->elementExists($name)) {
+        if (!$this->formElementExists($name)) {
             return array();
         }
         $nodeList = array();
@@ -141,6 +155,20 @@ class Form
     public function getNumFormElements($name)
     {
         return count($this->elements[$name]);
+    }
+
+    /**
+     * Check if a repeat,choice,var,form (template property) exists.
+     *
+     * @param string $key
+     * @return bool
+     */
+    public function formElementExists($key)
+    {
+        if (!array_key_exists($key, $this->elements)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -226,6 +254,7 @@ class Form
             $node->setAttribute('value', Template::objectToString($value));
             $this->form->appendChild($node);
             $this->form->appendChild($nl);
+            $this->elements[$name][] = $node;
         }
         return $this;
     }
@@ -283,20 +312,6 @@ class Form
     public function getNode()
     {
         return $this->form;
-    }
-
-    /**
-     * Check if a repeat,choice,var,form (template property) exists.
-     *
-     * @param string $key
-     * @return bool
-     */
-    private function elementExists($key)
-    {
-        if (!array_key_exists($key, $this->elements)) {
-            return false;
-        }
-        return true;
     }
 
     /**

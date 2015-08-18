@@ -21,7 +21,7 @@ use Dom\Template;
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  */
-class AutoRenderer implements RendererInterface
+class AutoRenderer implements Iface
 {
 
     /**

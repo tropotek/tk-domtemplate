@@ -1,5 +1,5 @@
 <?php
-namespace Dom;
+namespace Dom\Renderer;
 
 use Dom\Template;
 
@@ -21,7 +21,7 @@ use Dom\Template;
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  */
-abstract class Renderer implements RendererInterface
+abstract class Renderer implements Iface
 {
 
     /**
