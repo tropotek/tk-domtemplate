@@ -48,7 +48,7 @@ abstract class Renderer implements Iface
      * to get a template if non exits.
      * Use this for objects that use internal templates.
      *
-     * @return Template
+     * @return \Dom\Template | string | null
      */
     public function getTemplate()
     {

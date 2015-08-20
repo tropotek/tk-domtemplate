@@ -16,8 +16,7 @@ interface Iface
      * This method can optionally return a \Dom_Template
      * or HTML/XML string depending on your framework requirements
      *
-     * @param \Dom\Template $template
-     * @return \Dom\Template | string
+     * @return \Dom\Template | string | null
      */
     public function show();
 
