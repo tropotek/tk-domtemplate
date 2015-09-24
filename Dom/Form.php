@@ -79,7 +79,7 @@ class Form
             return $this;
         }
         $elements = $this->elements[$name];
-        /** @var \DomElement $element */
+        /** @var \DOMElement $element */
         foreach ($elements as $element) {
             if ($value !== null && ($element->getAttribute('value') == $value)) {
                 $element->setAttribute('checked', 'checked');
@@ -104,7 +104,7 @@ class Form
         }
         $element = $this->elements[$name][$i];
         $type = $element->nodeName;
-        if ($type == 'input') {
+        if ($type == 'input' || $type == 'button') {
             return new Input($element, $this);
         } elseif ($type == 'textarea') {
             return new Textarea($element, $this);
@@ -131,7 +131,7 @@ class Form
         for($i = 0; $i < $n; $i++) {
             $element = $this->elements[$name][$i];
             $type = $element->nodeName;
-            if ($type == 'input') {
+            if ($type == 'input' || $type == 'button') {
                 $nodeList[] = new Input($element, $this);
             } else {
                 if ($type == 'textarea') {
@@ -242,7 +242,7 @@ class Form
      *
      * @param string $name
      * @param string $value
-     * @return $this
+     * @return \DOMElement
      */
     public function appendHiddenElement($name, $value)
     {
@@ -256,7 +256,7 @@ class Form
             $this->form->appendChild($nl);
             $this->elements[$name][] = $node;
         }
-        return $this;
+        return $node;
     }
 
     /**
@@ -267,7 +267,7 @@ class Form
     public function getHiddenElements()
     {
         $arr = array();
-        /** @var \DomElement $element */
+        /** @var \DOMElement $element */
         foreach ($this->elements as $element) {
             $type = $element->nodeName;
             $inputType = $element->getAttribute('type');

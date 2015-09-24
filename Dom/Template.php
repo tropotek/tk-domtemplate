@@ -390,7 +390,7 @@ class Template
             }
 
             // Store all FormElement nodes
-            if ($node->nodeName == 'input' || $node->nodeName == 'textarea' || $node->nodeName == 'select') {
+            if ($node->nodeName == 'input' || $node->nodeName == 'textarea' || $node->nodeName == 'select' || $node->nodeName == 'button') {
                 $id = $node->getAttribute('name');
                 if ($id == null) {
                     $id = $node->getAttribute('id');
