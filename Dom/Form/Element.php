@@ -125,6 +125,7 @@ abstract class Element
         return $this->element->getAttribute('type');
     }
 
+
     /**
      * Disable this element, adds a disable attribute to the node
      *

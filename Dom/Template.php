@@ -1621,9 +1621,8 @@ class Template
             return $obj->toString();
         } else if (is_object($obj) && method_exists($obj, '__toString')) {
             return $obj->__toString();
-        } else {
-            return $obj;
         }
+        return $obj;
     }
 
     /**
