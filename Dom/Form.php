@@ -26,8 +26,8 @@ class Form
     protected $form = null;
 
     /**
-     * An Array of Element objects
-     * @var array Element
+     * An Array of Type objects
+     * @var array Type
      */
     protected $elements = array();
 

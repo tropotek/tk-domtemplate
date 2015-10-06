@@ -82,7 +82,7 @@ abstract class Element
     }
 
     /**
-     * Get the Element's Template
+     * Get the Type's Template
      *
      * @return Template
      */
