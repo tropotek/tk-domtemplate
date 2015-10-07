@@ -2,7 +2,7 @@
 namespace Dom\Renderer;
 
 /**
- * Template Renderer interface
+ * Template Bootstrap interface
  *
  * @author Michael Mifsud <info@tropotek.com>
  * @link http://www.tropotek.com/

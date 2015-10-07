@@ -32,10 +32,11 @@ abstract class Renderer implements Iface
 
 
 
+
     /**
      * Set a new template for this renderer.
      *
-     * @param Template $template
+     * @param \Dom\Template $template
      */
     public function setTemplate($template)
     {
@@ -45,10 +46,9 @@ abstract class Renderer implements Iface
     /**
      * Get the template
      * This method will try to call the magic method __makeTemplate
-     * to get a template if non exits.
-     * Use this for objects that use internal templates.
+     * to create a template if non exits.
      *
-     * @return \Dom\Template | string | null
+     * @return \Dom\Template
      */
     public function getTemplate()
     {
@@ -61,8 +61,6 @@ abstract class Renderer implements Iface
 
     /**
      * Test if this renderer has a template and is not NULL
-     * This will only est teh state of the template parameter.
-     * Use getTemplate() to see if the object will auto generate a template.
      *
      * @return bool
      */

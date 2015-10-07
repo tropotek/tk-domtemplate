@@ -36,7 +36,7 @@ $template = Dom_Template::load($buff);
 
 
 
-// Renderer Template example
+// Bootstrap Template example
 $xml = <<<TPL
 <?xml version="1.0" encoding="UTF-8"?>
 <div>
@@ -109,7 +109,7 @@ $objRen->testChoiceExists = true; // value could be any non-false value 1 'strin
 
 // Show Raw Template
 $template->insertHtml('tpl', htmlentities($xml));
-// Execute Object Renderer
+// Execute Object Bootstrap
 $objRen->show();
 // Show parsed template
 $template->insertHtml('parsed', htmlentities($objRen->getTemplate()->toString()));
