@@ -11,9 +11,8 @@ use \Dom\Loader;
  * For example:
  *      if the supplied class is \App\Module\Index
  *      The class is converted to App_Module_Index
- *      The adapter will
- *
- *
+ *      The adapter will look for a template in the supplied path for example:
+ *          /supplied/template/path/App_Module_Index.xml
  *
  * @author Michael Mifsud <info@tropotek.com>
  * @link http://www.tropotek.com/
@@ -42,8 +41,6 @@ class ClassPath extends Iface
         $this->ext = $ext;
     }
 
-
-
     /**
      * Load an xml/xhtml strings
      *
@@ -70,10 +67,10 @@ class ClassPath extends Iface
         try {
             $class = trim(str_replace('\\', '_', $class), '_');
             $tplpath = $this->path . '/' . $class . '.' . $this->ext;
-            if (!is_file($tplpath)) {
-                return;
+            if (is_file($tplpath)) {
+                return Template::loadFile($tplpath);
             }
-            return Template::loadFile($tplpath);
+
         } catch (\Exception $e) { vd($e->getMessage()); }
     }
 

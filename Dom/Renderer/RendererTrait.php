@@ -16,9 +16,6 @@ trait RendererTrait
     protected $template = null;
 
 
-
-
-
     /**
      * Set a new template for this renderer.
      *

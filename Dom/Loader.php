@@ -7,6 +7,8 @@ namespace Dom;
  *
  * You can add loader adapters to find templates in a cascading array
  *
+ * NOTE: Adapters are run as as LIFO (Last In First Out) queue.
+ * @link https://en.wikipedia.org/wiki/LIFO_%28education%29
  *
  *
  * @author Michael Mifsud <info@tropotek.com>
@@ -15,7 +17,6 @@ namespace Dom;
  */
 class Loader
 {
-
 
     /**
      * @var Loader
@@ -38,18 +39,8 @@ class Loader
      */
     protected $params = array();
 
-    /**
-     * @var string
-     */
-    protected $templateClass = '\Dom\Template';
 
 
-
-    /**
-     *
-     *
-     *
-     */
     public function __constructor()
     {
 
@@ -65,7 +56,6 @@ class Loader
     {
         if (static::$instance == null) {
             static::$instance = new static();
-            static::$instance->addAdapter(new Loader\Adapter\DefaultLoader());
         }
         if (!$class) {
             $class = self::getTraceClass(debug_backtrace());
@@ -112,6 +102,9 @@ class Loader
     static private function getTraceClass($trace)
     {
         $caller = $trace[1];
+        if (!empty($caller['object'])) {
+            return get_class($caller['object']);
+        }
         return $caller['class'];
     }
 
@@ -150,40 +143,13 @@ class Loader
         }
     }
 
-
-
-
-    /**
-     * Get the templateClass to use
-     *
-     * @return string
-     */
-    public function getTemplateClass()
-    {
-        return $this->templateClass;
-    }
-
-    /**
-     * Set the template class if different from \Dom\Template
-     * If you change this the new template object must
-     * inherit/implement the \Dom\Template class
-     *
-     * @param string $templateClass
-     * @return $this
-     * @throws Exception
-     */
-    public function setTemplateClass($templateClass)
-    {
-        if (!class_exists($templateClass))
-            throw new Exception('Template Class not found: ' . $templateClass);
-        $this->templateClass = $templateClass;
-        return $this;
-    }
-
     /**
      * addAdapter
      *
      * Adds an adapter to the beginning of the array
+     *
+     * NOTE: Adapters are run as as LIFO (Last In First Out) queue.
+     * @link https://en.wikipedia.org/wiki/LIFO_%28education%29
      *
      * @param Loader\Adapter\Iface $adapter
      * @return Loader\Adapter\Iface
@@ -196,13 +162,23 @@ class Loader
     }
 
     /**
+     * @return array
+     */
+    public function getAdapterList()
+    {
+        return $this->adapterList;
+    }
+
+    /**
+     * @param array $adapterList
      * @return $this
      */
-    public function resetAdapterList()
+    public function setAdapterList($adapterList)
     {
-        $this->adapterList = array();
+        $this->adapterList = $adapterList;
         return $this;
     }
+
 
     /**
      * @return string
