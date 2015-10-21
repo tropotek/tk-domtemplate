@@ -13,10 +13,10 @@ interface Iface
 
     /**
      * Execute the renderer.
-     * This method can optionally return a \Dom_Template
-     * or HTML/XML string depending on your framework requirements
+     * The returned object can be anything that you need to render
+     * the output.
      *
-     * @return \Dom\Template | string | null
+     * @return mixed
      */
     public function show();
 
