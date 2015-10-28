@@ -608,16 +608,20 @@ class Template
      * Add the class if it does not exist
      *
      * @param string $var
-     * @param string $class
+     * @param string|array $class
      * @return Template
      */
     public function addClass($var, $class)
     {
-        $class = trim($class);
-        $list = explode(' ', $class);
+        $list = $class;
+        if (!is_array($class)) {
+            $class = trim($class);
+            $list = explode(' ', $class);
+        }
         $list2 = explode(' ', $this->getAttr($var, 'class'));
         $list = array_merge($list2, $list);
         $list = array_unique($list);
+
         $classStr = trim(implode(' ', $list));
         $this->setAttr($var, 'class', $classStr);
         return $this;
