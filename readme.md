@@ -1,10 +1,8 @@
 # PHP DomTemplate
 
-Published: 01 Jul 2007  
-Web: <http://www.domtemplate.com/>  
-Authors:
-
-  * Michael Mifsud <http://www.tropotek.com/>
+__Published:__ 01 Jul 2007  
+__Web:__ <http://www.domtemplate.com/>  
+__Authors:__ Michael Mifsud <http://www.tropotek.com/>  
   
 A PHP5 DOM Template engine for XHTML/XML
 
