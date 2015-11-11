@@ -20,7 +20,7 @@ A PHP5 DOM Templating engine for XHTML/XML
 - [Misc Functions](#misc)
 - [Renderer](#renderer)
 - [Loader](#loader)
-- [PHP Examples](docs/examples/index.html)
+- [PHP Examples](docs/examples/)
 
 ## Installation
 
