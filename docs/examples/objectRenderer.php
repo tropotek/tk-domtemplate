@@ -1,7 +1,6 @@
 <?php
 // Start the output buffer
 ob_start();
-
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -12,7 +11,15 @@ ob_start();
 </head>
 <body>
   <div id="content">
-    <h1>Dom_ObjectRenderer Example</h1>
+    <h1>\Dom\Renderer\AutoRenderer Example</h1>
+
+    <p>
+      <em>
+        NOTICE: This object is currently under development and in an unstable state.
+        More Documentation will be available once this object is completed.
+      </em>
+    </p>
+
 
     <h4>Raw Template</h4>
     <pre var="tpl"></pre>
@@ -20,27 +27,29 @@ ob_start();
     <h4>Parsed Template</h4>
     <pre var="parsed"></pre>
 
+    <div class="footer">
+      <p class="home"><a href="index.html">Home</a></p>
+      <p class="copyright"><a href="http://www.domtemplate.com" target="_blank">Copyright 2008 PHP DOMTemplate</a></p>
+    </div>
   </div>
 </body>
 </html>
 <?php
-// include the Template lib
-include_once dirname(dirname(dirname(__FILE__))) . '/lib/Dom/Template.php';
-include_once dirname(dirname(dirname(__FILE__))) . '/lib/Dom/RendererInterface.php';
-include_once dirname(dirname(dirname(__FILE__))) . '/lib/Dom/ObjectRenderer.php';
+// Include lib, you should use use composer if available.
+$path = dirname(dirname(dirname(__FILE__)));
+include_once $path . '/Dom/Exception.php';
+include_once $path . '/Dom/Template.php';
+include_once $path . '/Dom/Renderer/Iface.php';
+include_once $path . '/Dom/Renderer/AutoRenderer.php';
 
 // Create a template from the html in the buffer
 $buff = ob_get_clean();
-$template = Dom_Template::load($buff);
-
-
-
+$template = \Dom\Template::load($buff);
 
 // Bootstrap Template example
 $xml = <<<TPL
 <?xml version="1.0" encoding="UTF-8"?>
 <div>
-
   <h4 var="title"></h4>
   <div var="HTML:descr"></div>
 
@@ -76,19 +85,20 @@ $xml = <<<TPL
 TPL;
 
 // Create ObjectRenderer
-$subTpl = Dom_Template::load($xml);
-$objList = array();
-$objRen = new Dom_ObjectRenderer($objList, $subTpl);
+$subTpl = \Dom\Template::load($xml);
+$objRen = new \Dom\Renderer\AutoRenderer($subTpl);
+
+
 
 // Fill object renderer with objects
-$objRen->title = 'This is a title';
-$objRen->descr = '<p>Nullam et sapien lectus, et pretium orci? In fermentum magna a
-    justo vestibulum congue. Sed mi nisi, egestas ut interdum nec, convallis vitae mauris.</p>';
+$objRen->set('title', 'This is a title');
+$objRen->set('descr', '<p>Nullam et sapien lectus, et pretium orci? In fermentum magna a
+    justo vestibulum congue. Sed mi nisi, egestas ut interdum nec, convallis vitae mauris.</p>');
 $list1 = array();
 $list1[] = array('title' => 'Item 1 Test', 'descr' => 'Item 1 description');
 $list1[] = array('title' => 'Item 2 Test', 'descr' => 'Item 2 description');
 $list1[] = array('title' => 'Item 3 Test', 'descr' => 'Item 3 description');
-$objRen->list1 = $list1;
+$objRen->set('list1', $list1);
 
 $list2 = array();
 $obj = new stdClass();
@@ -103,9 +113,8 @@ $obj = new stdClass();
 $obj->title = 'object title 3';
 $obj->descr = '<p>Object <a href="#">description</a> 3</p>';
 $list2[] = $obj;
-$objRen->list2 = $list2;
-
-$objRen->testChoiceExists = true; // value could be any non-false value 1 'string' etc....
+$objRen->set('list2', $list2);
+$objRen->set('testChoiceExists', true); // value could be any non-false value 1 'string' etc....
 
 // Show Raw Template
 $template->insertHtml('tpl', htmlentities($xml));
@@ -114,9 +123,4 @@ $objRen->show();
 // Show parsed template
 $template->insertHtml('parsed', htmlentities($objRen->getTemplate()->toString()));
 
-
-
-
-
 echo $template->toString();
-?>

@@ -2,6 +2,7 @@
 namespace Dom\Renderer;
 
 use Dom\Template;
+use Dom\Exception;
 
 /**
  * For classes that render dom templates.
@@ -46,10 +47,10 @@ class AutoRenderer implements Iface
         if ($template) {
             $this->template = $template;
         }
-        if ($data) {
-            $this->data = (object)$data;
+        if (!$data) {
+            $data = new \stdClass();
         }
-        $this->data = new \stdClass();
+        $this->data = (object)$data;
     }
 
     /**
@@ -96,13 +97,10 @@ class AutoRenderer implements Iface
     public function show()
     {
         $template = $this->getTemplate();
-
         // VAR
         $this->showVars($template);
-
         // CHOICE
         $this->showChoice($template);
-
         // REPEAT
         $this->showRepeat($template);
 
@@ -120,14 +118,14 @@ class AutoRenderer implements Iface
     protected function showRepeat($template, $varVal = null)
     {
         $vars = array_keys($template->getRepeatList());
-        foreach ($vars as $paramStr) {
+        foreach ($vars as $i => $paramStr) {
             $val = $this->getParameter($paramStr, $varVal);
             if (is_array($val)) {
                 foreach ($val as $obj) {
                     $rpt = $template->getRepeat($paramStr);
                     $this->showVars($rpt, $obj);
                     $this->showRepeat($rpt, $obj);
-                    $rpt->append();
+                    $rpt->appendRepeat();
                 }
             }
         }
@@ -301,7 +299,7 @@ class AutoRenderer implements Iface
     /**
      * Get the template
      * This method will try to call the magic method __makeTemplate
-     * to get a template if non exsits.
+     * to get a template if none exits.
      * Use this for objects that use internal templates.
      *
      * @return Template

@@ -32,8 +32,20 @@ pre {
 }
 
 .copyright {
+  float: right;
   text-align: right;
 }
+.home {
+  float:left;
+  text-align: left;
+}
+.footer {
+  display: inline-block;
+  width: 100%;
+}
+
+
+
 td.label {
   vertical-align: top;
   padding-top: 5px;

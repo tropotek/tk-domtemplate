@@ -19,17 +19,23 @@ ob_start();
     <div var="subTemplate"></div>
 
     <p>&#160;</p>
-    <p class="copyright"><a href="http://www.domtemplate.com/">Copyright 2008 PHP DOM Template</a></p>
+
+    <div class="footer">
+      <p class="home"><a href="index.html">Home</a></p>
+      <p class="copyright"><a href="http://www.domtemplate.com" target="_blank">Copyright 2008 PHP DOMTemplate</a></p>
+    </div>
   </div>
 </body>
 </html>
 <?php
-// include the Template lib
-include_once dirname(dirname(dirname(__FILE__))) . '/lib/Dom/Template.php';
+// Include lib, you should use use composer if available.
+$path = dirname(dirname(dirname(__FILE__)));
+include_once $path . '/Dom/Exception.php';
+include_once $path . '/Dom/Template.php';
 
 // Create a template from the html in the buffer
 $buff = ob_get_clean();
-$template = Dom_Template::load($buff);
+$template = \Dom\Template::load($buff);
 $template->insertText('helloWorld', 'This is the `Hello World` Dynamic text.');
 // Create some css styles
 $css = <<<CSS
@@ -54,7 +60,7 @@ This is some sub template content.
  </pre>
 </div>
 HTML;
-$subTpl = Dom_Template::load($html);
+$subTpl = \Dom\Template::load($html);
 // Add some headers to the sub template
 $css = <<<CSS
 .subTemplate { background-color: #44C; }
@@ -70,24 +76,3 @@ $template->insertTemplate('subTemplate', $subTpl);
 
 echo $template->toString();
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <title>PHP Dom Template (PDT) Library - example01.html</title>
-<style type="text/css">
-body {font-size: 80%; background-color: #CCC; }
-p { background-color: #9CF; }
-</style>
-<script type="text/javascript" src="/js/jquery.js"></script>
-  <link rel="stylesheet" type="text/css" href="stylesheet.css" />
-</head>
-<body>
-  <div id="content">
-    <h1>Hello World</h1>
-    <p>This is the `Hello World` Dynamic text.</p>
-    <p>&#xA0;</p>
-    <p class="copyright"><a href="http://www.domtemplate.com/">Copyright 2008 PHP DOM Template</a></p>
-  </div>
-</body>
-</html>

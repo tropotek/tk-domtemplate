@@ -4,15 +4,12 @@ ob_start();
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>PHP Dom Template (PDT) Library</title>
   <link rel="stylesheet" type="text/css" href="stylesheet.css" />
 </head>
-
 <body>
-
   <div id="content">
     <h1 var="pageTitle">Default Text</h1>
     <h3 class="contentHeader" var="pageTitle">Default Text</h3>
@@ -53,33 +50,37 @@ ob_start();
       </form>
 
       <p>&#160;</p>
-      <p>&#160;</p>
+    </div>
 
+    <div class="footer">
+      <p class="home"><a href="index.html">Home</a></p>
+      <p class="copyright"><a href="http://www.domtemplate.com" target="_blank">Copyright 2008 PHP DOMTemplate</a></p>
     </div>
   </div>
-
-
-
 </body>
 </html>
 <?php
-// include the Template lib
-include_once dirname(dirname(dirname(__FILE__))) . '/lib/Dom/Template.php';
+// Include lib, you should use use composer if available.
+$path = dirname(dirname(dirname(__FILE__)));
+include_once $path . '/Dom/Exception.php';
+include_once $path . '/Dom/Template.php';
+include_once $path . '/Dom/Form.php';
+include_once $path . '/Dom/Form/Element.php';
+include_once $path . '/Dom/Form/Input.php';
+include_once $path . '/Dom/Form/Textarea.php';
+include_once $path . '/Dom/Form/Select.php';
 
 // Create a template from the html in the buffer
 $buff = ob_get_clean();
-$template = Dom_Template::load($buff);
+$template = \Dom\Template::load($buff);
 
 // Set the pageTitle tag  --> <h1 var="pageTitle">Default Text</h1>
 $template->insertText('pageTitle', 'Dynamic Form Example');
 
-
 $domForm = $template->getForm('contactForm');
-
-
-// Initalise any form elements to a default status
+// Init any form elements to a default status
 $select = $domForm->getFormElement('country');
-/* @var $select Dk_Dom_FormSelectElement */
+/* @var $select \Dom\Form\Select */
 $select->appendOption('-- Select --', '');
 $select->appendOption('New Zealand', 'NZ');
 $select->appendOption('England', 'UK');
@@ -94,7 +95,6 @@ if (isset($_REQUEST['process'])) {
     $domForm->getFormElement('email')->setValue($_REQUEST['email']);
     $domForm->getFormElement('country')->setValue($_REQUEST['country']);
     $domForm->getFormElement('comments')->setValue($_REQUEST['comments']);
-
 
     // Do some basic validation
     $email = $_REQUEST['email'];
