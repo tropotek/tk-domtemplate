@@ -1,4 +1,4 @@
-# PHP DomTemplate
+# :boom: PHP DomTemplate 
 
 __Published:__ 01 Jul 2007  
 __Web:__ <http://www.domtemplate.com/>  
@@ -14,11 +14,9 @@ A PHP5 DOM Template engine for XHTML/XML
 - [CHOICE](#choice)
 - [REPEAT](#repeat)
 - [Forms](#form)
-<!--TODO:
-- [Misc Functions](#misc)
-- [Renderer](#renderer)
-- [Loader](#loader)
--->
+- ~~[Misc Functions](#misc)~~
+- ~~[Renderer](#renderer)~~
+- ~~[Loader](#loader)~~
 - [PHP Examples](docs/examples/)
 
 
