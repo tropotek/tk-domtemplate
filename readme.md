@@ -1,6 +1,4 @@
-# PHP DomTemplate 
-
-:boom:
+# PHP DomTemplate :boom: 
 
 __Published:__ 01 Jul 2007  
 __Web:__ <http://www.domtemplate.com/>  
