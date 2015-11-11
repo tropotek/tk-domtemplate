@@ -1,9 +1,7 @@
 # PHP DomTemplate
 
-Published: 01 Jul 2007
-
-Web: <http://www.domtemplate.com/>
-
+Published: 01 Jul 2007  
+Web: <http://www.domtemplate.com/>  
 Authors:
 
   * Michael Mifsud <http://www.tropotek.com/>
