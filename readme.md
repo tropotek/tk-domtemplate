@@ -14,9 +14,9 @@ A PHP5 DOM Template engine for XHTML/XML
 - [CHOICE](#choice)
 - [REPEAT](#repeat)
 - [Forms](#form)
-- ~~[Misc Functions](#misc)~~
-- ~~[Renderer](#renderer)~~
-- ~~[Loader](#loader)~~
+- [Misc Functions](#misc-functions)
+- [Auto Renderer](#autorenderer)
+- [Loader](#loader)
 - [PHP Examples](docs/examples/)
 
 
@@ -229,3 +229,53 @@ $domForm->getFormElement('comments')->setValue($_REQUEST['comments']);
 
 ```
 
+
+## Misc Functions 
+
+Other functions of the DomTemplate include:
+
+ - appendCss(), appendCssUrl(), appendJs(), appendJsUrl(): These allow you to append any css/JavaScript
+   to a template with ease. Also if you insert one template into another, the css and javascript is also 
+   copied through to its parent. This is handy when you want to add css to the main page template from a 
+   child sub-template.
+ - getElementById(): Retrieve a node via its ID attribute.
+ - setTitleText(): Set the &lt;title&gt; tag text if the tag exists.
+ - appendMetaTag(): will append a meta tag to the parent template if a &lt;head&gt; tag exists.
+
+
+
+## Loader
+
+The loader object gives the developer the ability to search for alternate templates before loading the 
+supplied template. This is handy when you want to be able to give users the ability to override existing
+default templates. Adapters can be added/created that search for alternate templates based on your own frameworks needs.
+
+First you need to setup the Loader and add any adapters that will look for existing templates. This uses a LIFO queue.
+So the Last added Adapter is the first to be executed.
+```php
+<?php
+// * Setup the Template loader, create adapters to look for templates as needed
+/** @var \Dom\Loader $tl */
+$dl = \Dom\Loader::getInstance();
+$dl->addAdapter(new \Dom\Loader\Adapter\DefaultLoader());
+$dl->addAdapter(new \Dom\Loader\Adapter\ClassPath($config->getAppPath().'/html/xml'));
+```
+
+Then later you can retrieve it to load all your apps templates:
+```php
+<?php
+$tplFile = \Tk\Config::getInstance()->getTemplatePath().'/index.html';
+$template = \Dom\Loader::loadFile($tplFile);
+```
+
+
+
+## AutoRenderer
+
+This object is currently under development. 
+
+The auto renderer was built to facilitate automatic rendering of data similar to that
+of other templating languages.
+
+Data is passed to the auto renderer and template attributes are used to display the selected data stored in 
+the AutoRenderer. [See the Example](docs/examples/autoRenderer.php)
