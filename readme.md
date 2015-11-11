@@ -1,13 +1,12 @@
 # PHP DomTemplate
 
 Published: 01 Jul 2007
+Web: <http://www.domtemplate.com/>
 Authors:
 
   * Michael Mifsud <http://www.tropotek.com/>
   
-A PHP5 DOM Templating engine for XHTML/XML
-
-
+A PHP5 DOM Template engine for XHTML/XML
 
 ## Using PHP DOMTemplate
 
@@ -40,7 +39,6 @@ Or add the following to your composer.json file:
 If you do not use Composer, you can grab the code from GitHub, and use any
 PSR-0 compatible autoloader (e.g. the [PHP DomTemplate](https://github.com/tropotek/tk-domtemplate))
 to load DOMTemplate classes.
-
 
 ## Introduction
 
@@ -96,7 +94,6 @@ $template->setAttr('link', 'href', 'http://www.example.com/');
 
 ...
 ```
-
 
 ## CHOICE
 A `choice` attribute allows for the removal of a dom node.
@@ -202,7 +199,6 @@ If we are given the following basic form:
   </table>
 </form>
 ```
-
 
 Then we can access the form through the code lik this:
 
