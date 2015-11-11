@@ -14,10 +14,13 @@ A PHP5 DOM Template engine for XHTML/XML
 - [CHOICE](#choice)
 - [REPEAT](#repeat)
 - [Forms](#form)
+<!--TODO:
 - [Misc Functions](#misc)
 - [Renderer](#renderer)
 - [Loader](#loader)
+-->
 - [PHP Examples](docs/examples/)
+
 
 ## Installation
 
