@@ -1,12 +1,13 @@
 # PHP DomTemplate :boom: 
 
+__Project:__ [ttek/tk-domtemplate](http://packagist.org/packages/ttek/tk-domtemplate)  
 __Published:__ 01 Jul 2007  
 __Web:__ <http://www.domtemplate.com/>  
 __Authors:__ Michael Mifsud <http://www.tropotek.com/>  
   
 A PHP5 DOM Template engine for XHTML/XML
 
-## Using PHP DOMTemplate
+## Contents
 
 - [Installation](#installation)
 - [Introduction](#introduction)
@@ -22,7 +23,7 @@ A PHP5 DOM Template engine for XHTML/XML
 
 ## Installation
 
-DOMTemplate is available on Packagist ([ttek/tk-domtemplate](http://packagist.org/packages/ttek/tk-domtemplate))
+Available on Packagist ([ttek/tk-domtemplate](http://packagist.org/packages/ttek/tk-domtemplate))
 and as such installable via [Composer](http://getcomposer.org/).
 
 ```bash
@@ -37,7 +38,7 @@ Or add the following to your composer.json file:
 
 If you do not use Composer, you can grab the code from GitHub, and use any
 PSR-0 compatible autoloader (e.g. the [PHP DomTemplate](https://github.com/tropotek/tk-domtemplate))
-to load DOMTemplate classes.
+to load the classes.
 
 ## Introduction
 
