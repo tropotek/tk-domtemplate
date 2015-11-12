@@ -29,7 +29,7 @@ class DefaultLoader extends Iface
     {
         try {
             return Template::load($xhtml);
-        } catch (\Exception $e) { vd($e->getMessage()); }
+        } catch (\Exception $e) { error_log($e->getMessage()); }
     }
 
     /**
@@ -43,7 +43,7 @@ class DefaultLoader extends Iface
     {
         try {
             return Template::loadFile($path);
-        } catch (\Exception $e) { vd($e->getMessage()); }
+        } catch (\Exception $e) { error_log($e->getMessage()); }
     }
 
 }

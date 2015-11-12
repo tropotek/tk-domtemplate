@@ -52,7 +52,7 @@ class ClassPath extends Iface
     {
         try {
             return $this->loadFile('', $class);
-        } catch (\Exception $e) { vd($e->getMessage()); }
+        } catch (\Exception $e) { error_log($e->getMessage()); }
     }
 
     /**
@@ -71,7 +71,7 @@ class ClassPath extends Iface
                 return Template::loadFile($tplpath);
             }
 
-        } catch (\Exception $e) { vd($e->getMessage()); }
+        } catch (\Exception $e) { error_log($e->getMessage()); }
     }
 
 }
