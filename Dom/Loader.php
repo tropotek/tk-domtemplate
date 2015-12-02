@@ -73,12 +73,17 @@ class Loader
      * @param string $xhtml
      * @param string $class
      * @return Template
+     * @throws Exception
      */
     static function load($xhtml, $class = '')
     {
         if (!$class)
             $class = self::getTraceClass(debug_backtrace());
-        return self::getInstance($class)->doLoad($xhtml);
+        $tpl = self::getInstance($class)->doLoad($xhtml);
+        if (!$tpl) {
+            throw new Exception('Unknown error, Cannot load template. ('.substr($xhtml, 0, 20).', '.$class.')');
+        }
+        return $tpl;
     }
 
     /**
@@ -87,12 +92,17 @@ class Loader
      * @param string $path
      * @param string $class
      * @return Template
+     * @throws Exception
      */
     static function loadFile($path, $class = '')
     {
         if (!$class)
             $class = self::getTraceClass(debug_backtrace());
-        return self::getInstance($class)->doLoadFile($path);
+        $tpl = self::getInstance($class)->doLoadFile($path);
+        if (!$tpl) {
+            throw new Exception('Unknown error, Cannot load template. ('.$path.', '.$class.')');
+        }
+        return $tpl;
     }
 
     /**
