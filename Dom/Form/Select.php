@@ -115,6 +115,7 @@ class Select extends Element
     public function setValue($value)
     {
         if (is_array($value)) {
+            //vd($value);
             if ($this->isMultiple()) {
                 foreach ($value as $v) {
                     $option = $this->findOption($this->element, $v);
