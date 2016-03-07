@@ -1,5 +1,27 @@
 #CHANGELOG#
 
+Ver 2.0.0 [2016-03-08]:
+-------------------------------
+ - Creating a simpler form object.
+ - Tiding up
+ - Fixing DomTemplate documentation
+ - Back to screwing with the DB objects again, I think we need the TkTool back
+ - More form changes, still experimenting....
+ - Still stuffing about with the forms. Getting Closer
+ - Still working on the form lib
+ - Added file type to form lib
+ - Finalised inline renderer
+ - Added get/set renderer to form
+ - Continued with form updates...BLAH BLAH BLAH!!!!!!!!!!!
+ - Added Authentication and Form objects
+ - Merge branch 'master' of git://github.com/tropotek/tk-domtemplate
+ - Update comments
+ - Documentation stuff
+ - Update douc comments
+ - Updated the framework a little, tis all...
+ - Updating libs to ver2
+
+
 Ver 1.2.0 [2014-11-17]:
 ----------------
  - Finished updates
