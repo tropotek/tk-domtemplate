@@ -27,7 +27,7 @@ class Loader
      * The class that called the loader getInstance() method
      * @var string
      */
-    protected $calledClass = '';
+    protected $callingClass = '';
 
     /**
      * @var array
@@ -40,16 +40,17 @@ class Loader
     protected $params = array();
 
 
+    /**
+     * 
+     */
+    private function __constructor() { }
 
-    public function __constructor()
-    {
-
-    }
 
     /**
      * Get a single instance of this object
      *
      * @param string $class
+     * @param null|array $params
      * @return Loader
      */
     static function getInstance($class = '', $params = null)
@@ -63,7 +64,7 @@ class Loader
         if ($params !== null) {
             static::$instance->params = $params;
         }
-        static::$instance->calledClass = $class;
+        static::$instance->callingClass = $class;
         return static::$instance;
     }
 
@@ -71,17 +72,17 @@ class Loader
      * Load an xml/xhtml strings
      *
      * @param string $xhtml
-     * @param string $class
+     * @param string $callingClass
      * @return Template
      * @throws Exception
      */
-    static function load($xhtml, $class = '')
+    static function load($xhtml, $callingClass = '')
     {
-        if (!$class)
-            $class = self::getTraceClass(debug_backtrace());
-        $tpl = self::getInstance($class)->doLoad($xhtml);
+        if (!$callingClass)
+            $callingClass = self::getTraceClass(debug_backtrace());
+        $tpl = self::getInstance($callingClass)->doLoad($xhtml);
         if (!$tpl) {
-            throw new Exception('Unknown error, Cannot load template. ('.substr($xhtml, 0, 20).', '.$class.')');
+            throw new Exception('Unknown error, Cannot load template. ('.substr($xhtml, 0, 20).', '.$callingClass.')');
         }
         return $tpl;
     }
@@ -90,17 +91,17 @@ class Loader
      * Load an xml/xhtml file
      *
      * @param string $path
-     * @param string $class
+     * @param string $callingClass
      * @return Template
      * @throws Exception
      */
-    static function loadFile($path, $class = '')
+    static function loadFile($path, $callingClass = '')
     {
-        if (!$class)
-            $class = self::getTraceClass(debug_backtrace());
-        $tpl = self::getInstance($class)->doLoadFile($path);
+        if (!$callingClass)
+            $callingClass = self::getTraceClass(debug_backtrace());
+        $tpl = self::getInstance($callingClass)->doLoadFile($path);
         if (!$tpl) {
-            throw new Exception('Unknown error, Cannot load template. ('.$path.', '.$class.')');
+            throw new Exception('Unknown error, Cannot load template. ('.$path.', '.$callingClass.')');
         }
         return $tpl;
     }
@@ -129,7 +130,7 @@ class Loader
     {
         /** @var Loader\Adapter\Iface $adapter */
         foreach($this->adapterList as $adapter) {
-            $tpl = $adapter->load($xhtml, $this->calledClass);
+            $tpl = $adapter->load($xhtml, $this->callingClass);
             if ($tpl instanceof Template) {
                 return $tpl;
             }
@@ -146,7 +147,7 @@ class Loader
     {
         /** @var Loader\Adapter\Iface $adapter */
         foreach($this->adapterList as $adapter) {
-            $tpl = $adapter->loadFile($path, $this->calledClass);
+            $tpl = $adapter->loadFile($path, $this->callingClass);
             if ($tpl instanceof Template) {
                 return $tpl;
             }
@@ -193,9 +194,9 @@ class Loader
     /**
      * @return string
      */
-    public function getCalledClass()
+    public function getCallingClass()
     {
-        return $this->calledClass;
+        return $this->callingClass;
     }
 
     /**
