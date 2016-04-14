@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 2.0.2 [2016-04-14]:
+-------------------------------
+ - Finalised base code for uni apps
+ - Merge branch 'master' of git://github.com/tropotek/tk-domtemplate
+
+
 Ver 2.0.1 [2016-03-23]:
 -------------------------------
  - Added new menu UI and updated pages to handle menu and breadcrumbs
