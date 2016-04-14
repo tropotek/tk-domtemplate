@@ -973,18 +973,17 @@ class Template
      * Append a CSS file to the template header
      *
      * @param string $urlString
-     * @param string $media
+     * @param array $attrs
      * @param \DOMElement $node If sent this head element will append after the supplied node
      * @return $this
      */
-    public function appendCssUrl($urlString, $media = '', $node = null)
+    public function appendCssUrl($urlString, $attrs = array(), $node = null)
     {
         if (!$this->isWritable())
             return $this;
-        $attrs = array('rel' => 'stylesheet', 'type' => 'text/css', 'href' => $urlString);
-        if ($media) {
-            $attrs['media'] = $media;
-        }
+        $attrs['type'] = 'text/css';
+        $attrs['rel'] = 'stylesheet';
+        $attrs['href'] = $urlString;
         $this->appendHeadElement('link', $attrs, '', $node);
         return $this;
     }
@@ -993,18 +992,15 @@ class Template
      * Append some CSS text to the template header
      *
      * @param $css
-     * @param string $media
+     * @param array $attrs
      * @param \DOMElement $node If sent this head element will append after the supplied node
      * @return Template
      */
-    public function appendCss($css, $media = '', $node = null)
+    public function appendCss($css, $attrs = array(), $node = null)
     {
         if (!$this->isWritable())
             return $this;
-        $attrs = array('type' => 'text/css');
-        if ($media) {
-            $attrs['media'] = $media;
-        }
+        $attrs['type'] = 'text/css';
         $this->appendHeadElement('style', $attrs, "\n" . $css . "\n", $node);
         return $this;
     }
@@ -1013,13 +1009,17 @@ class Template
      * Append a Javascript file to the template header
      *
      * @param string $urlString
+     * @param array $attrs
      * @param \DOMElement $node If sent this head element will append after the supplied node
      * @return Template
      */
-    public function appendJsUrl($urlString, $node = null)
+    public function appendJsUrl($urlString, $attrs = array(), $node = null)
     {
-        if ($this->isWritable())
-            $this->appendHeadElement('script', array('type' => 'text/javascript', 'src' => $urlString), '', $node);
+        if (!$this->isWritable())
+            return $this;
+        $attrs['type'] = 'text/javascript';
+        $attrs['src'] = $urlString;
+        $this->appendHeadElement('script', $attrs, '', $node);
         return $this;
     }
 
@@ -1027,13 +1027,16 @@ class Template
      * Append some CSS to the template header
      *
      * @param string $js
+     * @param array $attrs
      * @param \DOMElement $node If sent this head element will append after the supplied node
      * @return Template
      */
-    public function appendJs($js, $node = null)
+    public function appendJs($js, $attrs = array(), $node = null)
     {
-        if ($this->isWritable())
-            $this->appendHeadElement('script', array('type' => 'text/javascript'), $js, $node);
+        if (!$this->isWritable())
+            return $this;
+        $attrs['type'] = 'text/javascript';
+        $this->appendHeadElement('script', $attrs, $js, $node);
         return $this;
     }
 
