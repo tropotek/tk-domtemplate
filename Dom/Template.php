@@ -555,11 +555,7 @@ class Template
         /** @var \DOMElement $node */
         foreach ($nodes as $node) {
             $this->removeChildren($node);
-            if (is_object($value)) {
-                $newNode = $this->document->createTextNode(self::objectToString($value));
-            } else {
-                $newNode = $this->document->createTextNode($value);
-            }
+            $newNode = $this->document->createTextNode($value);
             $node->appendChild($newNode);
         }
         return $this;
@@ -580,11 +576,7 @@ class Template
         $nodes = $this->findVar($var);
         /** @var \DOMElement $node */
         foreach ($nodes as $node) {
-            if (is_object($value)) {
-                $newNode = $this->document->createTextNode(self::objectToString($value));
-            } else {
-                $newNode = $this->document->createTextNode($value);
-            }
+            $newNode = $this->document->createTextNode($value);
             $node->appendChild($newNode);
         }
         return $this;
@@ -679,7 +671,7 @@ class Template
             if ($value === null) {
                 $node->removeAttribute($attr);
             } else {
-                $node->setAttribute($attr, self::objectToString($value));
+                $node->setAttribute($attr, $value);
             }
         }
         return $this;
@@ -910,7 +902,7 @@ class Template
                 throw new Exception('This document has no title node.');
             }
             $this->removeChildren($this->title);
-            $this->title->nodeValue = self::objectToString($value);
+            $this->title->nodeValue = $value;
         }
         return $this;
     }
@@ -951,7 +943,7 @@ class Template
         $hash = md5($preKey);
         $this->headers[$hash]['elementName'] = $elementName;
         $this->headers[$hash]['attributes'] = $attributes;
-        $this->headers[$hash]['value'] = self::objectToString($value);
+        $this->headers[$hash]['value'] = $value;
         $this->headers[$hash]['node'] = $node;
         return $this;
     }
@@ -1544,7 +1536,7 @@ class Template
                     }
                     if (isset($header['attributes'])) {
                         foreach ($header['attributes'] as $k => $v) {
-                            $node->setAttribute($k, self::objectToString($v));
+                            $node->setAttribute($k, $v);
                         }
                     }
                     if ($header['node']) {
@@ -1621,6 +1613,7 @@ class Template
      *
      * @param mixed $obj
      * @return string
+     * @deprecated Objects should use the __toString magic method
      */
     static function objectToString($obj)
     {
