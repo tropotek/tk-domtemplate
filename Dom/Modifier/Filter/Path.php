@@ -171,7 +171,6 @@ class Path extends Iface
     {
         // TODO: Remove the config object from here.......
         $config = \Tk\Config::getInstance();
-        error_log($config->getSitePath(), $doc->documentURI);
         // Try to automatically determin the template path
         if (!$this->templateUrl && $doc->documentURI) {
             $urlStr = str_replace($config->getSitePath(), '', $doc->documentURI);
