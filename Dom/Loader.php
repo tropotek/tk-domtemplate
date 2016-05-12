@@ -221,7 +221,7 @@ class Loader
     }
 
     /**
-     * @param array $params
+     * @param array|\ArrayAccess $params
      * @return $this
      */
     public function setParams($params)
