@@ -163,24 +163,26 @@ class Path extends Iface
     }
 
     /**
-     * pre init the front controller
+     * pre init the filter
      *
      * @param \DOMDocument $doc
      */
     public function init($doc)
     {
+        // TODO: Remove the config object from here.......
+        $config = \Tk\Config::getInstance();
+        error_log($config->getSitePath(), $doc->documentURI);
         // Try to automatically determin the template path
         if (!$this->templateUrl && $doc->documentURI) {
-            $config = \Tk\Config::getInstance();
-            $urlStr = str_replace($config->getAppPath(), '', $doc->documentURI);
+            $urlStr = str_replace($config->getSitePath(), '', $doc->documentURI);
             $urlStr = dirname($urlStr);
-            $urlStr = $config->getAppUrl() . $urlStr;
+            $urlStr = $config->getSiteUrl() . $urlStr;
             $this->templateUrl = $urlStr;
         }
     }
 
     /**
-     * Call this method to travers a document
+     * Execute code on the current Comment Node
      *
      * @param \DOMComment $node
      */
@@ -190,7 +192,7 @@ class Path extends Iface
     }
 
     /**
-     * Call this method to travers a document
+     * Execute code on the current Node
      *
      * @param \DOMElement $node
      */
