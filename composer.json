@@ -19,7 +19,8 @@
         }
     },
     "require": {
-        "php": ">=5.4.0"
+        "php": ">=5.4.0",
+        "oyejorge/less.php": "~1.5"
     },
     "extra": {
         "branch-alias": {
