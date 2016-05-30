@@ -13,8 +13,7 @@ interface Iface
 
     /**
      * Execute the renderer.
-     * The returned object can be anything that you need to render
-     * the output.
+     * Return an object that your framework can interpret and display.
      *
      * @return mixed
      */

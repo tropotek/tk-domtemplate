@@ -77,12 +77,12 @@ class Loader
      * @throws Exception
      */
     static function load($xhtml, $callingClass = '')
-    {
+    {        
         if (!$callingClass)
             $callingClass = self::getTraceClass(debug_backtrace());
         $tpl = self::getInstance($callingClass)->doLoad($xhtml);
         if (!$tpl) {
-            throw new Exception('Unknown error, Cannot load template. ('.substr($xhtml, 0, 20).', '.$callingClass.')');
+            throw new Exception('Unknown error, Cannot load template. (' . substr($xhtml, 0, 20) . ', ' . $callingClass . ')');
         }
         return $tpl;
     }
@@ -113,6 +113,7 @@ class Loader
     static private function getTraceClass($trace)
     {
         $caller = $trace[1];
+        //vd($caller);
         if (!empty($caller['object'])) {
             return get_class($caller['object']);
         }

@@ -29,7 +29,7 @@ namespace Dom\Modifier\Filter;
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  */
-class Path extends Iface
+class UrlPath extends Iface
 {
 
     /**
@@ -99,12 +99,12 @@ class Path extends Iface
      *      $path = ./path/to/resource.js
      *      $path = ../path/to/resource.js
      *      $path = ../../path/to/resource.js
-     *      return /site/root/theme/selected/path/to/resource.js
+     *      return /site/root/template/selected/path/to/resource.js
      *
      * @param string $path
      * @return string
      */
-    protected function addThemeUrl($path)
+    protected function addTemplateUrl($path)
     {
         $path = str_replace($this->templateUrl, '', $path);
         $retPath =  $this->templateUrl . '/' . $path;
@@ -120,10 +120,8 @@ class Path extends Iface
      */
     protected function replaceStr($str)
     {
-        $str = str_replace('{sitePath}', $this->siteUrl, $str);
         $str = str_replace('{siteUrl}', $this->siteUrl, $str);
-        $str = str_replace('{themePath}', $this->templateUrl, $str);
-        $str = str_replace('{themeUrl}', $this->templateUrl, $str);
+        $str = str_replace('{templateUrl}', $this->templateUrl, $str);
 
         return $str;
     }
@@ -132,10 +130,10 @@ class Path extends Iface
      * Clean a path from ./ ../ but keep path integrity.
      * eg:
      *
-     *   From: /Work/Projects/tk003-trunk/theme/default/../../../../relative/path/from/theme.html
-     *     To: /Work/relative/path/from/theme.html
+     *   From: /Work/Projects/tk003-trunk/template/default/../../../../relative/path/from/template.html
+     *     To: /Work/relative/path/from/template.html
      *
-     * Note: This function can give access to unwanted paths if not used carfully.
+     * Note: This function can give access to unwanted paths if not used carefully.
      *
      * @param string $path
      * @return string
@@ -230,7 +228,7 @@ class Path extends Iface
         if ($path[0] == '/' || $path[0] == '\\') {   // match site relative paths
             $retPath = $this->addSiteUrl($path);
         } else  {
-            $retPath = $this->addThemeUrl($path);
+            $retPath = $this->addTemplateUrl($path);
         }
         return $retPath;
     }
