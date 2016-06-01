@@ -50,9 +50,7 @@ class ClassPath extends Iface
      */
     public function load($xhtml, $class)
     {
-        try {
-            return $this->loadFile('', $class);
-        } catch (\Exception $e) { error_log($e->getMessage()); }
+        return $this->loadFile('', $class);
     }
 
     /**
@@ -64,14 +62,11 @@ class ClassPath extends Iface
      */
     public function loadFile($path, $class)
     {
-        try {
-            $class = trim(str_replace('\\', '_', $class), '_');
-            $tplpath = $this->path . '/' . $class . '.' . $this->ext;
-            if (is_file($tplpath)) {
-                return Template::loadFile($tplpath);
-            }
-
-        } catch (\Exception $e) { error_log($e->getMessage()); }
+        $class = trim(str_replace('\\', '_', $class), '_');
+        $tplpath = $this->path . '/' . $class . '.' . $this->ext;
+        if (is_file($tplpath)) {
+            return Template::loadFile($tplpath);
+        }
     }
 
 }

@@ -27,9 +27,7 @@ class DefaultLoader extends Iface
      */
     public function load($xhtml, $class)
     {
-        try {
-            return Template::load($xhtml);
-        } catch (\Exception $e) { error_log($e->getMessage()); }
+        return Template::load($xhtml);
     }
 
     /**
@@ -41,9 +39,7 @@ class DefaultLoader extends Iface
      */
     public function loadFile($path, $class)
     {
-        try {
-            return Template::loadFile($path);
-        } catch (\Exception $e) { error_log($e->getMessage()); }
+        return Template::loadFile($path);
     }
 
 }

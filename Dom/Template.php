@@ -216,13 +216,13 @@ class Template
      *
      * @param string $filename
      * @param string $encoding
-     * @throws \RuntimeException
+     * @throws Exception
      * @return Template
      */
     static function loadFile($filename, $encoding = 'UTF-8')
     {
         if (!is_file($filename)) {
-            throw new \RuntimeException('Cannot locate XML/XHTML file: ' . $filename);
+            throw new Exception('Cannot locate XML/XHTML file: ' . $filename);
         }
         $html = file_get_contents($filename);
         $obj = self::load($html, $encoding);
@@ -235,14 +235,14 @@ class Template
      *
      * @param string $html
      * @param string $encoding
-     * @throws \RuntimeException
+     * @throws Exception
      * @return Template
      */
     static function load($html, $encoding = 'UTF-8')
     {
         $html = trim($html);
         if ($html == '' || $html[0] != '<') {
-            throw new \RuntimeException('Please supply a valid XHTML/XML string to create the \DOMDocument.');
+            throw new Exception('Please supply a valid XHTML/XML string to create the \DOMDocument.');
         }
         $isHtml5 = false;
         if ('<!doctype html>' == strtolower(substr($html, 0, 15))) {
@@ -260,7 +260,9 @@ class Template
                 $str .= sprintf("\n[%s:%s] %s", $error->line, $error->column, trim($error->message));
             }
             libxml_clear_errors();
-            throw new \RuntimeException($str);
+            $e = new Exception('Error Parsing DOM Template');
+            $e->setDump($str);
+            throw $e;
         }
         $obj = new self($doc, $encoding);
         $obj->isHtml5 = $isHtml5;

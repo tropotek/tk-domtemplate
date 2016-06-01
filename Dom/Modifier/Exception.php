@@ -8,4 +8,4 @@ namespace Dom\Modifier;
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  */
-class Exception extends \Exception { }
+class Exception extends \Dom\Exception { }
