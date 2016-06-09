@@ -1,6 +1,8 @@
 <?php
 namespace Dom\Renderer;
 
+use Dom\Template;
+
 /**
  * Template Bootstrap interface
  *
@@ -8,29 +10,14 @@ namespace Dom\Renderer;
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  */
-interface Iface
+interface DisplayInterface extends RendererInterface
 {
-
     /**
      * Execute the renderer.
      * Return an object that your framework can interpret and display.
      *
-     * @return mixed
+     * @return Template|Renderer
      */
     public function show();
-
-    /**
-     * Get the \Dom\Template
-     *
-     * @return \Dom\Template
-     */
-    public function getTemplate();
-
-    /**
-     * Set the \Dom\Template
-     *
-     * @param \Dom\Template $template
-     */
-    public function setTemplate($template);
 
 }

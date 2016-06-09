@@ -22,7 +22,7 @@ use Dom\Exception;
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  */
-class AutoRenderer implements Iface
+class AutoRenderer implements RendererInterface, DisplayInterface
 {
 
     /**

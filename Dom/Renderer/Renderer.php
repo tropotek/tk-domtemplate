@@ -15,13 +15,17 @@ use Dom\Template;
  * This is a good way to create a default template. But be aware that this will
  * be a new template and will have to be inserted into its parent using the \Dom_Template::insertTemplate()
  * method.
+ * 
+ * Update:
+ * Now the show() method has been removed from the renderer
+ * do not forget to implement the DisplayInterface if you need the show() method
  *
  *
  * @author Michael Mifsud <info@tropotek.com>
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  */
-abstract class Renderer implements Iface
+abstract class Renderer implements RendererInterface
 {
 
     /**
@@ -30,13 +34,10 @@ abstract class Renderer implements Iface
     protected $template = null;
 
 
-
-
-
     /**
      * Set a new template for this renderer.
      *
-     * @param \Dom\Template $template
+     * @param Template $template
      */
     public function setTemplate($template)
     {
@@ -48,7 +49,7 @@ abstract class Renderer implements Iface
      * This method will try to call the magic method __makeTemplate
      * to create a template if non exits.
      *
-     * @return \Dom\Template
+     * @return Template
      */
     public function getTemplate()
     {

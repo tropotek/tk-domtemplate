@@ -1,8 +1,13 @@
 <?php
 namespace Dom\Renderer;
 
+use Dom\Template;
+
 /**
  * Class RendererTrait
+ * 
+ * In rare cases use this to add the get/set template to your renderer object
+ * Do not forget to implement the DisplayInterface if you need the show() method
  *
  * @author Michael Mifsud <info@tropotek.com>
  * @link http://www.tropotek.com/
