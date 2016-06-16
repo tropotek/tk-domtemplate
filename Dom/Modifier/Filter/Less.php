@@ -20,7 +20,6 @@ class Less extends Iface
 {
     /**
      * @var \Tk\Cache\Cache
-     * @todo
      */
     protected $cache = null;
 
@@ -40,12 +39,18 @@ class Less extends Iface
      */
     protected $source = array();
 
+    /**
+     * @var null
+     */
     private $insNode = null;
 
-
+    /**
+     * @var array
+     */
     protected $params = array();
 
 
+    
     /**
      * __construct
      *
@@ -69,16 +74,11 @@ class Less extends Iface
             throw new Exception('Please install lessphp. (http://lessphp.gpeasy.com/) [Composer: "oyejorge/less.php": "~1.5"]');
         }
 
-
-
-
         // TODO: Fix this
         $this->source[] = <<<LESS
-@_themeUrl : {$this->enquote($this->getConfig()->getSelectedThemeUrl())};
-@_siteUrl  : {$this->enquote($this->getConfig()->getSiteUrl())};
-@_dataUrl  : {$this->enquote($this->getConfig()->getDataUrl())};
-@_libUrl   : {$this->enquote($this->getConfig()->getLibUrl())};
-@_mediaUrl : {$this->enquote($this->getConfig()->getMediaUrl())};
+@_templateUrl : {$this->enquote($this->params['template.path'])};
+@_siteUrl  : {$this->enquote($this->params['site.url'])};
+@_dataUrl  : {$this->enquote($this->params['data.url'])};
 
 LESS;
 
@@ -94,7 +94,7 @@ LESS;
     public function postTraverse($doc)
     {
         //tklog('-> Start LESS Parser');
-        $cachePath = $this->getConfig()->getCachePath();
+        $cachePath = $this->params['cache.path'];
         $options = array('cache_dir' => $cachePath, 'compress' => $this->compress);
         //$css_file_name = \Less_Cache::Get($this->source, $options, false);
         $css_file_name = \Less_Cache::Get($this->source, $options);
@@ -139,8 +139,8 @@ LESS;
     {
         if ($node->nodeName == 'link' && $node->hasAttribute('href') && preg_match('/\.less$/', $node->getAttribute('href'))) {
             $file = basename($node->getAttribute('href'));
-            $filePath = str_replace($this->getConfig()->getSiteUrl(), '', dirname($node->getAttribute('href')));
-            $filePath = $this->getConfig()->getSitePath() . $filePath .'/'.$file;
+            $filePath = str_replace($this->params['site.url'], '', dirname($node->getAttribute('href')));
+            $filePath = $this->params['site.path'] . $filePath .'/'.$file;
             $fileUrl = dirname($node->getAttribute('href'));
             $fileUrl = '';
 
