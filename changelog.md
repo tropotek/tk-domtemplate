@@ -1,5 +1,15 @@
 #CHANGELOG#
 
+Ver 2.0.3 [2016-07-10]:
+-------------------------------
+ - Added staticMatcher for routing
+ - Updated RendererInterface and seperated teh show() to DisplayInterface
+ - Finalised base template site
+ - Finished routing, added new template to site
+ - Updated code, added an update.md with info for the updated codes...
+ - Started rotation creation javascript plugin
+
+
 Ver 2.0.2 [2016-04-14]:
 -------------------------------
  - Finalised base code for uni apps
