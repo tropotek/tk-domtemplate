@@ -55,7 +55,7 @@ class Less extends Iface
      * __construct
      *
      */
-    public function __construct($params = [])
+    public function __construct($params = array())
     {
         $this->params = $params;
     }
