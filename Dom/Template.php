@@ -960,7 +960,7 @@ class Template
      */
     public function appendMetaTag($name, $content, $node = null)
     {
-        return $this->appendHeadElement('meta', array('name' => $name, 'content' => $content), $node);
+        return $this->appendHeadElement('meta', array('name' => $name, 'content' => $content), '', $node);
     }
 
     /**
@@ -1541,14 +1541,16 @@ class Template
                             $node->setAttribute($k, $v);
                         }
                     }
+
+                    $nl = $this->document->createTextNode("\n");
                     if ($header['node']) {
                         $n = $header['node'];
                         $n->parentNode->insertBefore($node, $n);
+                        $n->parentNode->insertBefore($nl, $n);
                     } else {
                         $this->head->appendChild($node);
+                        $this->head->appendChild($nl);
                     }
-                    $nl = $this->document->createTextNode("\n");
-                    $node->parentNode->insertBefore($nl, $node);
                 }
             }
             $this->parsed = true;

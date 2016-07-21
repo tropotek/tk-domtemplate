@@ -98,21 +98,21 @@ LESS;
         $options = array('cache_dir' => $cachePath, 'compress' => $this->compress);
         //$css_file_name = \Less_Cache::Get($this->source, $options, false);
         $css_file_name = \Less_Cache::Get($this->source, $options);
-        $css = file_get_contents($cachePath . '/' . $css_file_name);
+        $css = trim(file_get_contents($cachePath . '/' . $css_file_name));
         //tklog('-> End LESS Parser');
 
-
-        $newNode = $doc->createElement('style');
-        $newNode->setAttribute('type', 'text/css');
-        $newNode->setAttribute('data-author', 'PHP_LESS_Compiler');
-        $ct = $doc->createCDATASection("\n" . $css . "\n" );
-        $newNode->appendChild($ct);
-        if ($this->insNode) {
-            $this->insNode->parentNode->insertBefore($newNode, $this->insNode);
-        } else {
-            $this->domModifier->getHead()->appendChild($newNode);
+        if ($css) {
+            $newNode = $doc->createElement('style');
+            $newNode->setAttribute('type', 'text/css');
+            $newNode->setAttribute('data-author', 'PHP_LESS_Compiler');
+            $ct = $doc->createCDATASection("\n" . $css . "\n");
+            $newNode->appendChild($ct);
+            if ($this->insNode) {
+                $this->insNode->parentNode->insertBefore($newNode, $this->insNode);
+            } else {
+                $this->domModifier->getHead()->appendChild($newNode);
+            }
         }
-
 
     }
 
