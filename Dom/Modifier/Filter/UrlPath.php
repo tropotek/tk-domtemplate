@@ -205,6 +205,9 @@ class UrlPath extends Iface
                 if (preg_match('/^#/', $attr->value)) { // ignore fragment urls
                     continue;
                 }
+                if (preg_match('/^javascript:/', $attr->value)) { // ignore javascript directives
+                    continue;
+                }
                 if (preg_match('/(\S+):(\S+)/', $attr->value) || preg_match('/^\/\//', $attr->value)) {   // ignore full urls and schema-less urls
                     continue;
                 }
