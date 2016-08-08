@@ -1,0 +1,9 @@
+# Created by .ignore support plugin (hsz.mobi)
+.htaccess
+.idea
+.directory
+*.swp
+*bak*
+_*
+*.iml
+composer.lock
