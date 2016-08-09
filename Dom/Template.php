@@ -250,6 +250,8 @@ class Template
         }
         $doc = new \DOMDocument();
         libxml_use_internal_errors(true);
+
+        //$html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
         $html = self::cleanXml($html, $encoding);
         $r = $doc->loadXML($html);
         //$r = $doc->loadHTML($html);
@@ -264,6 +266,7 @@ class Template
             $e->setDump($str);
             throw $e;
         }
+
         $obj = new self($doc, $encoding);
         $obj->isHtml5 = $isHtml5;
         return $obj;
@@ -1633,12 +1636,21 @@ class Template
      * Receive the document in the format of 'xml' or 'html'.
      *
      * @param bool $parse parse the document
+     * @param bool $saveHtml If true saveHTML() is used instead of saveXML()
      * @return string
      */
-    public function toString($parse = true)
+    public function toString($parse = true, $saveHtml = false)
     {
         $doc = $this->getDocument($parse);
-        $str = $doc->saveXML($doc->documentElement);
+        if ($saveHtml) {
+            $str = $doc->saveHTML($doc->documentElement);
+        } else {
+            $str = $doc->saveXML($doc->documentElement);
+//            if ($this->encoding == 'UTF-8') {
+//                $str = utf8_decode($str);
+//            }
+        }
+
         // Cleanup Document
         if (substr($str, 0, 5) == '<?xml') {    // Remove xml declaration
             $str = substr($str, strpos($str, "\n") + 1);
@@ -1708,6 +1720,13 @@ class Template
      */
     static private function ord($ch)
     {
+//        $i = 0;
+//        $number = '';
+//        while (isset($ch{$i})) {
+//            $number.= ord($ch{$i});
+//            ++$i;
+//        }
+//        return $number;
         $k = mb_convert_encoding($ch, 'UCS-2LE', 'UTF-8');
         $k1 = ord(substr($k, 0, 1));
         $k2 = ord(substr($k, 1, 1));

@@ -58,7 +58,7 @@ class ClassPath extends Iface
      *
      * @param $path
      * @param $class
-     * @return Template
+     * @return Template|null
      */
     public function loadFile($path, $class)
     {
