@@ -1636,20 +1636,12 @@ class Template
      * Receive the document in the format of 'xml' or 'html'.
      *
      * @param bool $parse parse the document
-     * @param bool $saveHtml If true saveHTML() is used instead of saveXML()
      * @return string
      */
-    public function toString($parse = true, $saveHtml = false)
+    public function toString($parse = true)
     {
         $doc = $this->getDocument($parse);
-        if ($saveHtml) {
-            $str = $doc->saveHTML($doc->documentElement);
-        } else {
-            $str = $doc->saveXML($doc->documentElement);
-//            if ($this->encoding == 'UTF-8') {
-//                $str = utf8_decode($str);
-//            }
-        }
+        $str = $doc->saveXML($doc->documentElement);
 
         // Cleanup Document
         if (substr($str, 0, 5) == '<?xml') {    // Remove xml declaration
@@ -1720,13 +1712,6 @@ class Template
      */
     static private function ord($ch)
     {
-//        $i = 0;
-//        $number = '';
-//        while (isset($ch{$i})) {
-//            $number.= ord($ch{$i});
-//            ++$i;
-//        }
-//        return $number;
         $k = mb_convert_encoding($ch, 'UCS-2LE', 'UTF-8');
         $k1 = ord(substr($k, 0, 1));
         $k2 = ord(substr($k, 1, 1));
