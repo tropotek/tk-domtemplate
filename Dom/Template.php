@@ -375,12 +375,17 @@ class Template
 
             // Store all choice nodes
             if ($node->hasAttribute('choice')) {
-                if (!array_key_exists($node->getAttribute('choice'), $this->choice)) {
-                    $this->choice[$node->getAttribute('choice')] = array();
-                    $this->choice[$node->getAttribute('choice')]['node'] = array();
-                    $this->choice[$node->getAttribute('choice')]['set'] = false;
+                $arr = preg_split('/ /', $node->getAttribute('choice'));
+                foreach ($arr as $choice) {
+                    if (!array_key_exists($choice, $this->choice)) {
+                        $this->choice[$choice] = array();
+                        $this->choice[$choice]['node'] = array();
+                        $this->choice[$choice]['var'] = array();
+                        $this->choice[$choice]['set'] = false;
+                    }
+                    $this->choice[$choice]['node'][] = $node;
+                    $this->choice[$choice]['var'] = array_merge($this->choice[$choice]['var'], $arr);
                 }
-                $this->choice[$node->getAttribute('choice')]['node'][] = $node;
                 $node->removeAttribute('choice');
             }
 
@@ -1509,12 +1514,16 @@ class Template
                 unset($this->repeat[$name]);
             }
             foreach ($this->choice as $name => $nodes) {
+                // TODO: we are not handling double choices IE: choice="admin staff"
+                //  In this case if one is set then the node should not be removed.
+                //  The below code does not work like this......   ????????
+                //  Also needs to take into account unsetChoice()  ????????
                 if (!$nodes['set']) {
                     foreach ($nodes['node'] as $node) {
-                        if (!$node || !isset($node->ownerDocument)) {
+                        if (!$node || !isset($node->ownerDocument)) {       // ??? whats the need for ownerDocument ???
                             continue;
                         }
-                        if ($node != null && $node->parentNode != null) {
+                        if ($node && $node->parentNode) {
                             $node->parentNode->removeChild($node);
                         }
                     }
