@@ -40,24 +40,47 @@ class Less extends Iface
     protected $source = array();
 
     /**
-     * @var null
+     * @var null|\DOMElement
      */
     private $insNode = null;
 
     /**
      * @var array
      */
-    protected $params = array();
+    //protected $params = array();
+
+    /**
+     * @var string
+     */
+    protected $sitePath = '';
+
+    /**
+     * @var string
+     */
+    protected $siteUrl = '';
+
+    /**
+     * @var string
+     */
+    protected $cachePath = '';
+
+    /**
+     * @var array
+     */
+    protected $lessConstants = array();
 
 
-    
     /**
      * __construct
      *
      */
-    public function __construct($params = array())
+    //public function __construct($params = array())
+    public function __construct($sitePath, $siteUrl, $cachePath = '', $lessConstants = array())
     {
-        $this->params = $params;
+        $this->sitePath = $sitePath;
+        $this->siteUrl = $siteUrl;
+        $this->cachePath = $cachePath;
+        $this->lessConstants = $lessConstants;
     }
 
 
@@ -75,12 +98,20 @@ class Less extends Iface
         }
 
         // TODO: Fix this
-        $this->source[] = <<<LESS
-@_templateUrl : {$this->enquote($this->params['template.path'])};
-@_siteUrl  : {$this->enquote($this->params['site.url'])};
-@_dataUrl  : {$this->enquote($this->params['data.url'])};
+//        $this->source[] = <<<LESS
+//@_templateUrl : {$this->enquote($this->params['template.path'])};
+//@_siteUrl  : {$this->enquote($this->params['site.url'])};
+//@_dataUrl  : {$this->enquote($this->params['data.url'])};
+//LESS;
 
-LESS;
+        $this->lessConstants['siteUrl'] = $this->siteUrl;
+        $src = '';
+        foreach ($this->lessConstants as $k => $v) {
+            $src .= sprintf('@%s : %s;', $k, $this->enquote($v)) . "\n";
+        }
+        if ($src)
+            $this->source[] = $src;
+
 
     }
 
@@ -93,13 +124,11 @@ LESS;
      */
     public function postTraverse($doc)
     {
-        //tklog('-> Start LESS Parser');
-        $cachePath = $this->params['cache.path'];
+        $cachePath = $this->cachePath;
         $options = array('cache_dir' => $cachePath, 'compress' => $this->compress);
         //$css_file_name = \Less_Cache::Get($this->source, $options, false);
         $css_file_name = \Less_Cache::Get($this->source, $options);
         $css = trim(file_get_contents($cachePath . '/' . $css_file_name));
-        //tklog('-> End LESS Parser');
 
         if ($css) {
             $newNode = $doc->createElement('style');
@@ -113,7 +142,6 @@ LESS;
                 $this->domModifier->getHead()->appendChild($newNode);
             }
         }
-
     }
 
     /**
@@ -128,7 +156,6 @@ LESS;
         return $quote . $str . $quote;
     }
 
-
     /**
      * Call this method to traverse a document
      *
@@ -139,8 +166,8 @@ LESS;
     {
         if ($node->nodeName == 'link' && $node->hasAttribute('href') && preg_match('/\.less$/', $node->getAttribute('href'))) {
             $file = basename($node->getAttribute('href'));
-            $filePath = str_replace($this->params['site.url'], '', dirname($node->getAttribute('href')));
-            $filePath = $this->params['site.path'] . $filePath .'/'.$file;
+            $filePath = str_replace($this->siteUrl, '', dirname($node->getAttribute('href')));
+            $filePath = $this->sitePath . $filePath .'/'.$file;
             $fileUrl = dirname($node->getAttribute('href'));
             $fileUrl = '';
 
