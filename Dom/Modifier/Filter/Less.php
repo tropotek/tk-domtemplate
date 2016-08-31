@@ -45,11 +45,6 @@ class Less extends Iface
     private $insNode = null;
 
     /**
-     * @var array
-     */
-    //protected $params = array();
-
-    /**
      * @var string
      */
     protected $sitePath = '';
@@ -72,9 +67,11 @@ class Less extends Iface
 
     /**
      * __construct
-     *
+     * @param $sitePath
+     * @param $siteUrl
+     * @param string $cachePath
+     * @param array $lessConstants Any parameters you want accessable via the less file via @{paramName}
      */
-    //public function __construct($params = array())
     public function __construct($sitePath, $siteUrl, $cachePath = '', $lessConstants = array())
     {
         $this->sitePath = $sitePath;
@@ -82,8 +79,6 @@ class Less extends Iface
         $this->cachePath = $cachePath;
         $this->lessConstants = $lessConstants;
     }
-
-
 
     /**
      * pre init the Filter
@@ -97,38 +92,34 @@ class Less extends Iface
             throw new Exception('Please install lessphp. (http://lessphp.gpeasy.com/) [Composer: "oyejorge/less.php": "~1.5"]');
         }
 
-        // TODO: Fix this
-//        $this->source[] = <<<LESS
-//@_templateUrl : {$this->enquote($this->params['template.path'])};
-//@_siteUrl  : {$this->enquote($this->params['site.url'])};
-//@_dataUrl  : {$this->enquote($this->params['data.url'])};
-//LESS;
-
-        $this->lessConstants['siteUrl'] = $this->siteUrl;
         $src = '';
         foreach ($this->lessConstants as $k => $v) {
             $src .= sprintf('@%s : %s;', $k, $this->enquote($v)) . "\n";
         }
         if ($src)
             $this->source[] = $src;
-
-
     }
-
 
     /**
      * pre init the Filter
      *
      * @param \DOMDocument $doc
-     * @throws Exception
+     * @throws \Exception
+     *
      */
     public function postTraverse($doc)
     {
-        $cachePath = $this->cachePath;
-        $options = array('cache_dir' => $cachePath, 'compress' => $this->compress);
+
         //$css_file_name = \Less_Cache::Get($this->source, $options, false);
-        $css_file_name = \Less_Cache::Get($this->source, $options);
-        $css = trim(file_get_contents($cachePath . '/' . $css_file_name));
+        if ($this->cachePath) {
+            $options = array('cache_dir' => $this->cachePath, 'compress' => $this->compress);
+            $css_file_name = \Less_Cache::Get($this->source, $options);
+            $css = trim(file_get_contents($this->cachePath . '/' . $css_file_name));
+        } else {
+            // todo: Make the caching optional
+            $options = array('compress' => $this->compress);
+            throw new \Exception('Non cached parser not implemented, please supply a cachePath value');
+        }
 
         if ($css) {
             $newNode = $doc->createElement('style');
