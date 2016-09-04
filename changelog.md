@@ -1,5 +1,16 @@
 #CHANGELOG#
 
+Ver 2.0.4 [2016-09-05]:
+-------------------------------
+ - Fixed Less Compiler
+ - Modified user pages and login identity value
+ - Added new tk mail lib
+ - Implemented lib into project
+ - Checkbox broken still fixing it!
+ - Changed all = [] to = array()
+ - Change php version check to gt php5.0.0
+
+
 Ver 2.0.3 [2016-07-10]:
 -------------------------------
  - Added staticMatcher for routing
