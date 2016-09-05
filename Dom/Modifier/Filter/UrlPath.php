@@ -73,6 +73,18 @@ class UrlPath extends Iface
         $this->templateUrl = $templateUrl;
     }
 
+    /**
+     * Add a custom src url attribute
+     *
+     * @param $attr
+     * @return $this
+     */
+    public function addUrlAttr($attr)
+    {
+        if (!in_array($attr, $this->attrSrc))
+            $this->attrSrc[] = $attr;
+        return $this;
+    }
 
     /**
      * Prepend the site document root url to the provided path
