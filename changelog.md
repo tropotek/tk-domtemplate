@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 2.0.5 [2016-10-04]:
+-------------------------------
+ - Added new public template
+
+
 Ver 2.0.4 [2016-09-05]:
 -------------------------------
  - Fixed Less Compiler
