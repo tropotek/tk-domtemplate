@@ -983,7 +983,8 @@ class Template
     {
         if (!$this->isWritable())
             return $this;
-        $attrs['type'] = 'text/css';
+//        if (empty($attrs['type']))
+//            $attrs['type'] = 'text/css';
         $attrs['rel'] = 'stylesheet';
         $attrs['href'] = $urlString;
         $this->appendHeadElement('link', $attrs, '', $node);
@@ -1002,7 +1003,8 @@ class Template
     {
         if (!$this->isWritable())
             return $this;
-        $attrs['type'] = 'text/css';
+//        if (empty($attrs['type']))
+//            $attrs['type'] = 'text/css';
         $this->appendHeadElement('style', $attrs, "\n" . $css . "\n", $node);
         return $this;
     }
