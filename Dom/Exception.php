@@ -52,7 +52,7 @@ class Exception extends \Exception {
     {
         $str = parent::__toString();
         if ($this->dump != null) {
-            $str .= $this->dump . "\n\n";
+            $str =  "DOM Errors:\n" . $this->dump . "\n\n" . $str;
         }
         return $str;
     }
