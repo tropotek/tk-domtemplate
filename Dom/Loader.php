@@ -119,9 +119,12 @@ class Loader
      *
      * @param $xhtml
      * @return Template
+     * @throws \Tk\Exception
      */
     public function doLoad($xhtml)
     {
+        if (!count($this->adapterList)) // Should this exit silently????
+            throw new \Tk\Exception('No Template loaders defined!');
         /** @var Loader\Adapter\Iface $adapter */
         foreach($this->adapterList as $adapter) {
             $tpl = $adapter->load($xhtml, $this->callingClass);
@@ -136,9 +139,13 @@ class Loader
      *
      * @param $path
      * @return Template
+     * @throws \Tk\Exception
      */
     public function doLoadFile($path)
     {
+        if (!count($this->adapterList)) // Should this exit silently????
+            throw new \Tk\Exception('No Template loaders defined!');
+
         /** @var Loader\Adapter\Iface $adapter */
         foreach($this->adapterList as $adapter) {
             $tpl = $adapter->loadFile($path, $this->callingClass);

@@ -98,9 +98,15 @@ class UrlPath extends Iface
      */
     protected function addSiteUrl($path)
     {
-        $path = str_replace($this->siteUrl, '', $path);
-        $retPath = $this->siteUrl . $path;
-        return $retPath;
+        $searchFor = \Tk\Uri::create($this->siteUrl)->getPath();
+        $fixedPath = preg_replace('/^'.preg_quote($searchFor, '/').'/', '', $path);
+        if ($fixedPath) {
+            $path = $fixedPath;
+        }
+        //$path = str_replace($this->siteUrl, '', $path);
+        if ($path[0] != '/' && $path[0] != '\\') $path = '/'.$path;
+        $url = \Tk\Uri::create($this->siteUrl . $path)->toString();
+        return $url;
     }
 
     /**
@@ -118,9 +124,15 @@ class UrlPath extends Iface
      */
     protected function addTemplateUrl($path)
     {
-        $path = str_replace($this->templateUrl, '', $path);
-        $retPath =  $this->templateUrl . '/' . $path;
-        return $retPath;
+        $searchFor = \Tk\Uri::create($this->templateUrl)->getPath();
+        $fixedPath = preg_replace('/^'.preg_quote($searchFor, '/').'/', '', $path);
+        if ($fixedPath) {
+            $path = $fixedPath;
+        }
+        //$path = str_replace($this->templateUrl, '', $path);
+        if ($path[0] != '/' && $path[0] != '\\') $path = '/'.$path;
+        $url = \Tk\Uri::create($this->templateUrl . $path)->toString();
+        return $url;
     }
 
     /**

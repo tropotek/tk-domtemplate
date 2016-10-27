@@ -920,7 +920,7 @@ class Template
     /**
      * If a title tag exists it will be returned.
      *
-     * @return \DOMNode
+     * @return \DOMNode|null
      */
     public function getTitleElement()
     {

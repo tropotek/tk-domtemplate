@@ -109,7 +109,6 @@ class Less extends Iface
      */
     public function postTraverse($doc)
     {
-
         //$css_file_name = \Less_Cache::Get($this->source, $options, false);
         if ($this->cachePath) {
             $options = array('cache_dir' => $this->cachePath, 'compress' => $this->compress);
@@ -117,7 +116,7 @@ class Less extends Iface
             $css = trim(file_get_contents($this->cachePath . '/' . $css_file_name));
         } else {
             // todo: Make the caching optional
-            $options = array('compress' => $this->compress);
+            //$options = array('compress' => $this->compress);
             throw new \Exception('Non cached parser not implemented, please supply a cachePath value');
         }
 
@@ -156,15 +155,11 @@ class Less extends Iface
     public function executeNode(\DOMElement $node)
     {
         if ($node->nodeName == 'link' && $node->hasAttribute('href') && preg_match('/\.less$/', $node->getAttribute('href'))) {
-            $file = basename($node->getAttribute('href'));
-            $filePath = str_replace($this->siteUrl, '', dirname($node->getAttribute('href')));
-            $filePath = $this->sitePath . $filePath .'/'.$file;
-            $fileUrl = dirname($node->getAttribute('href'));
-            $fileUrl = '';
+            $url = \Tk\Uri::create($node->getAttribute('href'));
+            $path = $this->sitePath . $url->getRelativePath();
 
-            $this->source[$filePath] = $fileUrl;
+            $this->source[$path] = '';
             $this->domModifier->removeNode($node);
-
             $this->insNode = $node;
         } else if ($node->nodeName == 'style' && $node->getAttribute('type') == 'text/less' ) {
             $this->source[] = $node->nodeValue;
