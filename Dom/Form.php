@@ -40,7 +40,7 @@ class Form
      * __construct
      *
      * @param \DOMElement $form
-     * @param array $elements An array of form elements
+     * @param array|\DOMElement $elements An array of form elements
      * @param Template $parent The parent object
      */
     public function __construct($form, $elements, $parent)

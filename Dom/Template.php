@@ -22,7 +22,13 @@ namespace Dom;
  */
 class Template
 {
-    
+
+
+    /**
+     * Enable addition of data-tracer attributes to inserted JS and CSS
+     * @var bool
+     */
+    static $enableTracer = false;
 
     /**
      * Customised array of node names or attribute names to collect the nodes for.
@@ -547,8 +553,6 @@ class Template
         return null;
     }
 
-
-
     /**
      * Replace the text of one or more var nodes
      *
@@ -983,10 +987,9 @@ class Template
     {
         if (!$this->isWritable())
             return $this;
-//        if (empty($attrs['type']))
-//            $attrs['type'] = 'text/css';
         $attrs['rel'] = 'stylesheet';
         $attrs['href'] = $urlString;
+        $attrs = $this->addTracer(debug_backtrace(), $attrs);
         $this->appendHeadElement('link', $attrs, '', $node);
         return $this;
     }
@@ -1003,8 +1006,7 @@ class Template
     {
         if (!$this->isWritable())
             return $this;
-//        if (empty($attrs['type']))
-//            $attrs['type'] = 'text/css';
+        $attrs = $this->addTracer(debug_backtrace(), $attrs);
         $this->appendHeadElement('style', $attrs, "\n" . $css . "\n", $node);
         return $this;
     }
@@ -1023,6 +1025,7 @@ class Template
             return $this;
         $attrs['type'] = 'text/javascript';
         $attrs['src'] = $urlString;
+        $attrs = $this->addTracer(debug_backtrace(), $attrs);
         $this->appendHeadElement('script', $attrs, '', $node);
         return $this;
     }
@@ -1040,8 +1043,23 @@ class Template
         if (!$this->isWritable())
             return $this;
         $attrs['type'] = 'text/javascript';
+        $attrs = $this->addTracer(debug_backtrace(), $attrs);
         $this->appendHeadElement('script', $attrs, $js, $node);
         return $this;
+    }
+
+    /**
+     * Add the calling trace
+     * @param $trace
+     * @param $attrs
+     * @return mixed
+     */
+    private function addTracer($trace, $attrs)
+    {
+        if (self::$enableTracer && !empty($trace[1]) && empty($attrs['data-tracer'])) {
+            $attrs['data-tracer'] = (!empty($trace[1]['class']) ? $trace[1]['class'] . '::' : '').(!empty($trace[1]['function']) ? $trace[1]['function'] . '()' : '');
+        }
+        return $attrs;
     }
 
 
