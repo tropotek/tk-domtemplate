@@ -675,10 +675,13 @@ class Template
      * @param string $value
      * @return Template
      */
-    public function setAttr($var, $attr, $value)
+    public function setAttr($var, $attr, $value = null)
     {
         if (!$this->isWritable('var', $var))
             return $this;
+        if (!$value === null) {
+            $value = $attr;
+        }
         $nodes = $this->findVar($var);
         /** @var \DOMElement $node */
         foreach ($nodes as $node) {
