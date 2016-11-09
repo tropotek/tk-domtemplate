@@ -223,13 +223,13 @@ class UrlPath extends Iface
         foreach ($node->attributes as $attr) {
             if (in_array(strtolower($attr->nodeName), $this->attrSrc)) {
                 if (preg_match('/^#$/', $attr->value)) { // ignore hash urls
-                    $attr->value = 'javascript:;';
+                    $attr->value = 'javascript:;';  // Because of reloading the page bug on old ff browsers
                     continue;
                 }
                 if (preg_match('/^#/', $attr->value)) { // ignore fragment urls
                     continue;
                 }
-                if (preg_match('/^javascript:/', $attr->value)) { // ignore javascript directives
+                if (preg_match('/^[a-z0-9]{1,10}:/', $attr->value)) { // ignore Full URL's
                     continue;
                 }
                 if (preg_match('/(\S+):(\S+)/', $attr->value) || preg_match('/^\/\//', $attr->value)) {   // ignore full urls and schema-less urls
