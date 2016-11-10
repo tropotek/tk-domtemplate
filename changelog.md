@@ -1,5 +1,15 @@
 #CHANGELOG#
 
+Ver 2.0.6 [2016-11-11]:
+-------------------------------
+ - That will do fine
+ - Updated status ribbons
+ - Added attachments to contact form
+ - Started new comment rating sections
+ - Fixed some url path issues, added PageBytes Dom Filter
+ - Finalising View Project page
+
+
 Ver 2.0.5 [2016-10-04]:
 -------------------------------
  - Added new public template
