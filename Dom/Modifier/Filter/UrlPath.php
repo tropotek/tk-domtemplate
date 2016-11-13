@@ -103,8 +103,9 @@ class UrlPath extends Iface
         if ($fixedPath) {
             $path = $fixedPath;
         }
-        //$path = str_replace($this->siteUrl, '', $path);
         if ($path[0] != '/' && $path[0] != '\\') $path = '/'.$path;
+        $path = preg_replace('/^\/\.\//', '/', $path);
+        //$path = str_replace('/./', '/', $path);
         $url = \Tk\Uri::create($this->siteUrl . $path)->toString();
         return $url;
     }
@@ -129,8 +130,9 @@ class UrlPath extends Iface
         if ($fixedPath) {
             $path = $fixedPath;
         }
-        //$path = str_replace($this->templateUrl, '', $path);
         if ($path[0] != '/' && $path[0] != '\\') $path = '/'.$path;
+        $path = preg_replace('/^\/\.\//', '/', $path);
+        //$path = str_replace('/./', '/', $path);
         $url = \Tk\Uri::create($this->templateUrl . $path)->toString();
         return $url;
     }

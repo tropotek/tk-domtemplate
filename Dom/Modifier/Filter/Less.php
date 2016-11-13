@@ -40,6 +40,11 @@ class Less extends Iface
     protected $source = array();
 
     /**
+     * @var array
+     */
+    protected $sourcePaths = array();
+
+    /**
      * @var null|\DOMElement
      */
     private $insNode = null;
@@ -78,6 +83,24 @@ class Less extends Iface
         $this->siteUrl = $siteUrl;
         $this->cachePath = $cachePath;
         $this->lessConstants = $lessConstants;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isCompress()
+    {
+        return $this->compress;
+    }
+
+    /**
+     * @param boolean $compress
+     * @return $this
+     */
+    public function setCompress($compress)
+    {
+        $this->compress = $compress;
+        return $this;
     }
 
     /**
@@ -124,6 +147,7 @@ class Less extends Iface
             $newNode = $doc->createElement('style');
             $newNode->setAttribute('type', 'text/css');
             $newNode->setAttribute('data-author', 'PHP_LESS_Compiler');
+            $newNode->setAttribute('data-paths', implode(',', $this->sourcePaths));
             $ct = $doc->createCDATASection("\n" . $css . "\n");
             $newNode->appendChild($ct);
             if ($this->insNode) {
@@ -159,6 +183,7 @@ class Less extends Iface
             $path = $this->sitePath . $url->getRelativePath();
 
             $this->source[$path] = '';
+            $this->sourcePaths[] = $path;
             $this->domModifier->removeNode($node);
             $this->insNode = $node;
         } else if ($node->nodeName == 'style' && $node->getAttribute('type') == 'text/less' ) {
