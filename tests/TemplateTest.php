@@ -4,14 +4,14 @@
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  */
-namespace Dom\Test;
+namespace tests;
 
 use \Dom\Template as Template;
 /**
  *
  * @package dom\Test
  */
-class TemplateTest extends \UnitTestCase
+class TemplateTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var string
@@ -159,7 +159,8 @@ HTML;
 </head>
 <body>
   <h1></h1>
-  <div><ul><li>List Item 1</li>
+  <div><ul>
+  <li>List Item 1</li>
   <li>List Item 2</li>
   <li>List Item 3</li>
 </ul></div>
@@ -216,7 +217,8 @@ HTML;
 </head>
 <body>
   <h1></h1>
-  <ul><li>List Item 1</li>
+  <ul>
+  <li>List Item 1</li>
   <li>List Item 2</li>
   <li>List Item 3</li>
 </ul>
@@ -276,7 +278,8 @@ HTML;
   <h1></h1>
   <div>
     <p>Existing Content</p>
-  <ul><li>List Item 1</li>
+  <ul>
+  <li>List Item 1</li>
   <li>List Item 2</li>
   <li>List Item 3</li>
 </ul></div>
