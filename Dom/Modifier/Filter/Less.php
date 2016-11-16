@@ -124,6 +124,27 @@ class Less extends Iface
     }
 
     /**
+     * get path & uri
+     * 
+     * @param \Less_Tree_Import $import
+     * @return array()  EG: array('/file/path.less', '/~file/uri.less')
+     */
+    public function doImport($import)
+    {
+        // Allow including of /vendor/... less files using: @import '/vendor/package/lib/less/lessfile.less'
+        if (preg_match('/^\/vendor\//',$import->getPath())) {
+            $path = $import->getPath();
+            if (!preg_match('/\.less$/',$path)) {
+                $path = $path.'.less';
+            }
+            return array($this->sitePath.$path, $this->siteUrl.$path);
+        }
+        //
+        
+        
+    }
+
+    /**
      * pre init the Filter
      *
      * @param \DOMDocument $doc
@@ -134,7 +155,7 @@ class Less extends Iface
     {
         //$css_file_name = \Less_Cache::Get($this->source, $options, false);
         if ($this->cachePath) {
-            $options = array('cache_dir' => $this->cachePath, 'compress' => $this->compress);
+            $options = array('cache_dir' => $this->cachePath, 'compress' => $this->compress, 'import_dirs' => array($this->siteUrl), 'import_callback' => array($this, 'doImport'));
             $css_file_name = \Less_Cache::Get($this->source, $options);
             $css = trim(file_get_contents($this->cachePath . '/' . $css_file_name));
         } else {
@@ -183,7 +204,7 @@ class Less extends Iface
             $path = $this->sitePath . $url->getRelativePath();
 
             $this->source[$path] = '';
-            $this->sourcePaths[] = $path;
+            $this->sourcePaths[] = $path;   // For adding to data-paths attruibute
             $this->domModifier->removeNode($node);
             $this->insNode = $node;
         } else if ($node->nodeName == 'style' && $node->getAttribute('type') == 'text/less' ) {
