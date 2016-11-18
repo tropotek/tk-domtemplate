@@ -166,8 +166,12 @@ class UrlPath extends Iface
      */
     private function cleanRelative($path)
     {
+        if (preg_match('/^\/\//', $path)) {
+            vd($path);
+        }
+
         // TODO: could cause security issues. see how we go without it.
-        $path = str_replace(array('//','\\\\'), array('/','\\'), $path);
+        //$path = str_replace(array('//','\\\\'), array('/','\\'), $path);
         $array = explode( '/', $path);
         $parents = array();
         foreach( $array as $dir) {
@@ -224,17 +228,17 @@ class UrlPath extends Iface
         // Modify local paths to full path url's
         foreach ($node->attributes as $attr) {
             if (in_array(strtolower($attr->nodeName), $this->attrSrc)) {
-                if (preg_match('/^#$/', $attr->value)) { // ignore hash urls
-                    $attr->value = 'javascript:;';  // Because of reloading the page bug on old ff browsers
+                if (preg_match('/^#$/', $attr->value)) {    // ignore hash urls
+                    $attr->value = 'javascript:;';      // Because of reloading the page bug on old ff browsers
                     continue;
                 }
-                if (preg_match('/^#/', $attr->value)) { // ignore fragment urls
-                    continue;
-                }
-                if (preg_match('/^[a-z0-9]{1,10}:/', $attr->value)) { // ignore Full URL's
+                if (preg_match('/^#/', $attr->value)) {     // ignore fragment urls
                     continue;
                 }
                 if (preg_match('/(\S+):(\S+)/', $attr->value) || preg_match('/^\/\//', $attr->value)) {   // ignore full urls and schema-less urls
+                    continue;
+                }
+                if (preg_match('/^[a-z0-9]{1,10}:/', $attr->value)) {   // ignore Full URL's
                     continue;
                 }
                 $attr->value = htmlentities($this->prependPath($attr->value));
