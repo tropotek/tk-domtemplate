@@ -50,7 +50,7 @@ class Select extends Element
         if ($value === null) {
             $option->setAttribute('value', $text);
         } else {
-            $option->setAttribute('value', Template::objectToString($value));
+            $option->setAttribute('value', $value);
         }
 
         if ($this->useTextNode) {

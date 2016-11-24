@@ -51,9 +51,9 @@ class Input extends Element
     public function setValue($value)
     {
         if ($this->getType() == 'checkbox' || $this->getType() == 'radio') {
-            $this->form->setCheckedByValue($this->getName(), Template::objectToString($value));
+            $this->form->setCheckedByValue($this->getName(), $value);
         } else {
-            $this->element->setAttribute('value', Template::objectToString($value));
+            $this->element->setAttribute('value', $value);
         }
         return $this;
     }

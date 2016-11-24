@@ -9,7 +9,6 @@ namespace tests;
 use \Dom\Template as Template;
 /**
  *
- * @package dom\Test
  */
 class TemplateTest extends \PHPUnit_Framework_TestCase
 {

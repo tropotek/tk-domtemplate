@@ -148,12 +148,12 @@ class Modifier
     public function execute(\DOMDocument $doc)
     {
         $doc->normalizeDocument();
-        /** @var Filter\Iface $mod */
+        /* @var Filter\Iface $mod */
         foreach ($this->list as $mod) {
             $mod->init($doc);
         }
         $this->traverse($doc->documentElement);
-        /** @var Filter\Iface $mod */
+        /* @var Filter\Iface $mod */
         foreach ($this->list as $mod) {
             $mod->postTraverse($doc);
         }

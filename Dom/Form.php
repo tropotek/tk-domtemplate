@@ -79,7 +79,7 @@ class Form
             return $this;
         }
         $elements = $this->elements[$name];
-        /** @var \DOMElement $element */
+        /* @var \DOMElement $element */
         foreach ($elements as $element) {
             if ($value !== null && ($element->getAttribute('value') == $value)) {
                 $element->setAttribute('checked', 'checked');
@@ -191,7 +191,7 @@ class Form
     public function setAction($value)
     {
         if ($this->form != null) {
-            $this->form->setAttribute('action', Template::objectToString($value));
+            $this->form->setAttribute('action', $value);
         }
         return $this;
     }
@@ -211,7 +211,7 @@ class Form
     public function setMethod($value)
     {
         if ($this->form != null) {
-            $this->form->setAttribute('method', Template::objectToString($value));
+            $this->form->setAttribute('method', $value);
         }
         return $this;
     }
@@ -232,7 +232,7 @@ class Form
     public function setTarget($value)
     {
         if ($this->form != null) {
-            $this->form->setAttribute('target', Template::objectToString($value));
+            $this->form->setAttribute('target', $value);
         }
         return $this;
     }
@@ -251,7 +251,7 @@ class Form
             $node = $this->form->ownerDocument->createElement('input');
             $node->setAttribute('type', 'hidden');
             $node->setAttribute('name', $name);
-            $node->setAttribute('value', Template::objectToString($value));
+            $node->setAttribute('value', $value);
             $this->form->appendChild($node);
             $this->form->appendChild($nl);
             $this->elements[$name][] = $node;
@@ -267,7 +267,7 @@ class Form
     public function getHiddenElements()
     {
         $arr = array();
-        /** @var \DOMElement $element */
+        /* @var \DOMElement $element */
         foreach ($this->elements as $element) {
             $type = $element->nodeName;
             $inputType = $element->getAttribute('type');

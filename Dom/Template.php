@@ -28,7 +28,7 @@ class Template
      * Enable addition of data-tracer attributes to inserted JS and CSS
      * @var bool
      */
-    static $enableTracer = false;
+    public static $enableTracer = false;
 
     /**
      * Customised array of node names or attribute names to collect the nodes for.
@@ -40,7 +40,7 @@ class Template
      *
      * @var \DOMElement[]
      */
-    static $capture = array();
+    public static $capture = array();
 
     /**
      * The main template document
@@ -63,9 +63,7 @@ class Template
      * @var string
      */
     private $serialDoc = '';
-    
-    
-    
+
 
     /**
      * An array of var \DOMElement objects
@@ -225,7 +223,7 @@ class Template
      * @throws Exception
      * @return Template
      */
-    static function loadFile($filename, $encoding = 'UTF-8')
+    public static function loadFile($filename, $encoding = 'UTF-8')
     {
         if (!is_file($filename)) {
             throw new Exception('Cannot locate XML/XHTML file: ' . $filename);
@@ -244,7 +242,7 @@ class Template
      * @throws Exception
      * @return Template
      */
-    static function load($html, $encoding = 'UTF-8')
+    public static function load($html, $encoding = 'UTF-8')
     {
         $html = trim($html);
         if ($html == '' || $html[0] != '<') {
@@ -536,7 +534,7 @@ class Template
      * @param string $value
      * @return \DOMELement
      */
-    static function findNodeByAttr($node, $value, $attr = 'var')
+    public static function findNodeByAttr($node, $value, $attr = 'var')
     {
         if ($node->nodeType == \XML_ELEMENT_NODE) {
             if ($node->hasAttribute($attr) && $node->getAttribute($attr) == $value) {
@@ -566,7 +564,7 @@ class Template
             return $this;
 
         $nodes = $this->findVar($var);
-        /** @var \DOMElement $node */
+        /* @var \DOMElement $node */
         foreach ($nodes as $node) {
             $this->removeChildren($node);
             $newNode = $this->document->createTextNode($value);
@@ -588,7 +586,7 @@ class Template
             return $this;
 
         $nodes = $this->findVar($var);
-        /** @var \DOMElement $node */
+        /* @var \DOMElement $node */
         foreach ($nodes as $node) {
             $newNode = $this->document->createTextNode($value);
             $node->appendChild($newNode);
@@ -659,7 +657,7 @@ class Template
     {
         if (!$this->isWritable('var', $var))
             return '';
-        /** @var \DOMElement[] $nodes */
+        /* @var \DOMElement[] $nodes */
         $nodes = $this->findVar($var);
         if (count($nodes)) {
             return $nodes[0]->getAttribute($attr);
@@ -683,7 +681,7 @@ class Template
             $value = $attr;
         }
         $nodes = $this->findVar($var);
-        /** @var \DOMElement $node */
+        /* @var \DOMElement $node */
         foreach ($nodes as $node) {
             if ($value === null) {
                 $node->removeAttribute($attr);
@@ -1074,7 +1072,7 @@ class Template
      * @param string $encoding
      * @return \DOMElement
      */
-    static function makeContentNode($markup, $encoding = 'UTF-8')
+    public static function makeContentNode($markup, $encoding = 'UTF-8')
     {
         $markup = self::cleanXml($markup, $encoding);
         $id = '_c_o_n__';
@@ -1153,7 +1151,7 @@ class Template
      * @param string $encoding
      * @return \DOMElement
      */
-    static function insertHtmlDom($element, $html, $encoding = 'UTF-8')
+    public static function insertHtmlDom($element, $html, $encoding = 'UTF-8')
     {
         if ($html == null) {
             return null;
@@ -1189,7 +1187,7 @@ class Template
         if (!$this->isWritable('var', $var))
             return $this;
         $nodes = $this->findVar($var);
-        /** @var \DOMElement $node */
+        /* @var \DOMElement $node */
         foreach ($nodes as $node) {
             $this->removeChildren($node);
             if (!$doc->documentElement)
@@ -1250,7 +1248,7 @@ class Template
      * @param bool $preserveAttr Set to false to ignore copying of existing Attributes
      * @return \DOMElement
      */
-    static function replaceHtmlDom($element, $html, $encoding = 'UTF-8', $preserveAttr = true)
+    public static function replaceHtmlDom($element, $html, $encoding = 'UTF-8', $preserveAttr = true)
     {
         if ($html == null) {
             return null;
@@ -1262,7 +1260,7 @@ class Template
         }
         $elementDoc = $element->ownerDocument;
 
-        /** @var \DOMElement $contentNode */
+        /* @var \DOMElement $contentNode */
         $contentNode = self::makeContentNode($html);
         $contentNode = $contentNode->firstChild;
         $contentNode = $elementDoc->importNode($contentNode, true);
@@ -1347,9 +1345,9 @@ class Template
      * @param \DOMElement $element
      * @param string $html
      * @param string $encoding
-     * @return bool Returns true on success
+     * @return \DOMElement|null
      */
-    static function appendHtmlDom($element, $html, $encoding = 'UTF-8')
+    public static function appendHtmlDom($element, $html, $encoding = 'UTF-8')
     {
         if ($html == null) {
             return null;
@@ -1381,7 +1379,7 @@ class Template
         if (!$this->isWritable('var', $var))
             return $this;
         $nodes = $this->findVar($var);
-        /** @var \DOMElement $el */
+        /* @var \DOMElement $el */
         foreach ($nodes as $el) {
             $node = $this->document->importNode($doc->documentElement, true);
             $el->appendChild($node);
@@ -1434,7 +1432,7 @@ class Template
             return $this;
         $nodes = $this->findVar($var);
 
-        /** @var \DOMElement $el */
+        /* @var \DOMElement $el */
         foreach ($nodes as $el) {
             $node = $this->document->importNode($doc->documentElement, true);
             if ($el->firstChild) {
@@ -1458,7 +1456,7 @@ class Template
         if (!$this->isWritable('var', $var))
             return $this;
         $nodes = $this->findVar($var);
-        /** @var \DOMElement $node */
+        /* @var \DOMElement $node */
         foreach ($nodes as $i => $node) {
             self::prependHtmlDom($node, $html);
         }
@@ -1470,9 +1468,9 @@ class Template
      *
      * @param \DOMElement $element
      * @param string $html
-     * @return bool Returns true on success
+     * @return \DOMElement|null
      */
-    static function prependHtmlDom($element, $html)
+    public static function prependHtmlDom($element, $html)
     {
         if ($html == null) {
             return null;
@@ -1481,7 +1479,7 @@ class Template
 
         $contentNode = self::makeContentNode($html);
 
-        /** @var \DOMElement $child */
+        /* @var \DOMElement $child */
         foreach ($contentNode->childNodes as $child) {
             $node = $elementDoc->importNode($child, true);
             if ($element->firstChild) {
@@ -1527,7 +1525,7 @@ class Template
                     $node->parentNode->removeChild($node);
                 }
             }
-            /** @var Repeat $repeat */
+            /* @var Repeat $repeat */
             foreach ($this->repeat as $name => $repeat) {
                 $node = $repeat->getRepeatNode();
                 if (!$node || !isset($node->parentNode) || !$node->parentNode) {
@@ -1645,23 +1643,6 @@ class Template
                 return false;
         }
         return true;
-    }
-
-    /**
-     * Return a string from an object.
-     *
-     * @param mixed $obj
-     * @return string
-     * @deprecated Objects should use the __toString magic method
-     */
-    static function objectToString($obj)
-    {
-        if (is_object($obj) && method_exists($obj, 'toString')) {
-            return $obj->toString();
-        } else if (is_object($obj) && method_exists($obj, '__toString')) {
-            return $obj->__toString();
-        }
-        return $obj;
     }
 
     /**

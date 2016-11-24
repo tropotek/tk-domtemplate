@@ -21,7 +21,7 @@ class Loader
     /**
      * @var Loader
      */
-    static $instance = null;
+    public static $instance = null;
 
     /**
      * The class that called the loader getInstance() method
@@ -53,7 +53,7 @@ class Loader
      * @param null|array $params
      * @return Loader
      */
-    static function getInstance($class = '', $params = null)
+    public static function getInstance($class = '', $params = null)
     {
         if (static::$instance == null) {
             static::$instance = new static();
@@ -76,7 +76,7 @@ class Loader
      * @return Template
      * @throws Exception
      */
-    static function load($xhtml, $callingClass = '')
+    public static function load($xhtml, $callingClass = '')
     {        
         if (!$callingClass)
             $callingClass = self::getTraceClass(debug_backtrace());
@@ -92,7 +92,7 @@ class Loader
      * @return Template
      * @throws Exception
      */
-    static function loadFile($path, $callingClass = '')
+    public static function loadFile($path, $callingClass = '')
     {
         if (!$callingClass)
             $callingClass = self::getTraceClass(debug_backtrace());
@@ -104,7 +104,7 @@ class Loader
      * @param $trace
      * @return mixed
      */
-    static private function getTraceClass($trace)
+    private static function getTraceClass($trace)
     {
         $caller = $trace[1];
         if (!empty($caller['object'])) {
@@ -125,7 +125,7 @@ class Loader
     {
         if (!count($this->adapterList)) // Should this exit silently????
             throw new \Tk\Exception('No Template loaders defined!');
-        /** @var Loader\Adapter\Iface $adapter */
+        /* @var Loader\Adapter\Iface $adapter */
         foreach($this->adapterList as $adapter) {
             $tpl = $adapter->load($xhtml, $this->callingClass);
             if ($tpl instanceof Template) {
@@ -146,7 +146,7 @@ class Loader
         if (!count($this->adapterList)) // Should this exit silently????
             throw new \Tk\Exception('No Template loaders defined!');
 
-        /** @var Loader\Adapter\Iface $adapter */
+        /* @var Loader\Adapter\Iface $adapter */
         foreach($this->adapterList as $adapter) {
             $tpl = $adapter->loadFile($path, $this->callingClass);
             if ($tpl instanceof Template) {

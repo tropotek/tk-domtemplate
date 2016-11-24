@@ -42,7 +42,7 @@ class XmlObj
      * @param \DOMNode $node
      * @return \stdClass
      */
-    static public function dom2Obj(\DOMNode $node)
+    public static function dom2Obj(\DOMNode $node)
     {
         $node->normalize();
         if ($node->firstChild != null) {

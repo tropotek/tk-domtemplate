@@ -15,13 +15,13 @@ class JsLast extends Iface
      * if > 0 the node is placed lower in the tree 
      * @var string
      */
-    static public $ATTR_PRIORITY = 'data-jsl-priority';
+    public static $ATTR_PRIORITY = 'data-jsl-priority';
 
     /**
      * Used to ensure the node is not moved/sorted.
      * @var string
      */
-    static public $ATTR_STATIC = 'data-jsl-static';
+    public static $ATTR_STATIC = 'data-jsl-static';
     
     /**
      * Flag to ensure its run once only 
