@@ -1613,7 +1613,7 @@ class Template
     /**
      * Check if a repeat,choice,var,form (template property) Exists.
      *
-     * @param string $property
+     * @param string $property (var, choice, repeat)
      * @param string $key
      * @return bool
      */
