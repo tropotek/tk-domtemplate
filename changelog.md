@@ -1,5 +1,12 @@
 #CHANGELOG#
 
+Ver 2.0.8 [2016-12-30]:
+-------------------------------
+ - Added new crumbs system
+ - Minor Code Updates
+ - 252s-dev.vet.unimelb.edu.au
+
+
 Ver 2.0.7 [2016-11-14]:
 -------------------------------
  - Minor Code Updates
