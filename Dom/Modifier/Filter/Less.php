@@ -167,8 +167,10 @@ class Less extends Iface
         if ($css) {
             $newNode = $doc->createElement('style');
             $newNode->setAttribute('type', 'text/css');
-            $newNode->setAttribute('data-author', 'PHP_LESS_Compiler');
-            $newNode->setAttribute('data-paths', implode(',', $this->sourcePaths));
+            //$newNode->setAttribute('data-author', 'PHP_LESS_Compiler');
+            if (class_exists('\Tk\Config') && \Tk\Config::getInstance()->isDebug()) {
+                $newNode->setAttribute('data-paths', implode(',', $this->sourcePaths));
+            }
             $ct = $doc->createCDATASection("\n" . $css . "\n");
             $newNode->appendChild($ct);
             if ($this->insNode) {
