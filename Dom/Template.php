@@ -692,6 +692,19 @@ class Template
         return $this;
     }
 
+
+    /**
+     * Remove an attribute
+     *
+     * @param string $var
+     * @param string $attr
+     * @return Template
+     */
+    public function removeAttr($var, $attr)
+    {
+        return $this->setAttr($var, $attr);
+    }
+
     /**
      * Set a choice node to become visible in a document.
      *
