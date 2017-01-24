@@ -966,6 +966,7 @@ class Template
             return $this;
         $preKey = $elementName . $value;
         foreach ($attributes as $k => $v) {
+            if ($elementName == 'meta' && $k != 'name') continue;   // Only use the name attribute in the hash for meta tags
             $preKey .= $k . $v;
         }
         $hash = md5($preKey);
