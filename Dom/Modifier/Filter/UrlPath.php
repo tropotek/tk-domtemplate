@@ -89,7 +89,7 @@ class UrlPath extends Iface
     /**
      * Prepend the site document root url to the provided path
      *
-     * Eg:
+     * Ems:
      *      $path = /path/to/resource.js
      *      return /site/root/path/to/resource.js
      *
@@ -113,7 +113,7 @@ class UrlPath extends Iface
     /**
      * Prepend the theme document root to the provided path
      *
-     * Eg:
+     * Ems:
      *      $path = path/to/resource.js
      *      $path = ./path/to/resource.js
      *      $path = ../path/to/resource.js
