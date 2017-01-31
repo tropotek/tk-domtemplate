@@ -286,7 +286,7 @@ So the Last added Adapter is the first to be executed.
 ```php
 <?php
 // * Setup the Template loader, create adapters to look for templates as needed
-/* @var \Dom\Loader $tl */
+/* @var \Dom\Loader $dl */
 $dl = \Dom\Loader::getInstance();
 $dl->addAdapter(new \Dom\Loader\Adapter\DefaultLoader());
 $dl->addAdapter(new \Dom\Loader\Adapter\ClassPath($config->getAppPath().'/html/xml'));
