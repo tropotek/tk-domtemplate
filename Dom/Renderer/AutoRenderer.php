@@ -17,10 +17,16 @@ use Dom\Exception;
  * be a new template and will have to be inserted into its parent using the \Dom_Template::insertTemplate()
  * method.
  *
- * @TODO: This object is currently under development and may change..
+ *
+ *
+ * @note I have ceased development on this object as I feel it does not belong with this
+ * library and introduces the need for logic into the template which is what we are trying to avoid.
+ *
+ *
  * @author Michael Mifsud <info@tropotek.com>
  * @link http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
+ * @deprecated Use this as a template to create something to suit your own requirements...
  */
 class AutoRenderer implements RendererInterface, DisplayInterface
 {

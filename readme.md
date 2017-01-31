@@ -231,14 +231,44 @@ $domForm->getFormElement('comments')->setValue($_REQUEST['comments']);
 ```
 
 
-## Misc Functions 
+## Misc Methods 
+
+For CSS and Javascript we have added some unique methods, these allow you to call the insertTemplate(), \
+appendTemplate(), insertDoc(), appendDoc(), etc..
+methods and the javascript and CSS will be inserted into the parents <head> tag. This allows you
+insert these scripts or URLS anywhere in the rendering process as long as the final parent template has a Head tag.
+
+ - appendCss(): 
+```
+$template->appendCss('body > p {background: #00FF00; }');
+```
+ - appendCssUrl(): 
+```
+$template->appendCssUrl('http://example.com/css/style.css');
+```
+ - appendJs(): 
+```
+$js = <<<JS
+jQuery(function ($) {
+    $('.act').click(function (e) {
+        return confirm('Are you sure you want to install this plugin?');
+    });
+});
+JS;
+$template->appendJs($js);
+```
+ - appendJsUrl(): 
+```
+$template->appendJsUrl('http://example.com/js/sctipt.css');
+```
+   
+This functionality is fantastic if you want to iterate over the DOMTemplate just before displaying the document
+and manipulate all the CSS or Javascript nodes.
+
+
 
 Other functions of the DomTemplate include:
 
- - appendCss(), appendCssUrl(), appendJs(), appendJsUrl(): These allow you to append any css/JavaScript
-   to a template with ease. Also if you insert one template into another, the css and javascript is also 
-   copied through to its parent. This is handy when you want to add css to the main page template from a 
-   child sub-template.
  - getElementById(): Retrieve a node via its ID attribute.
  - setTitleText(): Set the &lt;title&gt; tag text if the tag exists.
  - appendMetaTag(): will append a meta tag to the parent template if a &lt;head&gt; tag exists.
@@ -271,12 +301,21 @@ $template = \Dom\Loader::loadFile($tplFile);
 
 
 
-## AutoRenderer
+## AutoRenderer (deprecated)
 
-This object is currently under development. 
+__WHY?__ As I am not a fan of making the DOMTemplate Lib use any type of internal scripting logic, 
+which will add a new layer of complexity for the designer, I have terminated this as a supported part 
+of the DOMTemplate lib. 
+
+<small>_It is left here as a reference only, use it as a base to get yourself started if you want to build 
+on it for your own requirements._</small>
+
+---
 
 The auto renderer was built to facilitate automatic rendering of data similar to that
 of other templating languages.
 
 Data is passed to the auto renderer and template attributes are used to display the selected data stored in 
-the AutoRenderer. [See the Example](docs/examples/autoRenderer.php)
+the AutoRenderer.
+ 
+[See the Example](docs/examples/autoRenderer.php)
