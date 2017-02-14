@@ -608,14 +608,37 @@ class Template
         return $nodes[0]->nodeValue;
     }
 
+
     /**
-     * Add the class if it does not exist
+     * @param $var
+     * @param $class
+     * @return Template
+     * @deprecated Use Template::addCss()
+     */
+    public function addClass($var, $class) {
+        return $this->addCss($var, $class);
+    }
+
+    /**
+     * @param $var
+     * @param $class
+     * @return Template
+     * @deprecated Use Template::removeCss()
+     */
+    public function removeClass($var, $class)
+    {
+        return $this->removeCss($var, $class);
+    }
+
+
+    /**
+     * Add a css class if it does not exist
      *
      * @param string $var
      * @param string|array $class
      * @return Template
      */
-    public function addClass($var, $class)
+    public function addCss($var, $class)
     {
         $list = $class;
         if (!is_array($class)) {
@@ -638,7 +661,7 @@ class Template
      * @param string $class
      * @return Template
      */
-    public function removeClass($var, $class)
+    public function removeCss($var, $class)
     {
         $str = $this->getAttr($var, 'class');
         $str = preg_replace('/(' . $class . ')\s?/', '', trim($str));
@@ -646,24 +669,6 @@ class Template
         return $this;
     }
 
-    /**
-     * Retreive the text contained within an attribute of a node.
-     *
-     * @param string $var
-     * @param string $attr
-     * @return string
-     */
-    public function getAttr($var, $attr)
-    {
-        if (!$this->isWritable('var', $var))
-            return '';
-        /* @var \DOMElement[] $nodes */
-        $nodes = $this->findVar($var);
-        if (count($nodes)) {
-            return $nodes[0]->getAttribute($attr);
-        }
-        return '';
-    }
 
     /**
      * Replace an attribute value.
@@ -692,6 +697,24 @@ class Template
         return $this;
     }
 
+    /**
+     * Retreive the text contained within an attribute of a node.
+     *
+     * @param string $var
+     * @param string $attr
+     * @return string
+     */
+    public function getAttr($var, $attr)
+    {
+        if (!$this->isWritable('var', $var))
+            return '';
+        /* @var \DOMElement[] $nodes */
+        $nodes = $this->findVar($var);
+        if (count($nodes)) {
+            return $nodes[0]->getAttribute($attr);
+        }
+        return '';
+    }
 
     /**
      * Remove an attribute
