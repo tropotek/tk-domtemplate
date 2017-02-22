@@ -1,5 +1,12 @@
 #CHANGELOG#
 
+Ver 2.0.11 [2017-02-22]:
+-------------------------------
+ - Minor Code Updates
+ - 252s-dev.vet.unimelb.edu.au
+ - Merge branch 'master' of https://github.com/tropotek/tk-domtemplate
+
+
 Ver 2.0.10 [2017-01-20]:
 -------------------------------
  - Minor Code Updates
