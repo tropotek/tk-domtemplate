@@ -1737,8 +1737,8 @@ class Template
     {
         static $mapping = null;
         if (!$mapping) {
-            $list1 = get_html_translation_table(HTML_ENTITIES, ENT_NOQUOTES, $encoding);
-            $list2 = get_html_translation_table(HTML_SPECIALCHARS, ENT_NOQUOTES, $encoding);
+            $list1 = get_html_translation_table(HTML_ENTITIES, ENT_NOQUOTES);
+            $list2 = get_html_translation_table(HTML_SPECIALCHARS, ENT_NOQUOTES);
             $list = array_merge($list1, $list2);
             $mapping = array();
             foreach ($list as $char => $entity) {
@@ -1749,7 +1749,7 @@ class Template
             $mapping = array_merge($mapping, $extras);
         }
         $xml = str_replace(array_keys($mapping), $mapping, $xml);
-        $xml = preg_replace ('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', ' ', $xml);
+        $xml = preg_replace ('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', ' ', $xml);       // Strip out unsupported characters from XML
         return $xml;
     }
 
