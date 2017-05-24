@@ -674,8 +674,8 @@ class Template
      * Replace an attribute value.
      *
      * @param string $var
-     * @param string $attr
-     * @param string $value
+     * @param string|array $attr
+     * @param string|null $value
      * @return Template
      */
     public function setAttr($var, $attr, $value = null)
@@ -685,13 +685,17 @@ class Template
         if (!$value === null) {
             $value = $attr;
         }
+        if (!is_array($attr)) $attr = array($attr => $value);
         $nodes = $this->findVar($var);
         /* @var \DOMElement $node */
         foreach ($nodes as $node) {
-            if ($value === null) {
-                $node->removeAttribute($attr);
-            } else {
-                $node->setAttribute($attr, $value);
+            foreach ($attr as $k => $v) {
+                if (!$k) continue;
+                if ($v === null) {
+                    $node->removeAttribute($k);
+                } else {
+                    $node->setAttribute($k, $v);
+                }
             }
         }
         return $this;
