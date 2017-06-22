@@ -82,6 +82,8 @@ class Less extends Iface
         $this->sitePath = $sitePath;
         $this->siteUrl = $siteUrl;
         $this->cachePath = $cachePath;
+        if (!is_writable($cachePath))
+            throw new \Tk\Exception('Cannot write to cache path: ' . $cachePath);
         $this->lessConstants = $lessConstants;
     }
 
@@ -156,12 +158,16 @@ class Less extends Iface
         //$css_file_name = \Less_Cache::Get($this->source, $options, false);
         if ($this->cachePath) {
             $options = array('cache_dir' => $this->cachePath, 'compress' => $this->compress, 'import_dirs' => array($this->siteUrl), 'import_callback' => array($this, 'doImport'));
+            foreach (array_keys($this->source) as $path) {
+                if (preg_match('/\.less$/', $path) && !is_file($path)) 
+                    throw new \Tk\Exception('Invalid LESS file: ' . $path);
+            }
             $css_file_name = \Less_Cache::Get($this->source, $options);
             $css = trim(file_get_contents($this->cachePath . '/' . $css_file_name));
         } else {
             // todo: Make the caching optional
             //$options = array('compress' => $this->compress);
-            throw new \Exception('Non cached parser not implemented, please supply a cachePath value');
+            throw new \Exception('LESS Parser: Non cached parser not implemented, please supply a cachePath value');
         }
 
         if ($css) {
