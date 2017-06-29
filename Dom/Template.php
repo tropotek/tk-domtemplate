@@ -934,6 +934,17 @@ class Template
     }
 
     /**
+     * Return the root document node.
+     * IE: DomDocument->documentElement
+     *
+     * @return \DOMElement
+     */
+    public function getRootElement()
+    {
+        return $this->document->documentElement;
+    }
+
+    /**
      * Gets the page title text.
      *
      * @return string The title.

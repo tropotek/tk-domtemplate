@@ -16,7 +16,7 @@ interface DisplayInterface extends RendererInterface
      * Execute the renderer.
      * Return an object that your framework can interpret and display.
      *
-     * @return Template|Renderer
+     * @return null|Template|Renderer
      */
     public function show();
 
