@@ -681,10 +681,11 @@ class Template
     {
         if (!$this->isWritable('var', $var))
             return $this;
-        if (!$value === null) {
+        if ($value === null) {
             $value = $attr;
         }
         if (!is_array($attr)) $attr = array($attr => $value);
+
         $nodes = $this->findVar($var);
         /* @var \DOMElement $node */
         foreach ($nodes as $node) {
