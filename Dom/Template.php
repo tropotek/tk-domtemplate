@@ -1486,6 +1486,7 @@ class Template
 
         /* @var \DOMElement $el */
         foreach ($nodes as $el) {
+            if (!$doc->documentElement) continue; 
             $node = $this->document->importNode($doc->documentElement, true);
             if ($el->firstChild) {
                 $el->insertBefore($node, $el->firstChild);
