@@ -968,7 +968,7 @@ class Template
                 throw new Exception('This document has no title node.');
             }
             $this->removeChildren($this->title);
-            $this->title->nodeValue = $value;
+            $this->title->nodeValue = htmlentities(html_entity_decode($value));
         }
         return $this;
     }
