@@ -782,11 +782,12 @@ class Template
      * Get a repeating region from a document.
      *
      * @param string $repeat
-     * @return Repeat
+     * @return null|Repeat
      */
     public function getRepeat($repeat)
     {
         if ($this->keyExists('repeat', $repeat)) {
+            /** @var Repeat $obj */
             $obj = $this->repeat[$repeat];
             return clone $obj;
         }
@@ -1261,9 +1262,9 @@ class Template
      * @param bool $parse Set to false to disable template parsing
      * @return Template
      */
-    public function insertTemplate($var, Template $template, $parse = true)
+    public function insertTemplate($var, $template, $parse = true)
     {
-        if (!$this->isWritable('var', $var))
+        if (!$this->isWritable('var', $var) || !$template)
             return $this;
         $this->mergeHeaderList($template->getHeaderList());
         return $this->insertDoc($var, $template->getDocument($parse));
@@ -1362,9 +1363,9 @@ class Template
      * @throws Exception
      * @return Template
      */
-    public function replaceTemplate($var, Template $template)
+    public function replaceTemplate($var, $template)
     {
-        if (!$this->isWritable('var', $var))
+        if (!$this->isWritable('var', $var) || !$template)
             return $this;
         if (!$template instanceof Template) {
             throw new Exception('Invalid Template Object');
@@ -1447,9 +1448,9 @@ class Template
      * @param Template $template
      * @return Template
      */
-    public function appendTemplate($var, Template $template)
+    public function appendTemplate($var, $template)
     {
-        if (!$this->isWritable('var', $var))
+        if (!$this->isWritable('var', $var) || !$template)
             return $this;
         $this->mergeHeaderList($template->getHeaderList());
         return $this->appendDoc($var, $template->getDocument());
@@ -1463,9 +1464,9 @@ class Template
      * @param Template $template
      * @return Template
      */
-    public function prependTemplate($var, Template $template)
+    public function prependTemplate($var, $template)
     {
-        if (!$this->isWritable('var', $var))
+        if (!$this->isWritable('var', $var) || !$template)
             return $this;
         $this->mergeHeaderList($template->getHeaderList());
         return $this->prependDoc($var, $template->getDocument());
