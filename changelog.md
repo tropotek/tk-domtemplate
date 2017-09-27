@@ -1,5 +1,13 @@
 #CHANGELOG#
 
+Ver 2.0.14 [2017-09-27]:
+-------------------------------
+ - Added student create and confirm placement pages
+ - Fixed student company search table renderer
+ - Minor Code Updates
+ - 252s-dev.vet.unimelb.edu.au
+
+
 Ver 2.0.13 [2017-05-26]:
 -------------------------------
  - Minor Code Updates
