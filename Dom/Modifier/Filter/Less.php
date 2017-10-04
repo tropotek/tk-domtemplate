@@ -65,6 +65,11 @@ class Less extends Iface
     protected $cachePath = '';
 
     /**
+     * @var boolean
+     */
+    protected $useCache = true;
+
+    /**
      * @var array
      */
     protected $lessConstants = array();
@@ -76,6 +81,7 @@ class Less extends Iface
      * @param $siteUrl
      * @param string $cachePath
      * @param array $lessConstants Any parameters you want accessable via the less file via @{paramName}
+     * @throws \Tk\Exception
      */
     public function __construct($sitePath, $siteUrl, $cachePath = '', $lessConstants = array())
     {
@@ -85,6 +91,16 @@ class Less extends Iface
         if (!is_writable($cachePath))
             throw new \Tk\Exception('Cannot write to cache path: ' . $cachePath);
         $this->lessConstants = $lessConstants;
+    }
+
+    /**
+     * @param $b
+     * @return $this
+     */
+    public function enableCache($b)
+    {
+        $this->useCache = $b;
+        return $this;
     }
 
     /**
@@ -167,7 +183,7 @@ class Less extends Iface
             // TODO: Regen() the css files seems to fix this, this may only be a real issue in Debug mode.
             //$css_file_name = \Less_Cache::Regen($this->source, $options);
 
-            $css_file_name = \Less_Cache::Get($this->source, $options, true);
+            $css_file_name = \Less_Cache::Get($this->source, $options, $this->useCache);
             $css = trim(file_get_contents($this->cachePath . '/' . $css_file_name));
         } else {
             // todo: Make the caching optional
