@@ -62,10 +62,13 @@ class Select extends Element
         }
 
         $optGroupNode = null;
-        if ($optGroup != null) {
+        if ($optGroup) {
             $optGroupNode = $this->findOptGroup($this->element, $optGroup);
+            if (!$optGroupNode) {
+                $optGroupNode = $this->appendOptGroup($optGroup);
+            }
         }
-        if ($optGroupNode != null) {
+        if ($optGroupNode) {
             $optGroupNode->appendChild($nl);
             $optGroupNode->appendChild($option);
         } else {
@@ -93,10 +96,10 @@ class Select extends Element
         $option->setAttribute('label', $label);
 
         $optGroupNode = null;
-        if ($optGroup != null) {
+        if ($optGroup) {
             $optGroupNode = $this->findOptGroup($this->element, $optGroup);
         }
-        if ($optGroupNode != null) {
+        if ($optGroupNode) {
             $optGroupNode->appendChild($nl);
             $optGroupNode->appendChild($option);
         } else {
@@ -115,17 +118,16 @@ class Select extends Element
     public function setValue($value)
     {
         if (is_array($value)) {
-            //vd($value);
             if ($this->isMultiple()) {
                 foreach ($value as $v) {
                     $option = $this->findOption($this->element, $v);
-                    if ($option != null) {
+                    if ($option) {
                         $option->setAttribute('selected', 'selected');
                     }
                 }
             } else {
                 $option = $this->findOption($this->element, $value[0]);
-                if ($option != null) {
+                if ($option) {
                     $option->setAttribute('selected', 'selected');
                 }
             }
@@ -134,7 +136,7 @@ class Select extends Element
                 $this->clearSelected();
             }
             $option = $this->findOption($this->element, $value);
-            if ($option != null) {
+            if ($option) {
                 $option->setAttribute('selected', 'selected');
             }
         }
@@ -145,7 +147,7 @@ class Select extends Element
      * Return the selected value,
      * Will return an array if  multiple select is enabled.
      *
-     * @return \DOMNode Returns null if nothing selected.
+     * @return \DOMNode|\DOMNode[] Returns null if nothing selected.
      */
     public function getValue()
     {
@@ -188,7 +190,7 @@ class Select extends Element
      * Find the opt group node with the name
      *
      * @param \DOMElement $node
-     * @return \DOMElement
+     * @return \DOMElement|Select
      */
     private function clearSelectedFunction($node)
     {
@@ -255,7 +257,7 @@ class Select extends Element
      * Find the selected values to this select box
      *
      * @param \DOMElement $node
-     * @return array
+     * @return \DOMElement|\DOMElement[]
      */
     public function findSelected($node)
     {
