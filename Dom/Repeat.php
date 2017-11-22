@@ -38,6 +38,7 @@ class Repeat extends Template
         $this->repeatNode = $node;
         $this->repeatName = $node->getAttribute('repeat');
         $this->repeatParent = $parent;
+        $node->removeAttribute('repeat');
 
         $repeatDoc = new \DOMDocument();
         $tplNode = $repeatDoc->importNode($node, true);
@@ -46,13 +47,17 @@ class Repeat extends Template
         parent::__construct($repeatDoc, $parent->getEncoding());
     }
 
-    /**
-     * Re init the template when clone is called
-     */
+
     public function __clone()
     {
-        $this->init(clone $this->original, $this->encoding);
+        parent::__clone();
+        // TODO: To implement this we need a function like addVar that checks if a node
+        //       already exists in the list under a different name, or we check when we append
+        //       nodes to a var and only add it once pre not even if it is under a different var name?????
+        //       All this may slow it down to much.
+        //$this->var[$this->repeatName][] = $this->document->documentElement;
     }
+
 
     /**
      * Append a repeating region to the document.

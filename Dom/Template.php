@@ -358,8 +358,12 @@ class Template
             // Store all repeat regions
             if ($node->hasAttribute('repeat')) {
                 $repeatName = $node->getAttribute('repeat');
-                $node->removeAttribute('repeat');
                 $this->repeat[$repeatName] = new Repeat($node, $this);
+                if (!array_key_exists($repeatName, $this->var)) {
+                    $this->var[$repeatName] = array();
+                }
+                $this->var[$repeatName][] = $node;
+                $node->removeAttribute('repeat');
                 return;
             }
 
@@ -388,6 +392,11 @@ class Template
                     }
                     $this->choice[$choice]['node'][] = $node;
                     $this->choice[$choice]['var'] = array_merge($this->choice[$choice]['var'], $arr);
+                    // Mybe for the future, introduces to many bugs
+//                    if (!array_key_exists($choice, $this->var)) {
+//                        $this->var[$choice] = array();
+//                    }
+//                    $this->var[$choice][] = $node;
                 }
                 $node->removeAttribute('choice');
             }
