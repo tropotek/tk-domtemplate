@@ -877,6 +877,22 @@ class Template
     }
 
     /**
+     *
+     *
+     * @param $var
+     */
+    public function removeVar($var)
+    {
+        $list = $this->findVar($var);
+        /** @var \DOMElement $node */
+        foreach($list as $node) {
+            vd($node->nodeValue);
+            $node->parentNode->removeChild($node);
+        }
+    }
+
+
+    /**
      * Get a \DOMElement from the document based on its unique ID
      * ID attributes should be unique for XHTML documents, multiple names
      * are ignored and only the first node found is returned.
