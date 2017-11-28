@@ -658,7 +658,8 @@ class Template
         $list = array_unique($list);
 
         $classStr = trim(implode(' ', $list));
-        $this->setAttr($var, 'class', $classStr);
+        if ($classStr)
+            $this->setAttr($var, 'class', $classStr);
         return $this;
     }
 
