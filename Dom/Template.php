@@ -691,9 +691,6 @@ class Template
     {
         if (!$this->isWritable('var', $var))
             return $this;
-        if ($value === null) {
-            $value = $attr;
-        }
         if (!is_array($attr)) $attr = array($attr => $value);
 
         $nodes = $this->findVar($var);
@@ -701,11 +698,9 @@ class Template
         foreach ($nodes as $node) {
             foreach ($attr as $k => $v) {
                 if (!$k) continue;
-                if ($v === null) {
-                    $node->removeAttribute($k);
-                } else {
-                    $node->setAttribute($k, $v);
-                }
+                if ($v === null) $v = $k;
+                $node->setAttribute($k, $v);
+
             }
         }
         return $this;
