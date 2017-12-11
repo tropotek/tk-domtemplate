@@ -276,15 +276,29 @@ class Template
     }
 
     /**
-     * Reset the template to its unedited state
+     * This will create a new template object containing the
+     * HTML/XML content from the first var it finds with the same name
+     * Duplicates are ignored.
      *
-     * @return $this
+     * NOTE: This process can be process intensive as you have to iterate the original
+     * template node by node looking for the required var node...
+     *
+     *
+     * @param string $var
+     * @throws Exception
+     * @return \Dom\Template
      */
-    public function reset()
+    public function createTemplateFromVar($var)
     {
-        $this->parsed = false;
-        $this->init($this->original, $this->encoding);
-        return $this;
+        $node = self::findNodeByAttr($this->original->documentElement, $var, 'var');
+        if (!$node) {
+            //\Tk\Log::error('Cannot find var to create a template from: ' . $var);
+            throw new Exception('Cannot find var to create a template from: ' . $var);
+        }
+        $doc = new \DOMDocument();
+        $newNode = $doc->importNode($node, true);
+        $doc->appendChild($newNode);
+        return new self($doc, $this->getEncoding());
     }
 
     /**
@@ -337,6 +351,7 @@ class Template
         }
         if ($node->nodeType == \XML_ELEMENT_NODE) {
             if (count(self::$capture)) {
+                /** @var string $name */
                 foreach (self::$capture as $name) {
                     if ($name[0] == '@') {
                         if ($node->hasAttribute(substr($name, 1))) {
@@ -392,7 +407,7 @@ class Template
                     }
                     $this->choice[$choice]['node'][] = $node;
                     $this->choice[$choice]['var'] = array_merge($this->choice[$choice]['var'], $arr);
-                    // Mybe for the future, introduces to many bugs
+                    // Maybe for the future, introduces to many bugs
 //                    if (!array_key_exists($choice, $this->var)) {
 //                        $this->var[$choice] = array();
 //                    }
@@ -462,6 +477,18 @@ class Template
     }
 
     /**
+     * Reset the template to its unedited state
+     *
+     * @return $this
+     */
+    public function reset()
+    {
+        $this->parsed = false;
+        $this->init($this->original, $this->encoding);
+        return $this;
+    }
+
+    /**
      * Get the list of captured \DOMElement nodes
      *
      * @return array
@@ -482,24 +509,8 @@ class Template
     }
 
     /**
-     * This is the output flag for the \DomDocument
-     * if self::OUTPUT_XML the toString() will use the saveXML() method of the \DOMDocument
-     * otherwise it will use the saveHTML().
-     *
-     * Notice: if using HTML5 the saveHTML() will be used always.
-     *
-     * @param string $mode
-     * @return Template
-     */
-    public function setOutputMode($mode)
-    {
-        $this->output = $mode;
-        return $this;
-    }
-
-    /**
      * Return the document file path if one exists.
-     * For non file based tempaltes this value will be the same as dirname($_SERVER['PHP_SELF'])
+     * For non file based templates this value will be the same as dirname($_SERVER['PHP_SELF'])
      *
      * @return string
      */
@@ -507,32 +518,6 @@ class Template
     {
         return $this->document->documentURI;
     }
-
-    /**
-     * This will create a new template object containg the
-     * HTML/XML content from the first var it finds with the same name
-     * Duplicates are ignored.
-     *
-     * NOTE: This process can be process intensive as you have to iterate the original
-     * tempalte node by node looking for the required var node...
-     *
-     *
-     * @param string $var
-     * @throws Exception
-     * @return \Dom\Template
-     */
-    public function createTemplateFromVar($var)
-    {
-        $node = self::findNodeByAttr($this->original->documentElement, $var, 'var');
-        if (!$node) {
-            throw new Exception('Cannot find var to create a template from.');
-        }
-        $doc = new \DOMDocument();
-        $newNode = $doc->importNode($node, true);
-        $doc->appendChild($newNode);
-        return new self($doc, $this->getEncoding());
-    }
-    
     
     /**
      *  Find a node by its var/choice/repeat name
@@ -882,7 +867,6 @@ class Template
         $list = $this->findVar($var);
         /** @var \DOMElement $node */
         foreach($list as $node) {
-            vd($node->nodeValue);
             $node->parentNode->removeChild($node);
         }
     }
@@ -980,14 +964,14 @@ class Template
      * Sets the document title text if available.
      *
      * @param string $value
-     * @throws Exception
      * @return Template
      */
     public function setTitleText($value)
     {
         if ($this->isWritable()) {
             if ($this->title == null) {
-                throw new Exception('This document has no title node.');
+                //throw new Exception('This document has no title node.');
+                return $this;
             }
             $this->removeChildren($this->title);
             $this->title->nodeValue = htmlentities(html_entity_decode($value));
@@ -1381,7 +1365,6 @@ class Template
      *
      * @param string $var
      * @param Template $template
-     * @throws Exception
      * @return Template
      */
     public function replaceTemplate($var, $template)
@@ -1389,7 +1372,8 @@ class Template
         if (!$this->isWritable('var', $var) || !$template)
             return $this;
         if (!$template instanceof Template) {
-            throw new Exception('Invalid Template Object');
+            \Tk\Log::error('Invalid Template Object For: ' . $var);
+            return $this;
         }
         $this->mergeHeaderList($template->getHeaderList());
         return $this->replaceDoc($var, $template->getDocument());
@@ -1551,9 +1535,7 @@ class Template
             return null;
         }
         $elementDoc = $element->ownerDocument;
-
         $contentNode = self::makeContentNode($html);
-
         /* @var \DOMElement $child */
         foreach ($contentNode->childNodes as $child) {
             $node = $elementDoc->importNode($child, true);
@@ -1805,4 +1787,7 @@ class Template
         $k2 = ord(substr($k, 1, 1));
         return $k2 * 256 + $k1;
     }
+
+
+
 }

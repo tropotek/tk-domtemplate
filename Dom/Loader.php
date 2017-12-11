@@ -74,7 +74,6 @@ class Loader
      * @param string $xhtml
      * @param string $callingClass
      * @return Template
-     * @throws Exception
      */
     public static function load($xhtml, $callingClass = '')
     {        
@@ -90,7 +89,6 @@ class Loader
      * @param string $path
      * @param string $callingClass
      * @return Template
-     * @throws Exception
      */
     public static function loadFile($path, $callingClass = '')
     {
@@ -118,13 +116,14 @@ class Loader
      * Load an xml/xhtml strings
      *
      * @param $xhtml
-     * @return Template
-     * @throws \Tk\Exception
+     * @return null|Template
      */
     public function doLoad($xhtml)
     {
-        if (!count($this->adapterList)) // Should this exit silently????
-            throw new \Tk\Exception('No Template loaders defined!');
+        if (!$this->adapterList || !count($this->adapterList)) {
+            \Tk\Log::notice('No Template loaders defined!');
+            return null;
+        }
         /* @var Loader\Adapter\Iface $adapter */
         foreach($this->adapterList as $adapter) {
             $tpl = $adapter->load($xhtml, $this->callingClass);
@@ -132,6 +131,7 @@ class Loader
                 return $tpl;
             }
         }
+        return null;
     }
 
     /**
@@ -139,13 +139,13 @@ class Loader
      *
      * @param $path
      * @return Template
-     * @throws \Tk\Exception
      */
     public function doLoadFile($path)
     {
-        if (!count($this->adapterList)) // Should this exit silently????
-            throw new \Tk\Exception('No Template loaders defined!');
-
+        if (!$this->adapterList || !count($this->adapterList)) {
+            \Tk\Log::notice('No Template loaders defined!');
+            return null;
+        }
         /* @var Loader\Adapter\Iface $adapter */
         foreach($this->adapterList as $adapter) {
             $tpl = $adapter->loadFile($path, $this->callingClass);
@@ -153,6 +153,7 @@ class Loader
                 return $tpl;
             }
         }
+        return null;
     }
 
     /**
@@ -211,6 +212,7 @@ class Loader
         if (isset($this->params[$key])) {
             return $this->params[$key];
         }
+        return '';
     }
 
     /**
