@@ -24,6 +24,7 @@ class DefaultLoader extends Iface
      * @param $xhtml
      * @param $class
      * @return Template
+     * @throws \Dom\Exception
      */
     public function load($xhtml, $class)
     {
@@ -36,6 +37,7 @@ class DefaultLoader extends Iface
      * @param $path
      * @param $class
      * @return Template
+     * @throws \Dom\Exception
      */
     public function loadFile($path, $class)
     {

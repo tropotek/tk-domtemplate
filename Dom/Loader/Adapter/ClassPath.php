@@ -37,7 +37,7 @@ class ClassPath extends Iface
     public function __construct($path, $ext = 'xml')
     {
         $this->path = $path;
-        $this->ext = $ext;
+        $this->ext = trim($ext, '.');
     }
 
     /**
@@ -46,6 +46,7 @@ class ClassPath extends Iface
      * @param string $xhtml
      * @param string $class
      * @return Template
+     * @throws \Dom\Exception
      */
     public function load($xhtml, $class)
     {
@@ -58,6 +59,7 @@ class ClassPath extends Iface
      * @param string $path
      * @param string $class
      * @return Template|null
+     * @throws \Dom\Exception
      */
     public function loadFile($path, $class)
     {
