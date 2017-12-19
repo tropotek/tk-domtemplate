@@ -2,27 +2,30 @@
 namespace Dom\Modifier\Filter;
 
 /**
- * Convert all template relative paths to full path url's
- *
- * For all template paths we need to rewrite all the asset paths.
+ * Convert Urls to Template relative and project relative
  *
  * This filter assumes that the paths are used as follows:
  *
- * Relative: All relative paths as in <a href="js/image.png">image</a>
- *   will be converted to use the full template path so this path will
- *   be converted to "/projectPath/templatePath/js/image.png"
+ * Template Relative: <img src="./img/image.png" />
+ *   The path prefix './' will be trated as a special case and be
+ *   converted to the root of the current p[age template folder so an example
+ *   in this case if the template path was in '/html/default' the converted path
+ *   would be <img src="/html/default/img/image.png" />
+ *   All links in pages even in sub paths would be converted
+ *   <img src="./docs/api/image.png" />  TO  <img src="/html/default/docs/api/image.png" />
+ *   <img src="./image.png" />  TO  <img src="/html/default/image.png" />
  *
- * Absolute: For absolute paths we assume the template is accessing
+ * Absolute: <img src="/img/image.png" />, <img src="img/image.png" />
+ *   For absolute paths we assume the template is accessing
  *   assets from the project root. So a path of "/js/image.png"
- *   will be converted to "/projectPath/js/image.png" and the template
+ *   will be converted to "{projectPath}/js/image.png" and the template
  *   path is ignored.
+ *   Assuming the project URL path is 'http://example.com/project'
+ *   <img src="image.png" />  TO  <img src="http://example.com/project/image.png" />
+ *   <img src="/img/image.png" />  TO  <img src="http://example.com/project/img/image.png" />
  *
- * This filter attempts to convert some javascript paths but it is expected
- * that the designer uses the javascript config object (if available) to
- * build the asset paths within the javascript code.
- *
- * NOTE: js and css files are not modified by this filter only the
- *   DomTemplate object is handled.
+ * The filter attempts to convert some javascript event attribute paths but it is expected
+ * that the designer uses javascript to config paths using the project code.
  *
  *
  * @author Michael Mifsud <info@tropotek.com>
@@ -138,59 +141,6 @@ class UrlPath extends Iface
     }
 
     /**
-     * replace a string with paths using string replace.
-     * Useful for urls in script text and comments.
-     *
-     * @param $str
-     * @return mixed
-     */
-    protected function replaceStr($str)
-    {
-        $str = str_replace('{siteUrl}', $this->siteUrl, $str);
-        $str = str_replace('{templateUrl}', $this->templateUrl, $str);
-
-        return $str;
-    }
-
-    /**
-     * Clean a path from ./ ../ but keep path integrity.
-     * eg:
-     *
-     *   From: /Work/Projects/tk003-trunk/template/default/../../../../relative/path/from/template.html
-     *     To: /Work/relative/path/from/template.html
-     *
-     * Note: This function can give access to unwanted paths if not used carefully.
-     *
-     * @param string $path
-     * @return string
-     */
-    private function cleanRelative($path)
-    {
-        if (preg_match('/^\/\//', $path)) {
-            vd($path);
-        }
-
-        // TODO: could cause security issues. see how we go without it.
-        //$path = str_replace(array('//','\\\\'), array('/','\\'), $path);
-        $array = explode( '/', $path);
-        $parents = array();
-        foreach( $array as $dir) {
-            switch( $dir) {
-                case '.':
-                    // Don't need to do anything here
-                    break;
-                case '..':
-                    array_pop( $parents);
-                    break;
-                default:
-                    $parents[] = $dir;
-                    break;
-            }
-        }
-        return implode( '/', $parents);
-    }
-
-    /**
      * pre init the filter
      *
      * @param \DOMDocument $doc
@@ -229,18 +179,14 @@ class UrlPath extends Iface
         foreach ($node->attributes as $attr) {
             if (in_array(strtolower($attr->nodeName), $this->attrSrc)) {
                 if (preg_match('/^#$/', $attr->value)) {    // ignore hash urls
-                    $attr->value = 'javascript:;';      // Because of reloading the page bug on old ff browsers
+                    $attr->value = 'javascript:;';      // Because of the '#' double redirect bug on old FF browsers
                     continue;
                 }
-                if (preg_match('/^#/', $attr->value)) {     // ignore fragment urls
-                    continue;
-                }
-                if (preg_match('/(\S+):(\S+)/', $attr->value) || preg_match('/^\/\//', $attr->value)) {   // ignore full urls and schema-less urls
-                    continue;
-                }
-                if (preg_match('/^[a-z0-9]{1,10}:/', $attr->value)) {   // ignore Full URL's
-                    continue;
-                }
+                if (
+                    preg_match('/^#/', $attr->value) ||     // ignore fragment urls
+                    preg_match('/(\S+):(\S+)/', $attr->value) || preg_match('/^\/\//', $attr->value) ||   // ignore full urls and schema-less urls
+                    preg_match('/^[a-z0-9]{1,10}:/', $attr->value)  // ignore Full URL's
+                ) continue;
                 $attr->value = htmlentities($this->prependPath($attr->value));
             } elseif (in_array(strtolower($attr->nodeName), $this->attrJs)) {       // replace javascript strings
                 $attr->value = htmlentities($this->replaceStr($attr->value));
@@ -258,12 +204,65 @@ class UrlPath extends Iface
     private function prependPath($path)
     {
         if (!$path) return $path;
-        if ($path[0] == '/' || $path[0] == '\\') {   // match site relative paths
-            $retPath = $this->addSiteUrl($path);
-        } else  {
+        if (preg_match('|^\.\/|', $path)) {
             $retPath = $this->addTemplateUrl($path);
+        } else {
+            $retPath = $this->addSiteUrl($path);
         }
         return $retPath;
     }
 
+    /**
+     * replace a string with paths using string replace.
+     * Useful for urls in script text and comments.
+     *
+     * @param $str
+     * @return mixed
+     */
+    protected function replaceStr($str)
+    {
+        $str = str_replace('{siteUrl}', $this->siteUrl, $str);
+        $str = str_replace('{templateUrl}', $this->templateUrl, $str);
+
+        return $str;
+    }
+
+
+    /**
+     * Clean a path from ./ ../ but keep path integrity.
+     * eg:
+     *
+     *   From: /Work/Projects/tk003-trunk/template/default/../../../../relative/path/from/template.html
+     *     To: /Work/relative/path/from/template.html
+     *
+     * Note: This function can give access to unwanted paths if not used carefully.
+     *
+     * @param string $path
+     * @return string
+     */
+    private function cleanRelative($path)
+    {
+        if (preg_match('/^\/\//', $path)) {
+            vd($path);
+        }
+
+        // TODO: could cause security issues. see how we go without it.
+        //$path = str_replace(array('//','\\\\'), array('/','\\'), $path);
+        $array = explode( '/', $path);
+        $parents = array();
+        foreach( $array as $dir) {
+            switch( $dir) {
+                case '.':
+                    // Don't need to do anything here
+                    break;
+                case '..':
+                    array_pop( $parents);
+                    break;
+                default:
+                    $parents[] = $dir;
+                    break;
+            }
+        }
+        return implode( '/', $parents);
+    }
 }
