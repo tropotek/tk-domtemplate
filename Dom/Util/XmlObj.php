@@ -27,10 +27,23 @@ class XmlObj
             $xml = file_get_contents($xml);
         }
         $dom = new \DOMDocument();
-        if (!$dom->loadXML($xml)) {
-            $e = new Exception("Invalid XML cannot convert XML string to DOM.");
+        $r = $dom->loadXML($xml);
+
+//        if (!$dom->loadXML($xml)) {
+//            $e = new Exception('Invalid XML cannot convert XML string to DOM.');
+//            throw $e;
+//        }
+        if (!$r) {
+            $str = '';
+            foreach (libxml_get_errors() as $error) {
+                $str .= sprintf("\n[%s:%s] %s", $error->line, $error->column, trim($error->message));
+            }
+            libxml_clear_errors();
+            $e = new Exception('Invalid XML cannot convert To DOM Object.', 0, null, $str);
+            //$e->setDump($str);
             throw $e;
         }
+
         $obj = self::dom2Obj($dom->documentElement);
         return $obj;
     }

@@ -270,8 +270,7 @@ class Template
                 $str .= sprintf("\n[%s:%s] %s", $error->line, $error->column, trim($error->message));
             }
             libxml_clear_errors();
-            $e = new Exception('Error Parsing DOM Template');
-            $e->setDump($str);
+            $e = new Exception('Error Parsing DOM Template', 0, null, $str);
             throw $e;
         }
 
