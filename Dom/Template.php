@@ -18,6 +18,8 @@ namespace Dom;
  * @author Darryl Ross
  * @link http://www.domtemplate.com/
  * @license Copyright 2007
+ *
+ * @TODO: Remove all choice code on release v2.2.0
  */
 class Template
 {
@@ -82,6 +84,7 @@ class Template
      * deprecated: An array of choice \DOMElement objects
      * This array now stores all vars that are to be removed or ols choices that are set
      * @var \DOMElement[]
+     * @remove v2.2.0
      */
     protected $choice = array();
 
@@ -403,10 +406,10 @@ class Template
             if ($node->hasAttribute('choice')) {
                 $arr = preg_split('/ /', $node->getAttribute('choice'));
                 foreach ($arr as $choice) {
-                    if (!array_key_exists($choice, $this->var)) {
-                        $this->var[$choice] = array();
-                        $this->var[$choice][] = $node;
+                    if (!array_key_exists($choice, $this->choice)) {
+                        $this->choice[$choice] = array();
                     }
+                    $this->choice[$choice][] = $node;
                     $node->setAttribute(self::ATTR_HIDDEN, 'true');
                 }
                 $node->removeAttribute('choice');
@@ -1639,17 +1642,28 @@ class Template
                 unset($this->repeat[$name]);
             }
 
+
             // Remove nodes marked hidden
             foreach ($this->var as $var => $nodes) {
                 /** @var \DOMElement $node */
                 foreach ($nodes as $node) {
+                    if (!$node || !isset($node->parentNode) || !$node->parentNode) continue;
                     if ($node->hasAttribute(self::ATTR_HIDDEN) && $node->getAttribute(self::ATTR_HIDDEN) == 'true') {
-                        if ($node && $node->parentNode) {
-                            $node->parentNode->removeChild($node);
-                        }
+                        $node->parentNode->removeChild($node);
                     }
                 }
             }
+            // TODO: Remove all choices on v2.2.0 release
+            foreach ($this->choice as $choice => $nodes) {
+                /** @var \DOMElement $node */
+                foreach ($nodes as $node) {
+                    if (!$node || !isset($node->parentNode) || !$node->parentNode) continue;
+                    if ($node->hasAttribute(self::ATTR_HIDDEN) && $node->getAttribute(self::ATTR_HIDDEN) == 'true') {
+                        $node->parentNode->removeChild($node);
+                    }
+                }
+            }
+
 
             // Insert headers
             if ($this->head) {
