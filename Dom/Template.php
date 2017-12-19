@@ -14,17 +14,17 @@ namespace Dom;
  *   template system has been optimized for speed and there is a
  *   feeling that caching will introduce non required overhead.
  *
+ *
+ *
  * @author Michael Mifsud
  * @author Darryl Ross
  * @link http://www.domtemplate.com/
  * @license Copyright 2007
- *
- * @TODO: Remove all choice code on release v2.2.0
  */
 class Template
 {
 
-    const ATTR_HIDDEN = 'tk--dom--hide';
+    const ATTR_HIDDEN = '__tk-dom-template--hide';
 
 
     /**
@@ -83,7 +83,7 @@ class Template
     /**
      * deprecated: An array of choice \DOMElement objects
      * This array now stores all vars that are to be removed or ols choices that are set
-     * @var \DOMElement[]
+     * @var array|\DOMElement[][]
      * @remove v2.2.0
      */
     protected $choice = array();
@@ -402,7 +402,6 @@ class Template
                 }
             }
 
-            // Legacy choice attribute, remove on v2.2.0
             if ($node->hasAttribute('choice')) {
                 $arr = preg_split('/ /', $node->getAttribute('choice'));
                 foreach ($arr as $choice) {
@@ -667,11 +666,47 @@ class Template
     {
         $nodes = $this->findVar($var);
         foreach ($nodes as $node) {
-            $node->setAttribute(self::ATTR_HIDDEN, 'true');
+            if ($node->hasAttribute(self::ATTR_HIDDEN))
+                $node->removeAttribute(self::ATTR_HIDDEN);
         }
         return $this;
     }
 
+
+
+    /**
+     * Set a choice node to become visible in a document.
+     *
+     * @param string $choice The name of the choice
+     * @return Template
+     */
+    public function setChoice($choice)
+    {
+        if (empty($this->choice[$choice])) return $this;
+        $nodes = $this->choice[$choice];
+        foreach ($nodes as $node) {
+            if ($node->hasAttribute(self::ATTR_HIDDEN))
+                $node->removeAttribute(self::ATTR_HIDDEN);
+        }
+        return $this;
+    }
+
+    /**
+     * Set a choice node to become invisible in a document.
+     *
+     * @param string $choice The name of the choice
+     * @return Template
+     */
+    public function unsetChoice($choice)
+    {
+        if (empty($this->choice[$choice])) return $this;
+        $nodes = $this->choice[$choice];
+        foreach ($nodes as $node) {
+            if ($node->hasAttribute(self::ATTR_HIDDEN))
+                $node->removeAttribute(self::ATTR_HIDDEN);
+        }
+        return $this;
+    }
 
 
 
@@ -708,21 +743,6 @@ class Template
             return clone $obj;
         }
         return null;
-    }
-
-    /**
-     * Get a var element node from the document.
-     *
-     * @param string $var
-     * @return \DOMElement[]
-     */
-    public function getVarElement($var)
-    {
-        $nodes = $this->findVar($var);
-        if (is_array($nodes) && count($nodes)) {
-            return $nodes[0];
-        }
-        return $nodes;
     }
 
     /**
@@ -786,11 +806,26 @@ class Template
     }
 
     /**
+     * Get a var element node from the document.
+     *
+     * @param string $var
+     * @return \DOMElement[]
+     */
+    public function getVarElement($var)
+    {
+        $nodes = $this->findVar($var);
+        if (is_array($nodes) && count($nodes)) {
+            return $nodes[0];
+        }
+        return $nodes;
+    }
+
+    /**
      *
      *
      * @param $var
      */
-    public function removeVar($var)
+    public function removeVarElement($var)
     {
         $list = $this->findVar($var);
         /** @var \DOMElement $node */
@@ -1653,7 +1688,7 @@ class Template
                     }
                 }
             }
-            // TODO: Remove all choices on v2.2.0 release
+            // Remove choice node marked hidden
             foreach ($this->choice as $choice => $nodes) {
                 /** @var \DOMElement $node */
                 foreach ($nodes as $node) {
@@ -1878,33 +1913,6 @@ class Template
     public function removeCss($var, $class)
     {
         return $this->removeClass($var, $class);
-    }
-
-
-    /**
-     * Set a choice node to become visible in a document.
-     *
-     * @param string $choice The name of the choice
-     * @return Template
-     * @deprecated Choices are now vars and use Template::hide($var); Template::show($var); to hide/show an element
-     * @remove v2.2.0
-     */
-    public function setChoice($choice)
-    {
-        return $this->show($choice);
-    }
-
-    /**
-     * Set a choice node to become invisible in a document.
-     *
-     * @param string $choice The name of the choice
-     * @return Template
-     * @deprecated Choices are now vars and use Template::hide($var); Template::show($var); to hide/show an element
-     * @remove v2.2.0
-     */
-    public function unsetChoice($choice)
-    {
-        return $this->hide($choice);
     }
 
 
