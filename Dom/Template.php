@@ -22,6 +22,8 @@ namespace Dom;
 class Template
 {
 
+    const ATTR_HIDDEN = 'tk--dom--hide';
+
 
     /**
      * Enable addition of data-tracer attributes to inserted JS and CSS
@@ -66,21 +68,24 @@ class Template
 
     /**
      * An array of var \DOMElement objects
-     * @var \DOMElement[]
+     * @var \DOMElement[][]
      */
     protected $var = array();
 
     /**
-     * An array of choice \DOMElement objects
+     * An array of repeat \DOMElement objects
+     * @var \DOMElement[][]
+     */
+    protected $repeat = array();
+
+    /**
+     * deprecated: An array of choice \DOMElement objects
+     * This array now stores all vars that are to be removed or ols choices that are set
      * @var \DOMElement[]
      */
     protected $choice = array();
 
-    /**
-     * An array of repeat \DOMElement objects
-     * @var \DOMElement[]
-     */
-    protected $repeat = array();
+
 
     /**
      * An array of form \DOMElement objects
@@ -395,26 +400,19 @@ class Template
                 }
             }
 
-            // Store all choice nodes
+            // Legacy choice attribute, remove on v2.2.0
             if ($node->hasAttribute('choice')) {
                 $arr = preg_split('/ /', $node->getAttribute('choice'));
                 foreach ($arr as $choice) {
-                    if (!array_key_exists($choice, $this->choice)) {
-                        $this->choice[$choice] = array();
-                        $this->choice[$choice]['node'] = array();
-                        $this->choice[$choice]['var'] = array();
-                        $this->choice[$choice]['set'] = false;
+                    if (!array_key_exists($choice, $this->var)) {
+                        $this->var[$choice] = array();
+                        $this->var[$choice][] = $node;
                     }
-                    $this->choice[$choice]['node'][] = $node;
-                    $this->choice[$choice]['var'] = array_merge($this->choice[$choice]['var'], $arr);
-                    // Maybe for the future, introduces to many bugs
-//                    if (!array_key_exists($choice, $this->var)) {
-//                        $this->var[$choice] = array();
-//                    }
-//                    $this->var[$choice][] = $node;
+                    $node->setAttribute(self::ATTR_HIDDEN, 'true');
                 }
                 $node->removeAttribute('choice');
             }
+
 
             // Store all Form nodes
             if ($node->nodeName == 'form') {
@@ -544,95 +542,14 @@ class Template
         return null;
     }
 
-    /**
-     * Replace the text of one or more var nodes
-     *
-     * @param string $var The var's name.
-     * @param string $value The vars value inside the tags.
-     * @return Template
-     */
-    public function insertText($var, $value)
-    {
-        if (!$this->isWritable('var', $var))
-            return $this;
-
-        $nodes = $this->findVar($var);
-        /* @var \DOMElement $node */
-        foreach ($nodes as $node) {
-            $this->removeChildren($node);
-            $newNode = $this->document->createTextNode($value);
-            $node->appendChild($newNode);
-        }
-        return $this;
-    }
-
-    /**
-     * Append the text of one or more var nodes
-     *
-     * @param string $var The var's name.
-     * @param string $value The vars value inside the tags.
-     * @return Template
-     */
-    public function appendText($var, $value)
-    {
-        if (!$this->isWritable('var', $var))
-            return $this;
-
-        $nodes = $this->findVar($var);
-        /* @var \DOMElement $node */
-        foreach ($nodes as $node) {
-            $newNode = $this->document->createTextNode($value);
-            $node->appendChild($newNode);
-        }
-        return $this;
-    }
-
-    /**
-     * Get the text inside a var node.
-     *
-     * @param string $var
-     * @return string
-     */
-    public function getText($var)
-    {
-        if (!$this->isWritable('var', $var))
-            return '';
-        $nodes = $this->findVar($var);
-        return $nodes[0]->nodeValue;
-    }
-
 
     /**
      * @param $var
      * @param $class
      * @return Template
-     * @deprecated Use Template::addCss()
      */
     public function addClass($var, $class) {
-        return $this->addCss($var, $class);
-    }
 
-    /**
-     * @param $var
-     * @param $class
-     * @return Template
-     * @deprecated Use Template::removeCss()
-     */
-    public function removeClass($var, $class)
-    {
-        return $this->removeCss($var, $class);
-    }
-
-
-    /**
-     * Add a css class if it does not exist
-     *
-     * @param string $var
-     * @param string|array $class
-     * @return Template
-     */
-    public function addCss($var, $class)
-    {
         $list = $class;
         if (!is_array($class)) {
             $class = trim($class);
@@ -649,20 +566,17 @@ class Template
     }
 
     /**
-     * remove the class if it exists
-     *
-     * @param string $var
-     * @param string $class
+     * @param $var
+     * @param $class
      * @return Template
      */
-    public function removeCss($var, $class)
+    public function removeClass($var, $class)
     {
         $str = $this->getAttr($var, 'class');
         $str = preg_replace('/(' . $class . ')\s?/', '', trim($str));
         $this->setAttr($var, 'class', $str);
         return $this;
     }
-
 
     /**
      * Replace an attribute value.
@@ -692,7 +606,7 @@ class Template
     }
 
     /**
-     * Retreive the text contained within an attribute of a node.
+     * Retrieve the text contained within an attribute of a node.
      *
      * @param string $var
      * @param string $attr
@@ -722,33 +636,43 @@ class Template
         return $this->setAttr($var, $attr);
     }
 
+
     /**
-     * Set a choice node to become visible in a document.
+     * Show a hidden var node
      *
-     * @param string $choice The name of the choice
+     * @param string $var
+     * @since 2.0.15
      * @return Template
      */
-    public function setChoice($choice)
+    public function show($var)
     {
-        if ($this->isWritable('choice', $choice)) {
-            $this->choice[$choice]['set'] = true;
+        $nodes = $this->findVar($var);
+        foreach ($nodes as $node) {
+            if ($node->hasAttribute(self::ATTR_HIDDEN))
+                $node->removeAttribute(self::ATTR_HIDDEN);
         }
         return $this;
     }
 
     /**
-     * Set a choice node to become invisible in a document.
+     * Hide a visible var node
      *
-     * @param string $choice The name of the choice
+     * @param string $var
+     * @since 2.0.15
      * @return Template
      */
-    public function unsetChoice($choice)
+    public function hide($var)
     {
-        if (!$this->keyExists('choice', $choice)) {
-            $this->choice[$choice]['set'] = false;
+        $nodes = $this->findVar($var);
+        foreach ($nodes as $node) {
+            $node->setAttribute(self::ATTR_HIDDEN, 'true');
         }
         return $this;
     }
+
+
+
+
 
     /**
      * Return a form object from the document.
@@ -788,7 +712,7 @@ class Template
      * Get a var element node from the document.
      *
      * @param string $var
-     * @return \DOMElement
+     * @return \DOMElement[]
      */
     public function getVarElement($var)
     {
@@ -824,7 +748,7 @@ class Template
      * If no var name is provided the entire var array is returned.
      *
      * @param string $var
-     * @return \DOMNode[]
+     * @return array|\DOMElement[]
      */
     public function getVarList($var = '')
     {
@@ -839,7 +763,7 @@ class Template
      * Internal method to enable var to be a \DOMElement or array of \DOMElements....
      *
      * @param mixed $var
-     * @return array|\DOMElement
+     * @return array|\DOMElement[]
      */
     protected function findVar($var)
     {
@@ -854,7 +778,7 @@ class Template
         if ($this->keyExists('var', $var)) {
             return $this->var[$var];
         }
-        return null;
+        return array();
     }
 
     /**
@@ -1109,6 +1033,7 @@ class Template
 
     /**
      * Add the calling trace
+     *
      * @param $trace
      * @param $attrs
      * @return mixed
@@ -1122,23 +1047,84 @@ class Template
     }
 
 
+
+
+
+
     /**
-     * Create an importable Node filled with new content
-     * Useful for inserting nodes from string
+     * Replace the text of one or more var nodes
      *
-     * @param $markup
-     * @param string $encoding
-     * @return \DOMElement
+     * @param string $var The var's name.
+     * @param string $value The vars value inside the tags.
+     * @return Template
      */
-    public static function makeContentNode($markup, $encoding = 'UTF-8')
+    public function insertText($var, $value)
     {
-        $markup = self::cleanXml($markup, $encoding);
-        $id = '_c_o_n__';
-        $markup = sprintf('<?xml version="1.0" encoding="%s"?><div xml:id="%s">%s</div>', $encoding, $id, $markup);
-        $doc = new \DOMDocument();
-        $doc->loadXML($markup);
-        return $doc->getElementById($id);
+        if (!$this->isWritable('var', $var))
+            return $this;
+
+        $nodes = $this->findVar($var);
+        /* @var \DOMElement $node */
+        foreach ($nodes as $node) {
+            $this->removeChildren($node);
+            $newNode = $this->document->createTextNode($value);
+            $node->appendChild($newNode);
+        }
+        return $this;
     }
+
+    /**
+     * Append the text of one or more var nodes
+     *
+     * @param string $var The var's name.
+     * @param string $value The vars value inside the tags.
+     * @return Template
+     */
+    public function appendText($var, $value)
+    {
+        if (!$this->isWritable('var', $var))
+            return $this;
+
+        $nodes = $this->findVar($var);
+        /* @var \DOMElement $node */
+        foreach ($nodes as $node) {
+            $newNode = $this->document->createTextNode($value);
+            $node->appendChild($newNode);
+        }
+        return $this;
+    }
+
+    /**
+     * Get the text inside a var node.
+     *
+     * @param string $var
+     * @return string
+     */
+    public function getText($var)
+    {
+        if (!$this->isWritable('var', $var))
+            return '';
+        $nodes = $this->findVar($var);
+        if (count($nodes)) {
+            return $nodes[0]->textContent;
+        }
+        return '';
+    }
+
+    /**
+     *
+     * @param string $var
+     * @param string $text
+     * @return Template
+     * @since v2.0.15
+     */
+    public function setText($var, $text)
+    {
+        return $this->insertText($var, $text);
+    }
+
+
+
 
 
 
@@ -1151,6 +1137,8 @@ class Template
      * @param string $var
      * @param int $idx
      * @return string
+     * @deprecated Use Template::getHtml()
+     * @remove v2.2.0
      */
     public function innerHtml($var, $idx = 0)
     {
@@ -1167,17 +1155,36 @@ class Template
      *
      * @param string $var
      * @return string
+     * @since v2.0.15
      */
     public function getHtml($var)
     {
+        $html = '';
         if (!$this->isWritable('var', $var))
-            return '';
+            return $html;
         $nodes = $this->findVar($var);
-        $doc = new \DOMDocument();
-        $doc->appendChild($doc->importNode($nodes[0], TRUE));
-        $html = trim($doc->saveHTML());
+        if (count($nodes)) {
+            $doc = new \DOMDocument();
+            $doc->appendChild($doc->importNode($nodes[0], TRUE));
+            $html = trim($doc->saveHTML());
+        }
         return $html;
     }
+
+    /**
+     * @param string $var
+     * @param string $html
+     * @return Template
+     * @since v2.0.15
+     */
+    public function setHtml($var, $html)
+    {
+        return $this->insertHtml($var, $html);
+    }
+
+
+
+    // ---------------- INSERT --------------------
 
     /**
      * Insert HTML formatted text into a var element.
@@ -1274,6 +1281,9 @@ class Template
         $this->mergeHeaderList($template->getHeaderList());
         return $this->insertDoc($var, $template->getDocument($parse));
     }
+
+
+    // ---------------- REPLACE --------------------
 
     /**
      * Replace HTML formatted text into a var element.
@@ -1379,6 +1389,10 @@ class Template
         return $this->replaceDoc($var, $template->getDocument());
     }
 
+
+
+    // ----------------------  APPEND --------------------------------------------
+
     /**
      * Append HTML formatted text into a var element.
      *
@@ -1436,6 +1450,9 @@ class Template
     {
         if (!$this->isWritable('var', $var))
             return $this;
+
+        //if (!$doc->childNodes->length) return $this;
+
         $nodes = $this->findVar($var);
         /* @var \DOMElement $el */
         foreach ($nodes as $el) {
@@ -1460,6 +1477,10 @@ class Template
         $this->mergeHeaderList($template->getHeaderList());
         return $this->appendDoc($var, $template->getDocument());
     }
+
+
+    // ---------------------- PREPEND -------------------------
+
 
     /**
      * Prepend a template to a var element, it will parse the template before appending it
@@ -1548,6 +1569,28 @@ class Template
         return $contentNode;
     }
 
+
+
+
+
+    /**
+     * Create an importable Node filled with new content
+     * Useful for inserting nodes from string
+     *
+     * @param $markup
+     * @param string $encoding
+     * @return \DOMElement
+     */
+    public static function makeContentNode($markup, $encoding = 'UTF-8')
+    {
+        $markup = self::cleanXml($markup, $encoding);
+        $id = '_c_o_n__';
+        $markup = sprintf('<?xml version="1.0" encoding="%s"?><div xml:id="%s">%s</div>', $encoding, $id, $markup);
+        $doc = new \DOMDocument();
+        $doc->loadXML($markup);
+        return $doc->getElementById($id);
+    }
+
     /**
      * Get the parsed state of the template.
      * If true then no more changes can be made to the template
@@ -1570,6 +1613,8 @@ class Template
     public function getDocument($parse = true)
     {
         if (!$this->isParsed() && $parse) {
+
+            /** @var \DOMElement $node */
             foreach ($this->comments as $node) {
                 // Keep the IE comment control statements
                 if (!$node || !isset($node->parentNode) || !$node->parentNode || !$node->ownerDocument ) {
@@ -1582,6 +1627,7 @@ class Template
                     $node->parentNode->removeChild($node);
                 }
             }
+
             /* @var Repeat $repeat */
             foreach ($this->repeat as $name => $repeat) {
                 $node = $repeat->getRepeatNode();
@@ -1591,23 +1637,19 @@ class Template
                 $node->parentNode->removeChild($node);
                 unset($this->repeat[$name]);
             }
-            foreach ($this->choice as $name => $nodes) {
-                // TODO: we are not handling double choices IE: choice="admin staff"
-                //  In this case if one is set then the node should not be removed.
-                //  The below code does not work like this......   ????????
-                //  Also needs to take into account unsetChoice()  ????????
-                if (!$nodes['set']) {
-                    foreach ($nodes['node'] as $node) {
-                        if (!$node || !isset($node->ownerDocument)) {       // ??? whats the need for ownerDocument ???
-                            continue;
-                        }
+
+            // Remove nodes marked hidden
+            foreach ($this->var as $var => $nodes) {
+                /** @var \DOMElement $node */
+                foreach ($nodes as $node) {
+                    if ($node->hasAttribute(self::ATTR_HIDDEN) && $node->getAttribute(self::ATTR_HIDDEN) == 'true') {
                         if ($node && $node->parentNode) {
                             $node->parentNode->removeChild($node);
                         }
                     }
                 }
-                unset($this->choice[$name]);
             }
+
             // Insert headers
             if ($this->head) {
                 $meta = array();
@@ -1787,6 +1829,69 @@ class Template
         $k2 = ord(substr($k, 1, 1));
         return $k2 * 256 + $k1;
     }
+
+
+
+
+
+    // Deprecated functions below
+
+
+
+
+    /**
+     * Add a css class if it does not exist
+     *
+     * @param string $var
+     * @param string|array $class
+     * @return Template
+     * @deprecated Use Template::addClass()
+     */
+    public function addCss($var, $class)
+    {
+        return $this->addClass($var, $class);
+    }
+
+    /**
+     * Remove the class if it exists
+     *
+     * @param string $var
+     * @param string $class
+     * @return Template
+     * @deprecated Use Template::removeClass()
+     */
+    public function removeCss($var, $class)
+    {
+        return $this->removeClass($var, $class);
+    }
+
+
+    /**
+     * Set a choice node to become visible in a document.
+     *
+     * @param string $choice The name of the choice
+     * @return Template
+     * @deprecated Choices are now vars and use Template::hide($var); Template::show($var); to hide/show an element
+     * @remove v2.2.0
+     */
+    public function setChoice($choice)
+    {
+        return $this->show($choice);
+    }
+
+    /**
+     * Set a choice node to become invisible in a document.
+     *
+     * @param string $choice The name of the choice
+     * @return Template
+     * @deprecated Choices are now vars and use Template::hide($var); Template::show($var); to hide/show an element
+     * @remove v2.2.0
+     */
+    public function unsetChoice($choice)
+    {
+        return $this->hide($choice);
+    }
+
 
 
 
