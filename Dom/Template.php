@@ -318,7 +318,7 @@ class Template
     public function init($doc, $encoding = 'UTF-8')
     {
         $this->var = array();
-        $this->choice = array();
+        //$this->choice = array();
         $this->repeat = array();
         $this->form = array();
         $this->formElement = array();
@@ -737,6 +737,8 @@ class Template
      * Get the choice node list
      *
      * @return array
+     * @deprecated This will no longer return any valid nodes. just an empty array
+     * @remove v2.2.0
      */
     public function getChoiceList()
     {
