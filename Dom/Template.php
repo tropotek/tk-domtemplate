@@ -20,6 +20,11 @@ namespace Dom;
  * @author Darryl Ross
  * @link http://www.domtemplate.com/
  * @license Copyright 2007
+ *
+ * @todo BUG: found if you declare a nested var on a node then replace the parent var with another template
+ * @todo      this removed the child var nodes and then when you try to modify them the DOM engine
+ * @todo      errors with "Couldn't fetch DOMElement", have not notice this happening before the 2.0.15 update
+ *
  */
 class Template
 {
@@ -596,11 +601,11 @@ class Template
         $nodes = $this->findVar($var);
         /* @var \DOMElement $node */
         foreach ($nodes as $node) {
+            if (!$node) continue;
             foreach ($attr as $k => $v) {
                 if (!$k) continue;
                 if ($v === null) $v = $k;
-                $node->setAttribute($k, $v);
-
+                    $node->setAttribute($k, $v);
             }
         }
         return $this;
@@ -832,6 +837,7 @@ class Template
         foreach($list as $node) {
             $node->parentNode->removeChild($node);
         }
+
     }
 
 
@@ -1204,7 +1210,7 @@ class Template
         $nodes = $this->findVar($var);
         if (count($nodes)) {
             $doc = new \DOMDocument();
-            $doc->appendChild($doc->importNode($nodes[0], TRUE));
+            $doc->appendChild($doc->importNode($nodes[0], true));
             $html = trim($doc->saveHTML());
         }
         return $html;
@@ -1392,10 +1398,10 @@ class Template
     {
         if (!$this->isWritable('var', $var))
             return $this;
-        $nodes = $this->findVar($var);
         if (!$doc->documentElement) {
             return $this;
         }
+        $nodes = $this->findVar($var);
         foreach ($nodes as $i => $node) {
             $newNode = $this->document->importNode($doc->documentElement, true);
             $node->parentNode->replaceChild($newNode, $node);
@@ -1735,6 +1741,13 @@ class Template
                     }
                 }
             }
+
+
+
+
+
+
+
             $this->parsed = true;
 
             $this->document->formatOutput = true;
