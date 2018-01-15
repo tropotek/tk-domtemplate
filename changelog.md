@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 2.1.0 [2018-01-15]:
+-------------------------------
+ - Minor Code Updates
+
+
 Ver 2.0.14 [2017-09-27]:
 -------------------------------
  - Added student create and confirm placement pages
