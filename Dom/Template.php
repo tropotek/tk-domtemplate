@@ -1894,13 +1894,7 @@ class Template
     }
 
 
-
-
-
-    // Deprecated functions below
-
-
-
+    // Alias functions
 
     /**
      * Add a css class if it does not exist
@@ -1908,7 +1902,7 @@ class Template
      * @param string $var
      * @param string|array $class
      * @return Template
-     * @deprecated Use Template::addClass()
+     * @notes Alias to Template::addClass()
      */
     public function addCss($var, $class)
     {
@@ -1921,7 +1915,7 @@ class Template
      * @param string $var
      * @param string $class
      * @return Template
-     * @deprecated Use Template::removeClass()
+     * @notes Alias to Template::removeClass()
      */
     public function removeCss($var, $class)
     {
