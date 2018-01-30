@@ -2,6 +2,7 @@
 
 Ver 2.2.0 [2018-01-31]:
 -------------------------------
+ - Added new callable events to template parsing (onPreParse, onPostParse)
 
 
 Ver 2.1.0 [2018-01-15]:
