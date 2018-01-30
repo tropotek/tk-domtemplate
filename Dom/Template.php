@@ -50,6 +50,7 @@ class Template
      */
     public static $capture = array();
 
+
     /**
      * The main template document
      * @var \DOMDocument
@@ -184,7 +185,26 @@ class Template
      * @var bool
      */
     protected $newlineReplace = true;
-    
+
+
+    /**
+     * @var null|callable
+     * @since 2.2.0
+     */
+    protected $onPreParse = null;
+
+    /**
+     * @var null|callable
+     * @since 2.2.0
+     */
+    protected $onPostParse = null;
+
+    /**
+     * Blocking var to avoid a callback recursive loop
+     * @var bool
+     * @since 2.2.0
+     */
+    private $parsing = false;
     
     
     
@@ -1648,6 +1668,56 @@ class Template
     }
 
     /**
+     * @return callable|null
+     * @since 2.2.0
+     */
+    public function getOnPreParse()
+    {
+        return $this->onPreParse;
+    }
+
+    /**
+     * Add a callable function on pre document parsing
+     *
+     * EG: function ($template) { }
+     *
+     * @param callable|null $onPreParse
+     * @return Template
+     * @since 2.2.0
+     */
+    public function setOnPreParse($onPreParse)
+    {
+        $this->onPreParse = $onPreParse;
+        return $this;
+    }
+
+    /**
+     * @return callable|null
+     * @since 2.2.0
+     */
+    public function getOnPostParse()
+    {
+        return $this->onPostParse;
+    }
+
+    /**
+     * Add a callable function on post document parsing
+     *
+     * EG: function ($template) { }
+     *
+     * @param callable|null $onPostParse
+     * @return Template
+     * @since 2.2.0
+     */
+    public function setOnPostParse($onPostParse)
+    {
+        $this->onPostParse = $onPostParse;
+        return $this;
+    }
+
+
+
+    /**
      * Return a parsed \Dom document.
      * After using this call you can no longer use the template render functions
      * as no changes will be made to the template unless you use DOM functions
@@ -1657,7 +1727,14 @@ class Template
      */
     public function getDocument($parse = true)
     {
-        if (!$this->isParsed() && $parse) {
+
+        if (!$this->isParsed() && !$this->parsing) {
+            $this->parsing = true;
+
+            // On Pre Parse Event
+            if (is_callable($this->getOnPreParse())) {
+                call_user_func_array($this->getOnPreParse(), array($this));
+            }
 
             /** @var \DOMElement $node */
             foreach ($this->comments as $node) {
@@ -1683,7 +1760,6 @@ class Template
                 unset($this->repeat[$name]);
             }
 
-
             // Remove nodes marked hidden
             foreach ($this->var as $var => $nodes) {
                 /** @var \DOMElement $node */
@@ -1694,6 +1770,7 @@ class Template
                     }
                 }
             }
+
             // Remove choice node marked hidden
             foreach ($this->choice as $choice => $nodes) {
                 /** @var \DOMElement $node */
@@ -1704,7 +1781,6 @@ class Template
                     }
                 }
             }
-
 
             // Insert headers
             if ($this->head) {
@@ -1729,7 +1805,6 @@ class Template
                             $node->setAttribute($k, $v);
                         }
                     }
-
                     $nl = $this->document->createTextNode("\n");
                     if ($header['node']) {
                         $n = $header['node'];
@@ -1742,17 +1817,17 @@ class Template
                 }
             }
 
-
-
-
-
-
-
             $this->parsed = true;
-
             $this->document->formatOutput = true;
             $this->document->preserveWhiteSpace = false;
             $this->document->normalizeDocument();
+
+            // On Post Parse Event
+            if (is_callable($this->getOnPostParse())) {
+                call_user_func_array($this->getOnPostParse(), array($this));
+            }
+
+            $this->parsing = false;
         }
 
         return $this->document;
@@ -1790,7 +1865,6 @@ class Template
     /**
      * Check if a repeat,choice,var,form (template property) exist,
      * and if the document has ben parsed.
-     *
      *
      * @param string $property
      * @param string $key
