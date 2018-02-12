@@ -289,15 +289,14 @@ class Template
 
         //$html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
         $html = self::cleanXml($html, $encoding);
-        $r = $doc->loadXML($html);
-        //$r = $doc->loadHTML($html);
-
-        if (!$r) {
+        $ok = $doc->loadXML($html);
+        if (!$ok) {
             $str = '';
             foreach (libxml_get_errors() as $error) {
                 $str .= sprintf("\n[%s:%s] %s", $error->line, $error->column, trim($error->message));
             }
             libxml_clear_errors();
+            $str .= "\n\n" . $html . "\n";
             $e = new Exception('Error Parsing DOM Template', 0, null, $str);
             throw $e;
         }
@@ -1635,9 +1634,6 @@ class Template
     }
 
 
-
-
-
     /**
      * Create an importable Node filled with new content
      * Useful for inserting nodes from string
@@ -1645,14 +1641,27 @@ class Template
      * @param $markup
      * @param string $encoding
      * @return \DOMElement
+     * @throws Exception
      */
     public static function makeContentNode($markup, $encoding = 'UTF-8')
     {
         $markup = self::cleanXml($markup, $encoding);
         $id = '_c_o_n__';
-        $markup = sprintf('<?xml version="1.0" encoding="%s"?><div xml:id="%s">%s</div>', $encoding, $id, $markup);
+        $xml = sprintf('<?xml version="1.0" encoding="%s"?><div xml:id="%s">%s</div>', $encoding, $id, $markup);
         $doc = new \DOMDocument();
-        $doc->loadXML($markup);
+        libxml_use_internal_errors(true);
+        $ok = $doc->loadXML($xml);
+        if (!$ok) {
+            $str = '';
+            foreach (libxml_get_errors() as $error) {
+                $str .= sprintf("\n[%s:%s] %s", $error->line, $error->column, trim($error->message));
+            }
+            libxml_clear_errors();
+            $str .= "\n\n" . $markup . "\n";
+            $e = new Exception('Error Parsing DOM Template', 0, null, $str);
+            throw $e;
+        }
+
         return $doc->getElementById($id);
     }
 
