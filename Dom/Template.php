@@ -1256,6 +1256,7 @@ class Template
      * @param string $var
      * @param string $html
      * @return Template
+     * @throws Exception
      * @warn bug exists where after insertion the template loses
      *   reference to the node in repeat regions. The fix (for now)
      *   is to just do all operations on that var node before this call.
@@ -1279,6 +1280,7 @@ class Template
      * @param string $html
      * @param string $encoding
      * @return \DOMElement
+     * @throws Exception
      */
     public static function insertHtmlDom($element, $html, $encoding = 'UTF-8')
     {
