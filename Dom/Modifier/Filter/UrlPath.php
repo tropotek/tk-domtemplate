@@ -67,13 +67,13 @@ class UrlPath extends Iface
     /**
      * __construct
      *
-     * @param string $siteUrl
-     * @param string $templateUrl
+     * @param string|\Tk\Uri $siteUrl
+     * @param string|\Tk\Uri $templateUrl
      */
     public function __construct($siteUrl = '', $templateUrl = '')
     {
-        $this->siteUrl = $siteUrl;
-        $this->templateUrl = $templateUrl;
+        $this->siteUrl = rtrim($siteUrl, '/');
+        $this->templateUrl = rtrim($templateUrl, '/');
     }
 
     /**
@@ -187,6 +187,7 @@ class UrlPath extends Iface
                     preg_match('/(\S+):(\S+)/', $attr->value) || preg_match('/^\/\//', $attr->value) ||   // ignore full urls and schema-less urls
                     preg_match('/^[a-z0-9]{1,10}:/', $attr->value)  // ignore Full URL's
                 ) continue;
+
                 $attr->value = htmlentities($this->prependPath($attr->value));
             } elseif (in_array(strtolower($attr->nodeName), $this->attrJs)) {       // replace javascript strings
                 $attr->value = htmlentities($this->replaceStr($attr->value));
