@@ -1002,10 +1002,15 @@ class Template
             $preKey .= $k . $v;
         }
         $hash = md5($preKey);
+        if (isset($this->headers[$hash])) {
+            // TODO: exception or log????
+            vd($this->headers[$hash]);
+        }
         $this->headers[$hash]['elementName'] = $elementName;
         $this->headers[$hash]['attributes'] = $attributes;
         $this->headers[$hash]['value'] = $value;
         $this->headers[$hash]['node'] = $node;
+
         return $this;
     }
 
