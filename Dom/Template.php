@@ -997,8 +997,12 @@ class Template
         if (!$this->isWritable())
             return $this;
         $preKey = $elementName . $value;
+        // TODO: This should be configurable in the Template object (or some sort of header filter object)
+        // TODO:  Could be something more like array('mete' => array('content'), 'link' => array('type'));  ???
+        $ignore = array('content', 'type');
         foreach ($attributes as $k => $v) {
-            if ($elementName == 'meta' && $k != 'name') continue;   // Only use the name attribute in the hash for meta tags
+            if (in_array($k, $ignore)) continue;
+            //if ($elementName == 'meta' && $k != 'name') continue;   // Only use the name attribute in the hash for meta tags
             $preKey .= $k . $v;
         }
         $hash = md5($preKey);
