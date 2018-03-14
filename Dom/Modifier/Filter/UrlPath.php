@@ -90,57 +90,6 @@ class UrlPath extends Iface
     }
 
     /**
-     * Prepend the site document root url to the provided path
-     *
-     * Eg:
-     *      $path = /path/to/resource.js
-     *      return /site/root/path/to/resource.js
-     *
-     * @param string $path
-     * @return string
-     */
-    protected function addSiteUrl($path)
-    {
-        $searchFor = \Tk\Uri::create($this->siteUrl)->getPath();
-        $fixedPath = preg_replace('/^'.preg_quote($searchFor, '/').'/', '', $path);
-        if ($fixedPath) {
-            $path = $fixedPath;
-        }
-        if ($path[0] != '/' && $path[0] != '\\') $path = '/'.$path;
-        $path = preg_replace('/^\/\.\//', '/', $path);
-        //$path = str_replace('/./', '/', $path);
-        $url = \Tk\Uri::create($this->siteUrl . $path)->toString();
-        return $url;
-    }
-
-    /**
-     * Prepend the theme document root to the provided path
-     *
-     * Eg:
-     *      $path = path/to/resource.js
-     *      $path = ./path/to/resource.js
-     *      $path = ../path/to/resource.js
-     *      $path = ../../path/to/resource.js
-     *      return /site/root/template/selected/path/to/resource.js
-     *
-     * @param string $path
-     * @return string
-     */
-    protected function addTemplateUrl($path)
-    {
-        $searchFor = \Tk\Uri::create($this->templateUrl)->getPath();
-        $fixedPath = preg_replace('/^'.preg_quote($searchFor, '/').'/', '', $path);
-        if ($fixedPath) {
-            $path = $fixedPath;
-        }
-        if ($path[0] != '/' && $path[0] != '\\') $path = '/'.$path;
-        $path = preg_replace('/^\/\.\//', '/', $path);
-        //$path = str_replace('/./', '/', $path);
-        $url = \Tk\Uri::create($this->templateUrl . $path)->toString();
-        return $url;
-    }
-
-    /**
      * pre init the filter
      *
      * @param \DOMDocument $doc
@@ -186,7 +135,9 @@ class UrlPath extends Iface
                     preg_match('/^#/', $attr->value) ||     // ignore fragment urls
                     preg_match('/(\S+):(\S+)/', $attr->value) || preg_match('/^\/\//', $attr->value) ||   // ignore full urls and schema-less urls
                     preg_match('/^[a-z0-9]{1,10}:/', $attr->value)  // ignore Full URL's
-                ) continue;
+                ) {
+                    continue;
+                }
 
                 $attr->value = htmlentities($this->prependPath($attr->value));
             } elseif (in_array(strtolower($attr->nodeName), $this->attrJs)) {       // replace javascript strings
@@ -204,6 +155,7 @@ class UrlPath extends Iface
      */
     private function prependPath($path)
     {
+
         if (!$path) return $path;
         if (preg_match('|^\.\/|', $path)) {
             $retPath = $this->addTemplateUrl($path);
@@ -211,6 +163,57 @@ class UrlPath extends Iface
             $retPath = $this->addSiteUrl($path);
         }
         return $retPath;
+    }
+
+    /**
+     * Prepend the site document root url to the provided path
+     *
+     * Eg:
+     *      $path = /path/to/resource.js
+     *      return /site/root/path/to/resource.js
+     *
+     * @param string $path
+     * @return string
+     */
+    protected function addSiteUrl($path)
+    {
+        $path = rtrim($path, '/');
+        $searchFor = \Tk\Uri::create($this->siteUrl)->getPath();
+        $fixedPath = preg_replace('/^'.preg_quote($searchFor, '/').'/', '', $path);
+        if ($fixedPath) {
+            $path = $fixedPath;
+        }
+        if ($path && $path[0] != '/' && $path[0] != '\\') $path = '/'.$path;
+        $path = preg_replace('/^\/\.\//', '/', $path);
+        $url = \Tk\Uri::create($this->siteUrl . $path)->toString();
+        return $url;
+    }
+
+    /**
+     * Prepend the theme document root to the provided path
+     *
+     * Eg:
+     *      $path = path/to/resource.js
+     *      $path = ./path/to/resource.js
+     *      $path = ../path/to/resource.js
+     *      $path = ../../path/to/resource.js
+     *      return /site/root/template/selected/path/to/resource.js
+     *
+     * @param string $path
+     * @return string
+     */
+    protected function addTemplateUrl($path)
+    {
+        $path = rtrim($path, '/');
+        $searchFor = \Tk\Uri::create($this->templateUrl)->getPath();
+        $fixedPath = preg_replace('/^'.preg_quote($searchFor, '/').'/', '', $path);
+        if ($fixedPath) {
+            $path = $fixedPath;
+        }
+        if ($path[0] != '/' && $path[0] != '\\') $path = '/'.$path;
+        $path = preg_replace('/^\/\.\//', '/', $path);
+        $url = \Tk\Uri::create($this->templateUrl . $path)->toString();
+        return $url;
     }
 
     /**
@@ -244,7 +247,8 @@ class UrlPath extends Iface
     private function cleanRelative($path)
     {
         if (preg_match('/^\/\//', $path)) {
-            vd($path);
+            // Should not be `http://` at the start
+            throw new \Tk\Exception('Invalid url path: ' . $path);
         }
 
         // TODO: could cause security issues. see how we go without it.
