@@ -99,6 +99,7 @@ class AutoRenderer implements RendererInterface, DisplayInterface
      * or HTML/XML string depending on your framework requirements
      *
      * @return Template | string
+     * @throws Exception
      */
     public function show()
     {
@@ -117,9 +118,10 @@ class AutoRenderer implements RendererInterface, DisplayInterface
     /**
      * Render all vars found in the template
      *
-     * @param Template    $template
+     * @param Template $template
      * @param string|null $varVal
      * @return $this
+     * @throws Exception
      */
     protected function showRepeat($template, $varVal = null)
     {

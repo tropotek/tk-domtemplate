@@ -1248,6 +1248,7 @@ class Template
      * @param string $var
      * @param string $html
      * @return Template
+     * @throws Exception
      * @since v2.0.15
      */
     public function setHtml($var, $html)
@@ -1367,6 +1368,7 @@ class Template
      * @param string $html
      * @param bool $preserveAttr Set to false to ignore copying of existing Attributes
      * @return Template
+     * @throws Exception
      */
     public function replaceHtml($var, $html, $preserveAttr = true)
     {
@@ -1390,6 +1392,7 @@ class Template
      * @param string $encoding
      * @param bool $preserveAttr Set to false to ignore copying of existing Attributes
      * @return \DOMElement
+     * @throws Exception
      */
     public static function replaceHtmlDom($element, $html, $encoding = 'UTF-8', $preserveAttr = true)
     {
@@ -1474,6 +1477,7 @@ class Template
      * @param string $var
      * @param string $html
      * @return Template
+     * @throws Exception
      */
     public function appendHtml($var, $html)
     {
@@ -1493,6 +1497,7 @@ class Template
      * @param string $html
      * @param string $encoding
      * @return \DOMElement|null
+     * @throws Exception
      */
     public static function appendHtmlDom($element, $html, $encoding = 'UTF-8')
     {
@@ -1605,6 +1610,7 @@ class Template
      * @param string $var
      * @param string $html
      * @return Template
+     * @throws Exception
      */
     public function prependHtml($var, $html)
     {
@@ -1624,6 +1630,7 @@ class Template
      * @param \DOMElement $element
      * @param string $html
      * @return \DOMElement|null
+     * @throws Exception
      */
     public static function prependHtmlDom($element, $html)
     {

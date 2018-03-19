@@ -225,7 +225,6 @@ class Less extends Iface
      * Call this method to traverse a document
      *
      * @param \DOMElement $node
-     * @throws Exception
      */
     public function executeNode(\DOMElement $node)
     {

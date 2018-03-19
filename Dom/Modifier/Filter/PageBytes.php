@@ -42,9 +42,9 @@ class PageBytes extends Iface
     protected $basePath = '';
 
 
-
     /**
      * __construct
+     * @param $basePath
      */
     public function __construct($basePath)
     {
@@ -72,7 +72,6 @@ class PageBytes extends Iface
      * pre init the Filter
      *
      * @param \DOMDocument $doc
-     * @throws Exception
      */
     public function init($doc)
     {
@@ -111,7 +110,6 @@ class PageBytes extends Iface
      * Call this method to traverse a document
      *
      * @param \DOMElement $node
-     * @throws Exception
      */
     public function executeNode(\DOMElement $node)
     {

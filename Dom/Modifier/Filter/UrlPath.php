@@ -243,6 +243,7 @@ class UrlPath extends Iface
      *
      * @param string $path
      * @return string
+     * @throws \Tk\Exception
      */
     private function cleanRelative($path)
     {
