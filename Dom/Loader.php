@@ -8,11 +8,11 @@ namespace Dom;
  * You can add loader adapters to find templates in a cascading array
  *
  * NOTE: Adapters are run as as LIFO (Last In First Out) queue.
- * @link https://en.wikipedia.org/wiki/LIFO_%28education%29
+ * @see https://en.wikipedia.org/wiki/LIFO_%28education%29
  *
  *
  * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
+ * @see http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */
 class Loader
@@ -162,7 +162,7 @@ class Loader
      * Adds an adapter to the beginning of the array
      *
      * NOTE: Adapters are run as as LIFO (Last In First Out) queue.
-     * @link https://en.wikipedia.org/wiki/LIFO_%28education%29
+     * @see https://en.wikipedia.org/wiki/LIFO_%28education%29
      *
      * @param Loader\Adapter\Iface $adapter
      * @return Loader\Adapter\Iface

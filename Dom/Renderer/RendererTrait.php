@@ -10,7 +10,7 @@ use Dom\Template;
  * Do not forget to implement the DisplayInterface if you need the show() method
  *
  * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
+ * @see http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */
 trait RendererTrait

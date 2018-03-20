@@ -9,7 +9,7 @@ use Dom\Template;
  *
  * @author Michael Mifsud
  * @author Darryl Ross
- * @link http://www.domtemplate.com/
+ * @see http://www.domtemplate.com/
  * @license Copyright 2007
  */
 class Select extends Element

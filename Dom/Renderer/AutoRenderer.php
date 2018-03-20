@@ -24,7 +24,7 @@ use Dom\Exception;
  *
  *
  * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
+ * @see http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  * @deprecated Use this as a template to create something to suit your own requirements...
  */

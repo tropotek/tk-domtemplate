@@ -14,7 +14,7 @@ use Dom\Form\Textarea;
  *
  * @author Michael Mifsud
  * @author Darryl Ross
- * @link http://www.domtemplate.com/
+ * @see http://www.domtemplate.com/
  * @license Copyright 2007
  */
 class Form
@@ -305,7 +305,7 @@ class Form
     }
 
     /**
-     * Get the \DOMElement of this form object.
+     * Get the DOMElement of this form object.
      *
      * @return \DOMElement
      */

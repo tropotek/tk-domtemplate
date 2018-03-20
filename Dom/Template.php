@@ -18,7 +18,7 @@ namespace Dom;
  *
  * @author Michael Mifsud
  * @author Darryl Ross
- * @link http://www.domtemplate.com/
+ * @see http://www.domtemplate.com/
  * @license Copyright 2007
  *
  * @todo BUG: found if you declare a nested var on a node then replace the parent var with another template
@@ -41,8 +41,8 @@ class Template
     /**
      * Customised array of node names or attribute names to collect the nodes for.
      * For example:
-     *   Node Name = 'module': All \DOMElements with the name <module></module> will be captured
-     *   Attr Name = '@attr-name': All \DOMElements containing the attr name 'attr-name' will be captured
+     *   Node Name = 'module': All DOMElements with the name <module></module> will be captured
+     *   Attr Name = '@attr-name': All DOMElements containing the attr name 'attr-name' will be captured
      *
      * This can be set statically <b>after</b> the session is set.
      *
@@ -75,19 +75,19 @@ class Template
 
 
     /**
-     * An array of var \DOMElement objects
+     * An array of var DOMElement objects
      * @var \DOMElement[][]
      */
     protected $var = array();
 
     /**
-     * An array of repeat \DOMElement objects
+     * An array of repeat DOMElement objects
      * @var \DOMElement[][]
      */
     protected $repeat = array();
 
     /**
-     * deprecated: An array of choice \DOMElement objects
+     * deprecated: An array of choice DOMElement objects
      * This array now stores all vars that are to be removed or ols choices that are set
      * @var array|\DOMElement[][]
      * @remove v2.2.0
@@ -97,19 +97,19 @@ class Template
 
 
     /**
-     * An array of form \DOMElement objects
+     * An array of form DOMElement objects
      * @var \DOMElement[]
      */
     protected $form = array();
 
     /**
-     * An array of formElement \DOMElement objects
+     * An array of formElement DOMElement objects
      * @var \DOMElement[]
      */
     protected $formElement = array();
 
     /**
-     * An array of all custom captured \DOMElement objects
+     * An array of all custom captured DOMElement objects
      * @var \DOMElement[]
      */
     protected $captureList = array();
@@ -278,7 +278,7 @@ class Template
     {
         $html = trim($html);
         if ($html == '' || $html[0] != '<') {
-            throw new Exception('Please supply a valid XHTML/XML string to create the \DOMDocument.');
+            throw new Exception('Please supply a valid XHTML/XML string to create the DOMDocument.');
         }
         $isHtml5 = false;
         if ('<!doctype html>' == strtolower(substr($html, 0, 15))) {
@@ -512,7 +512,7 @@ class Template
     }
 
     /**
-     * Get the list of captured \DOMElement nodes
+     * Get the list of captured DOMElement nodes
      *
      * @return array
      */
@@ -522,7 +522,7 @@ class Template
     }
 
     /**
-     * Get the current \DOMDocument character encoding
+     * Get the current DOMDocument character encoding
      *
      * @return string
      */
@@ -808,7 +808,7 @@ class Template
     }
 
     /**
-     * Internal method to enable var to be a \DOMElement or array of \DOMElements....
+     * Internal method to enable var to be a DOMElement or array of DOMElements...
      *
      * @param mixed $var
      * @return array|\DOMElement[]
@@ -861,7 +861,7 @@ class Template
 
 
     /**
-     * Get a \DOMElement from the document based on its unique ID
+     * Get a DOMElement from the document based on its unique ID
      * ID attributes should be unique for XHTML documents, multiple names
      * are ignored and only the first node found is returned.
      *
@@ -1316,7 +1316,7 @@ class Template
     }
 
     /**
-     * Insert a \DOMDocument into a var element
+     * Insert a DOMDocument into a var element
      * The var tag will not be replaced only its contents
      *
      * @param string $var
@@ -1420,8 +1420,8 @@ class Template
     }
 
     /**
-     * Replace a node with the supplied \DOMDocument
-     * The \DOMDocument's topmost node will be used to replace the destination node
+     * Replace a node with the supplied DOMDocument
+     * The DOMDocument's topmost node will be used to replace the destination node
      *
      * @param string $var
      * @param \DOMDocument $doc
@@ -1447,7 +1447,7 @@ class Template
 
     /**
      * Replace a var node with the supplied Template
-     * The \DOMDocument's topmost node will be used to replace the destination node
+     * The DOMDocument's topmost node will be used to replace the destination node
      *
      * This will also copy any headers in the supplied template.
      *
@@ -1749,7 +1749,7 @@ class Template
      * After using this call you can no longer use the template render functions
      * as no changes will be made to the template unless you use DOM functions
      *
-     * @param bool $parse Set to false to avoid parsing and return \DOMDocument in its current state
+     * @param bool $parse Set to false to avoid parsing and return DOMDocument in its current state
      * @return \DOMDocument
      */
     public function getDocument($parse = true)

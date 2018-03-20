@@ -7,7 +7,7 @@ use Dom\Template;
  * Template Bootstrap interface
  *
  * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
+ * @see http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  */
 interface DisplayInterface extends RendererInterface

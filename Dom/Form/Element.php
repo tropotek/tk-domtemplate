@@ -10,14 +10,14 @@ use Dom\Template;
  *
  * @author Michael Mifsud
  * @author Darryl Ross
- * @link http://www.domtemplate.com/
+ * @see http://www.domtemplate.com/
  * @license Copyright 2007
  */
 abstract class Element
 {
 
     /**
-     * This could be a single \DOMElement or an array of \DOMElement
+     * This could be a single DOMElement or an array of DOMElement
      * @var \DOMElement
      */
     protected $element = null;
@@ -62,7 +62,7 @@ abstract class Element
     }
 
     /**
-     * Get the \DomElement node for this form element
+     * Get the DomElement node for this form element
      *
      * @return \DOMElement
      */

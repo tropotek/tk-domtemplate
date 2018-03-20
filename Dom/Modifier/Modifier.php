@@ -2,7 +2,7 @@
 namespace Dom\Modifier;
 
 /**
- * This class is designed to take a \DOMDocument, traverse it and pass each Type to
+ * This class is designed to take a DOMDocument, traverse it and pass each Type to
  * the children filters.
  *
  * The main aim of this object is to make final last minute alterations to the dom template.
@@ -21,7 +21,7 @@ namespace Dom\Modifier;
  * </code>
  *
  * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
+ * @see http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  */
 class Modifier

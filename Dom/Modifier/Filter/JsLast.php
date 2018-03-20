@@ -122,7 +122,7 @@ class JsLast extends Iface
      * @param array $array
      * @param $value_compare_func
      * @return mixed
-     * @link https://github.com/vanderlee/PHP-stable-sort-functions/blob/master/classes/StableSort.php
+     * @see https://github.com/vanderlee/PHP-stable-sort-functions/blob/master/classes/StableSort.php
      */
     private function usort(array &$array, $value_compare_func)
     {

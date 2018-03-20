@@ -14,7 +14,7 @@ use \Dom\Template;
  *          /supplied/template/path/App_Module_Index.xml
  *
  * @author Michael Mifsud <info@tropotek.com>
- * @link http://www.tropotek.com/
+ * @see http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */
 class ClassPath extends Iface
