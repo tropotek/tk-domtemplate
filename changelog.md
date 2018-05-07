@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 2.2.1 [2018-05-08]:
+-------------------------------
+ - Dev.ttek.org
+
+
 Ver 2.2.0 [2018-01-31]:
 -------------------------------
  - Added new callable events to template parsing (onPreParse, onPostParse)
