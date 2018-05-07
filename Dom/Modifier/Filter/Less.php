@@ -184,7 +184,8 @@ class Less extends Iface
             // TODO: Regen() the css files seems to fix this, this may only be a real issue in Debug mode.
             //$css_file_name = \Less_Cache::Regen($this->source, $options);
 
-            $css_file_name = \Less_Cache::Get($this->source, $options, $this->useCache);
+            $modify_vars = array(); // ?????
+            $css_file_name = \Less_Cache::Get($this->source, $options, $modify_vars);
             $css = trim(file_get_contents($this->cachePath . '/' . $css_file_name));
         } else {
             // todo: Make the caching optional
