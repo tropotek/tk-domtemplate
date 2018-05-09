@@ -142,6 +142,16 @@ class UrlPath extends Iface
                 $attr->value = htmlentities($this->prependPath($attr->value));
             } elseif (in_array(strtolower($attr->nodeName), $this->attrJs)) {       // replace javascript strings
                 $attr->value = htmlentities($this->replaceStr($attr->value));
+            } elseif (strtolower($attr->nodeName) == 'style') {
+                if (preg_match_all('/url\(.*\)/', $attr->nodeValue)) {
+                    $newValue = preg_replace_callback('/url\(((\"|\'|)?.*[\'"]?)\)/U', function ($matches) {
+                        // vd($matches);
+                        $url = "'" . $this->prependPath(str_replace(array('"',"'"), '', $matches[1])) . "'";
+                        return 'url('.$url.')';
+                    }, $attr->nodeValue);
+                    $attr->nodeValue = $newValue;
+                }
+                // TODO: possibly do the same to inline style tag URL's
             }
         }
     }
