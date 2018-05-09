@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 2.2.4 [2018-05-10]:
+-------------------------------
+ - Added new style tag URL re-writing
+ - Fixed SQL error for company groups
+
+
 Ver 2.2.3 [2018-05-08]:
 -------------------------------
 
