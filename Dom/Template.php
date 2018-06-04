@@ -157,10 +157,16 @@ class Template
     protected $encoding = 'UTF-8';
 
     /**
-     * Header elements to be added
+     * Elements to be appended to the <head> tag
      * @var array
      */
     protected $headers = array();
+
+    /**
+     * Templates to be appended to the <body> tag
+     * @var array
+     */
+    protected $bodyTemplates = array();
 
     /**
      * Set to true if this template has been parsed
@@ -833,7 +839,7 @@ class Template
      * Get a var element node from the document.
      *
      * @param string $var
-     * @return \DOMElement[]
+     * @return \DOMElement[]|\DOMElement
      */
     public function getVarElement($var)
     {
@@ -845,9 +851,8 @@ class Template
     }
 
     /**
-     *
-     *
-     * @param $var
+     * @param string $var
+     * @return Template
      */
     public function removeVarElement($var)
     {
@@ -856,7 +861,7 @@ class Template
         foreach($list as $node) {
             $node->parentNode->removeChild($node);
         }
-
+        return $this;
     }
 
 
@@ -871,60 +876,6 @@ class Template
     public function getElementById($id)
     {
         return $this->idList[$id];
-    }
-
-    /**
-     * Return the head node if it exists.
-     *
-     * @return \DOMElement
-     */
-    public function getHeadElement()
-    {
-        return $this->head;
-    }
-
-    /**
-     * Return the current list of header nodes
-     *
-     * @return array
-     */
-    public function getHeaderList()
-    {
-        return $this->headers;
-    }
-
-    /**
-     * Set the current list of header nodes
-     *
-     * @param array
-     * @return Template
-     */
-    public function setHeaderList($arr)
-    {
-        $this->headers = $arr;
-        return $this;
-    }
-
-    /**
-     * merge existing header array with this template header array
-     *
-     * @param array $arr
-     * @return Template
-     */
-    public function mergeHeaderList($arr)
-    {
-        $this->setHeaderList(array_merge($this->headers, $arr));
-        return $this;
-    }
-
-    /**
-     * Return the body node.
-     *
-     * @return \DOMElement
-     */
-    public function getBodyElement()
-    {
-        return $this->body;
     }
 
     /**
@@ -977,6 +928,51 @@ class Template
         return $this->title;
     }
 
+
+    /**
+     * Return the head node if it exists.
+     *
+     * @return \DOMElement
+     */
+    public function getHeadElement()
+    {
+        return $this->head;
+    }
+
+    /**
+     * Return the current list of header nodes
+     *
+     * @return array
+     */
+    public function getHeaderList()
+    {
+        return $this->headers;
+    }
+
+    /**
+     * Set the current list of header nodes
+     *
+     * @param array
+     * @return Template
+     */
+    public function setHeaderList($arr)
+    {
+        $this->headers = $arr;
+        return $this;
+    }
+
+    /**
+     * merge existing header array with this template header array
+     *
+     * @param array $arr
+     * @return Template
+     */
+    public function mergeHeaderList($arr)
+    {
+        $this->setHeaderList(array_merge($this->headers, $arr));
+        return $this;
+    }
+
     /**
      * Appends an element to the widgets of the HTML head element.
      *
@@ -985,6 +981,9 @@ class Template
      *
      * NOTE: Only allows unique headers. An md5 hash is referenced from all input parameters.
      *  Any duplicate headers are discarded.
+     *
+     * I this template does not have a <head> tag the elements will be added to
+     * any parent templates that this template is appended/inserted/prepended etc to.
      *
      * @param string $elementName
      * @param array $attributes An associative array of (attr, value) pairs.
@@ -1120,8 +1119,77 @@ class Template
     }
 
 
+    /**
+     * Return the body node.
+     *
+     * @return \DOMElement
+     */
+    public function getBodyElement()
+    {
+        return $this->body;
+    }
+
+    /**
+     * Return the current list of header nodes
+     *
+     * @return array|Template[]
+     */
+    public function getBodyTemplateList()
+    {
+        return $this->bodyTemplates;
+    }
+
+    /**
+     * Set the current list of header nodes
+     *
+     * @param array|Template[]
+     * @return Template
+     */
+    public function setBodyTemplateList($arr)
+    {
+        $this->bodyTemplates = $arr;
+        return $this;
+    }
+
+    /**
+     * merge existing header array with this template header array
+     *
+     * @param array|Template[] $arr
+     * @return Template
+     */
+    public function mergeBodyTemplateList($arr)
+    {
+        $this->setBodyTemplateList(array_merge($this->bodyTemplates, $arr));
+        return $this;
+    }
+
+    /**
+     * Append a template to the <body> tag, the supplied template
+     * will be merged into other templates until a <body> tag exists
+     *
+     * @param Template $template
+     * @return $this
+     */
+    public function appendBodyTemplate($template)
+    {
+        if (!$this->isWritable())
+            return $this;
+        //vd($template->getRootElement()->getAttribute('class'));
+        $this->bodyTemplates[] = $template;
+        return $this;
+    }
 
 
+    /**
+     * @param Template $template
+     * @return Template
+     */
+    protected function mergeTemplate($template)
+    {
+        $this->mergeHeaderList($template->getHeaderList());
+        $this->mergeBodyTemplateList($template->getBodyTemplateList());
+        return $this;
+    }
 
 
     /**
@@ -1135,7 +1203,6 @@ class Template
     {
         if (!$this->isWritable('var', $var))
             return $this;
-
         $nodes = $this->findVar($var);
         /* @var \DOMElement $node */
         foreach ($nodes as $node) {
@@ -1157,7 +1224,6 @@ class Template
     {
         if (!$this->isWritable('var', $var))
             return $this;
-
         $nodes = $this->findVar($var);
         /* @var \DOMElement $node */
         foreach ($nodes as $node) {
@@ -1354,7 +1420,7 @@ class Template
     {
         if (!$this->isWritable('var', $var) || !$template)
             return $this;
-        $this->mergeHeaderList($template->getHeaderList());
+        $this->mergeTemplate($template);
         return $this->insertDoc($var, $template->getDocument($parse));
     }
 
@@ -1463,7 +1529,7 @@ class Template
             \Tk\Log::error('Invalid Template Object For: ' . $var);
             return $this;
         }
-        $this->mergeHeaderList($template->getHeaderList());
+        $this->mergeTemplate($template);
         return $this->replaceDoc($var, $template->getDocument());
     }
 
@@ -1554,7 +1620,7 @@ class Template
     {
         if (!$this->isWritable('var', $var) || !$template)
             return $this;
-        $this->mergeHeaderList($template->getHeaderList());
+        $this->mergeTemplate($template);
         return $this->appendDoc($var, $template->getDocument());
     }
 
@@ -1574,7 +1640,7 @@ class Template
     {
         if (!$this->isWritable('var', $var) || !$template)
             return $this;
-        $this->mergeHeaderList($template->getHeaderList());
+        $this->mergeTemplate($template);
         return $this->prependDoc($var, $template->getDocument());
     }
 
@@ -1754,13 +1820,19 @@ class Template
      */
     public function getDocument($parse = true)
     {
-
         if (!$this->isParsed() && !$this->parsing) {
             $this->parsing = true;
 
             // On Pre Parse Event
             if (is_callable($this->getOnPreParse())) {
                 call_user_func_array($this->getOnPreParse(), array($this));
+            }
+
+            // Insert any body templates
+            if ($this->body) {
+                foreach ($this->bodyTemplates as $child) {
+                    $this->appendTemplate($this->body, $child);
+                }
             }
 
             /** @var \DOMElement $node */
@@ -1853,7 +1925,6 @@ class Template
             if (is_callable($this->getOnPostParse())) {
                 call_user_func_array($this->getOnPostParse(), array($this));
             }
-
             $this->parsing = false;
         }
 
@@ -2022,8 +2093,5 @@ class Template
     {
         return $this->removeClass($var, $class);
     }
-
-
-
 
 }
