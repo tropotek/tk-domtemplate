@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 2.2.6 [2018-06-05]:
+-------------------------------
+Minor Code Updates
+
+
 Ver 2.2.4 [2018-05-10]:
 -------------------------------
  - Added new style tag URL re-writing
