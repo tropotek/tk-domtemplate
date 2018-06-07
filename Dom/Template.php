@@ -962,18 +962,6 @@ class Template
     }
 
     /**
-     * merge existing header array with this template header array
-     *
-     * @param array $arr
-     * @return Template
-     */
-    public function mergeHeaderList($arr)
-    {
-        $this->setHeaderList(array_merge($this->headers, $arr));
-        return $this;
-    }
-
-    /**
      * Appends an element to the widgets of the HTML head element.
      *
      * In the form of:
@@ -1129,6 +1117,7 @@ class Template
         return $this->body;
     }
 
+
     /**
      * Return the current list of header nodes
      *
@@ -1148,18 +1137,6 @@ class Template
     public function setBodyTemplateList($arr)
     {
         $this->bodyTemplates = $arr;
-        return $this;
-    }
-
-    /**
-     * merge existing header array with this template header array
-     *
-     * @param array|Template[] $arr
-     * @return Template
-     */
-    public function mergeBodyTemplateList($arr)
-    {
-        $this->setBodyTemplateList(array_merge($this->bodyTemplates, $arr));
         return $this;
     }
 
@@ -1188,6 +1165,34 @@ class Template
     {
         $this->mergeHeaderList($template->getHeaderList());
         $this->mergeBodyTemplateList($template->getBodyTemplateList());
+        return $this;
+    }
+
+    /**
+     * merge existing header array with this template header array
+     *
+     * @param array|Template[] $arr
+     * @return Template
+     */
+    public function mergeBodyTemplateList($arr)
+    {
+        //if (count($this->bodyTemplates)) {
+            $this->setBodyTemplateList(array_merge($this->bodyTemplates, $arr));
+        //}
+        return $this;
+    }
+
+    /**
+     * merge existing header array with this template header array
+     *
+     * @param array|Template[] $arr
+     * @return Template
+     */
+    public function mergeHeaderList($arr)
+    {
+        //if (count($this->headers)) {
+            $this->setHeaderList(array_merge($this->headers, $arr));
+        //}
         return $this;
     }
 
@@ -1251,7 +1256,6 @@ class Template
     }
 
     /**
-     *
      * @param string $var
      * @param string $text
      * @return Template
@@ -1261,11 +1265,6 @@ class Template
     {
         return $this->insertText($var, $text);
     }
-
-
-
-
-
 
     /**
      * Return the HTML/XML contents of a var node.

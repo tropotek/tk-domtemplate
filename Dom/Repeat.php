@@ -74,8 +74,9 @@ class Repeat extends Template
         if (!$this->isWritable()) {
             return null;
         }
-
+        // $this->mergeTemplate($template);
         $this->repeatParent->setHeaderList(array_merge($this->repeatParent->getHeaderList(), $this->getHeaderList()));
+        $this->repeatParent->setBodyTemplateList(array_merge($this->repeatParent->getBodyTemplateList(), $this->getBodyTemplateList()));
 
         $appendNode = $this->repeatNode;
         if ($var) {
@@ -97,6 +98,7 @@ class Repeat extends Template
         }
 
         $appendNode->appendChild($insertNode);
+
         return $insertNode;
     }
 
