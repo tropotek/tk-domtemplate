@@ -744,7 +744,7 @@ class Template
     /**
      * Return a form object from the document.
      *
-     * @param string $id
+     * @param string|int $id
      * @return Form|null
      */
     public function getForm($id = '')
