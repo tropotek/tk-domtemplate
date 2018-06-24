@@ -81,15 +81,16 @@ class Less extends Iface
      * @param $siteUrl
      * @param string $cachePath
      * @param array $lessConstants Any parameters you want accessable via the less file via @{paramName}
-     * @throws \Tk\Exception
      */
     public function __construct($sitePath, $siteUrl, $cachePath = '', $lessConstants = array())
     {
         $this->sitePath = $sitePath;
         $this->siteUrl = $siteUrl;
         $this->cachePath = $cachePath;
-        if (!is_writable($cachePath))
-            throw new \Tk\Exception('Cannot write to cache path: ' . $cachePath);
+        if (!is_writable($cachePath)) {
+            \Tk\Log::warning('Cannot write to cache path: ' . $cachePath);
+            //throw new \Tk\Exception('Cannot write to cache path: ' . $cachePath);
+        }
         $this->lessConstants = $lessConstants;
     }
 
@@ -125,12 +126,12 @@ class Less extends Iface
      * pre init the Filter
      *
      * @param \DOMDocument $doc
-     * @throws Exception
      */
     public function init($doc)
     {
         if (!class_exists('Less_Parser')) {
-            throw new Exception('Please install lessphp. (http://lessphp.gpeasy.com/) [Composer: "oyejorge/less.php": "~1.5"]');
+            \Tk\Log::warning('Please install lessphp. (http://lessphp.gpeasy.com/) [Composer: "oyejorge/less.php": "~1.5"]');
+            //throw new Exception('Please install lessphp. (http://lessphp.gpeasy.com/) [Composer: "oyejorge/less.php": "~1.5"]');
         }
 
         $src = '';
@@ -150,16 +151,14 @@ class Less extends Iface
     public function doImport($import)
     {
         // Allow including of /vendor/... less files using: @import '/vendor/package/lib/less/lessfile.less'
-        if (preg_match('/^\/vendor\//',$import->getPath())) {
-            $path = $import->getPath();
-            if (!preg_match('/\.less$/',$path)) {
-                $path = $path.'.less';
-            }
-            return array($this->sitePath.$path, $this->siteUrl.$path);
+        if (!preg_match('/^\/vendor\//',$import->getPath())) return array();
+
+        $path = $import->getPath();
+        if (!preg_match('/\.less$/',$path)) {
+            $path = $path.'.less';
         }
-        //
-        
-        
+
+        return array($this->sitePath.$path, $this->siteUrl.$path);
     }
 
     /**
@@ -176,8 +175,10 @@ class Less extends Iface
             $options = array('cache_dir' => $this->cachePath, 'compress' => $this->compress, 'import_dirs' => array($this->siteUrl),
                 'import_callback' => array($this, 'doImport'));
             foreach (array_keys($this->source) as $path) {
-                if (preg_match('/\.less$/', $path) && !is_file($path)) 
-                    throw new \Tk\Exception('Invalid LESS file: ' . $path);
+                if (preg_match('/\.less$/', $path) && !is_file($path)) {
+                    \Tk\Log::warning('Invalid LESS file: ' . $path);
+                    //throw new \Tk\Exception('Invalid LESS file: ' . $path);
+                }
             }
 
             // TODO: Cache bug for inline styles, the compiled_file hash does not include them, this can cause inline styles to remain
@@ -190,7 +191,7 @@ class Less extends Iface
         } else {
             // todo: Make the caching optional
             //$options = array('compress' => $this->compress);
-            throw new \Exception('LESS Parser: Non cached parser not implemented, please supply a cachePath value');
+            throw new \Exception('LESS Parser: Non cached parser not implemented, please supply a valid `cachePath` value');
         }
 
         if ($css) {
