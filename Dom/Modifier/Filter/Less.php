@@ -170,27 +170,20 @@ class Less extends Iface
      */
     public function postTraverse($doc)
     {
-        //$css_file_name = \Less_Cache::Get($this->source, $options, false);
+        $options = array('cache_dir' => $this->cachePath, 'compress' => $this->compress, 'import_dirs' => array($this->siteUrl),
+            'import_callback' => array($this, 'doImport'));
         if ($this->cachePath) {
-            $options = array('cache_dir' => $this->cachePath, 'compress' => $this->compress, 'import_dirs' => array($this->siteUrl),
-                'import_callback' => array($this, 'doImport'));
             foreach (array_keys($this->source) as $path) {
                 if (preg_match('/\.less$/', $path) && !is_file($path)) {
                     \Tk\Log::warning('Invalid LESS file: ' . $path);
-                    //throw new \Tk\Exception('Invalid LESS file: ' . $path);
                 }
             }
-
             // TODO: Cache bug for inline styles, the compiled_file hash does not include them, this can cause inline styles to remain
             // TODO: Regen() the css files seems to fix this, this may only be a real issue in Debug mode.
-            //$css_file_name = \Less_Cache::Regen($this->source, $options);
-
-            $modify_vars = array(); // ?????
-            $css_file_name = \Less_Cache::Get($this->source, $options, $modify_vars);
+            $css_file_name = \Less_Cache::Get($this->source, $options);
             $css = trim(file_get_contents($this->cachePath . '/' . $css_file_name));
         } else {
-            // todo: Make the caching optional
-            //$options = array('compress' => $this->compress);
+            \Less_Cache::Regen($this->source, $options);
             throw new \Exception('LESS Parser: Non cached parser not implemented, please supply a valid `cachePath` value');
         }
 
