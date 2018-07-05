@@ -39,11 +39,19 @@ class Loader
      */
     protected $params = array();
 
+    /**
+     * @var null|\Tk\Event\Dispatcher
+     */
+    protected $dispatcher = null;
+
 
     /**
-     * 
+     * @param null|\Tk\Event\Dispatcher $dispatcher
      */
-    private function __constructor() { }
+    protected function __construct($dispatcher = null)
+    {
+        $this->dispatcher = $dispatcher;
+    }
 
 
     /**
@@ -56,7 +64,11 @@ class Loader
     public static function getInstance($class = '', $params = null)
     {
         if (static::$instance == null) {
-            static::$instance = new static();
+            $dispatcher = null;
+            if (class_exists('App\Config')) {
+                $dispatcher = \App\Config::getInstance()->getEventDispatcher();
+            }
+            static::$instance = new static($dispatcher);
         }
         if (!$class) {
             $class = self::getTraceClass(debug_backtrace());
@@ -128,6 +140,7 @@ class Loader
         foreach($this->adapterList as $adapter) {
             $tpl = $adapter->load($xhtml, $this->callingClass);
             if ($tpl instanceof Template) {
+                $tpl = $this->triggerLoadEvent($tpl);
                 return $tpl;
             }
         }
@@ -150,10 +163,25 @@ class Loader
         foreach($this->adapterList as $adapter) {
             $tpl = $adapter->loadFile($path, $this->callingClass);
             if ($tpl instanceof Template) {
+                $tpl = $this->triggerLoadEvent($tpl);
                 return $tpl;
             }
         }
         return null;
+    }
+
+    /**
+     * @param Template $template
+     * @return Template
+     */
+    protected function triggerLoadEvent($template)
+    {
+        if ($this->dispatcher) {
+            $e = new \Dom\Event\DomEvent($template);
+            $e->set('callingClass', $this->getCallingClass());
+            $this->dispatcher->dispatch(\Dom\DomEvents::DOM_TEMPLATE_LOAD, $e);
+        }
+        return $template;
     }
 
     /**

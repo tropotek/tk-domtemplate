@@ -864,6 +864,19 @@ class Template
         return $this;
     }
 
+    /**
+     * @param string $var
+     * @return bool
+     */
+    public function hasVar($var)
+    {
+        $nodes = $this->findVar($var);
+        if (is_array($nodes) && count($nodes)) {
+            return true;
+        }
+        return false;
+    }
+
 
     /**
      * Get a DOMElement from the document based on its unique ID
