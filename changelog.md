@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 2.2.16 [2018-07-09]:
+-------------------------------
+Added Load events to DomLoader object
+
+
 Ver 2.2.14 [2018-06-25]:
 -------------------------------
 Minor Code Updates
