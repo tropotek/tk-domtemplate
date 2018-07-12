@@ -196,6 +196,7 @@ class Less extends Iface
             }
             $ct = $doc->createCDATASection("\n" . $css . "\n");
             $newNode->appendChild($ct);
+
             if ($this->insNode) {
                 $this->insNode->parentNode->insertBefore($newNode, $this->insNode);
             } else {
