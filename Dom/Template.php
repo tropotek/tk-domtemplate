@@ -1832,6 +1832,8 @@ class Template
      */
     public function getDocument($parse = true)
     {
+        if (!$parse) return $this->document;
+
         if (!$this->isParsed() && !$this->parsing) {
             $this->parsing = true;
 
