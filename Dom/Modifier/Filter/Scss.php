@@ -14,7 +14,7 @@ use Dom\Modifier\Exception;
  *   }
  * }
  *
- * @todo: need to implement this for the TK3 libs
+ * @see http://leafo.github.io/scssphp/docs/
  */
 class Scss extends Iface
 {
@@ -49,6 +49,7 @@ class Scss extends Iface
      */
     private $insNode = null;
 
+
     /**
      * @var string
      */
@@ -63,11 +64,6 @@ class Scss extends Iface
      * @var string
      */
     protected $cachePath = '';
-
-    /**
-     * @var boolean
-     */
-    protected $useCache = true;
 
     /**
      * @var array
@@ -89,9 +85,9 @@ class Scss extends Iface
         $this->cachePath = $cachePath;
         if (!is_writable($cachePath)) {
             \Tk\Log::warning('Cannot write to cache path: ' . $cachePath);
-            //throw new \Tk\Exception('Cannot write to cache path: ' . $cachePath);
         }
         $this->constants = $constants;
+        $this->cache = new \Tk\Cache\Cache(new \Tk\Cache\Adapter\Filesystem($cachePath));
     }
 
     /**
@@ -132,32 +128,6 @@ class Scss extends Iface
         if (!class_exists('Leafo\ScssPhp\Compiler')) {
             \Tk\Log::warning('Please install scssphp. (http://leafo.github.io/scssphp/) [Composer: "leafo/scssphp": "~0.7.7"]');
         }
-
-        $src = '';
-        foreach ($this->constants as $k => $v) {
-            $src .= sprintf('@%s : %s;', $k, $this->enquote($v)) . "\n";
-        }
-        if ($src)
-            $this->source[] = $src;
-    }
-
-    /**
-     * get path & uri
-     * 
-     * @param \Less_Tree_Import $import
-     * @return array()  EG: array('/file/path.scss', '/~file/uri.scss')
-     */
-    public function doImport($import)
-    {
-        // Allow including of /vendor/... less files using: @import '/vendor/package/lib/scss/scssfile.scss'
-        if (!preg_match('/^\/vendor\//',$import->getPath())) return array();
-
-        $path = $import->getPath();
-        if (!preg_match('/\.scss/',$path)) {
-            $path = $path.'.scss';
-        }
-
-        return array($this->sitePath.$path, $this->siteUrl.$path);
     }
 
     /**
@@ -169,28 +139,34 @@ class Scss extends Iface
      */
     public function postTraverse($doc)
     {
-        $options = array('cache_dir' => $this->cachePath, 'compress' => $this->compress, 'import_dirs' => array($this->siteUrl),
-            'import_callback' => array($this, 'doImport'));
+        $scss = new \Leafo\ScssPhp\Compiler();
+        $scss->setVariables($this->constants);
+        $scss->setFormatter(new \Leafo\ScssPhp\Formatter\Expanded());
+        if ($this->isCompress()) {
+            $scss->setFormatter(new \Leafo\ScssPhp\Formatter\Crunched());
+        }
 
-        if ($this->cachePath) {
-            foreach (array_keys($this->source) as $path) {
-                if (preg_match('/\.scss/', $path) && !is_file($path)) {
-                    \Tk\Log::warning('Invalid file: ' . $path);
+        $css = '';
+        foreach ($this->source as $path => $v) {
+            if (preg_match('/\.scss/', $path) && is_file($path)) {
+                $cCss = $this->cache->fetch($path);
+                if (!$cCss) {
+                    $scss->setImportPaths(array($this->siteUrl, dirname($path)));
+                    $src = file_get_contents($path);
+                    $cCss = $scss->compile($src);
+                    // Storing the data in the cache for 10 minutes
+                    $this->cache->store($path, $cCss, $this->hours);
                 }
+                $css .= $cCss;
+            } else {
+                \Tk\Log::warning('Invalid file: ' . $path);
             }
-            // TODO: Cache bug for inline styles, the compiled_file hash does not include them, this can cause inline styles to remain
-            // TODO: Regen() the css files seems to fix this, this may only be a real issue in Debug mode.
-            $css_file_name = \Less_Cache::Get($this->source, $options);
-            $css = trim(file_get_contents($this->cachePath . '/' . $css_file_name));
-        } else {
-            \Less_Cache::Regen($this->source, $options);
-            throw new \Exception('Parser: Non cached parser not implemented, please supply a valid `cachePath` value');
         }
 
         if ($css) {
             $newNode = $doc->createElement('style');
             $newNode->setAttribute('type', 'text/css');
-            //$newNode->setAttribute('data-author', 'PHP_LESS_Compiler');
+            //$newNode->setAttribute('data-author', 'scssphp_compiler');
             if (class_exists('\Tk\Config') && \Tk\Config::getInstance()->isDebug()) {
                 $newNode->setAttribute('data-paths', implode(',', $this->sourcePaths));
             }
@@ -203,6 +179,7 @@ class Scss extends Iface
                 $this->domModifier->getHead()->appendChild($newNode);
             }
         }
+
     }
 
     /**
@@ -227,9 +204,8 @@ class Scss extends Iface
         if ($node->nodeName == 'link' && $node->hasAttribute('href') && preg_match('/\.scss/', $node->getAttribute('href'))) {
             $url = \Tk\Uri::create($node->getAttribute('href'));
             $path = $this->sitePath . $url->getRelativePath();
-
             $this->source[$path] = '';
-            $this->sourcePaths[] = $path;   // For adding to data-paths attruibute
+            $this->sourcePaths[] = $path;   // For adding to data-paths attributes
             $this->domModifier->removeNode($node);
             $this->insNode = $node;
         } else if ($node->nodeName == 'style' && $node->getAttribute('type') == 'text/scss' ) {

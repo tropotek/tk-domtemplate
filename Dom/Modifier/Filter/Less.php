@@ -18,16 +18,6 @@ use Dom\Modifier\Exception;
  */
 class Less extends Iface
 {
-    /**
-     * @var \Tk\Cache\Cache
-     */
-    protected $cache = null;
-
-    /**
-     * The number of hours to refresh the cache.
-     * @var int
-     */
-    protected $hours = 6;
 
     /**
      * @var bool
@@ -89,7 +79,6 @@ class Less extends Iface
         $this->cachePath = $cachePath;
         if (!is_writable($cachePath)) {
             \Tk\Log::warning('Cannot write to cache path: ' . $cachePath);
-            //throw new \Tk\Exception('Cannot write to cache path: ' . $cachePath);
         }
         $this->lessConstants = $lessConstants;
     }
@@ -131,7 +120,6 @@ class Less extends Iface
     {
         if (!class_exists('Less_Parser')) {
             \Tk\Log::warning('Please install lessphp. (http://lessphp.gpeasy.com/) [Composer: "oyejorge/less.php": "~1.5"]');
-            //throw new Exception('Please install lessphp. (http://lessphp.gpeasy.com/) [Composer: "oyejorge/less.php": "~1.5"]');
         }
 
         $src = '';
@@ -143,6 +131,7 @@ class Less extends Iface
     }
 
     /**
+     * A callback method for the LESS compiler
      * get path & uri
      * 
      * @param \Less_Tree_Import $import
@@ -152,12 +141,10 @@ class Less extends Iface
     {
         // Allow including of /vendor/... less files using: @import '/vendor/package/lib/less/lessfile.less'
         if (!preg_match('/^\/vendor\//',$import->getPath())) return array();
-
         $path = $import->getPath();
         if (!preg_match('/\.less$/',$path)) {
             $path = $path.'.less';
         }
-
         return array($this->sitePath.$path, $this->siteUrl.$path);
     }
 
@@ -190,7 +177,7 @@ class Less extends Iface
         if ($css) {
             $newNode = $doc->createElement('style');
             $newNode->setAttribute('type', 'text/css');
-            //$newNode->setAttribute('data-author', 'PHP_LESS_Compiler');
+            //$newNode->setAttribute('data-author', 'lessphp_compiler');
             if (class_exists('\Tk\Config') && \Tk\Config::getInstance()->isDebug()) {
                 $newNode->setAttribute('data-paths', implode(',', $this->sourcePaths));
             }
