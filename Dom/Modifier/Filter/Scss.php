@@ -19,15 +19,15 @@ use Dom\Modifier\Exception;
 class Scss extends Iface
 {
     /**
+     * The number of seconds to refresh the cache.
+     * @var int
+     */
+    static $CACHE_TIMEOUT = 60 * 60 * 6;
+
+    /**
      * @var \Tk\Cache\Cache
      */
     protected $cache = null;
-
-    /**
-     * The number of hours to refresh the cache.
-     * @var int
-     */
-    protected $hours = 6;
 
     /**
      * @var bool
@@ -61,11 +61,6 @@ class Scss extends Iface
     protected $siteUrl = '';
 
     /**
-     * @var string
-     */
-    protected $cachePath = '';
-
-    /**
      * @var array
      */
     protected $constants = array();
@@ -82,22 +77,14 @@ class Scss extends Iface
     {
         $this->sitePath = $sitePath;
         $this->siteUrl = $siteUrl;
-        $this->cachePath = $cachePath;
-        if (!is_writable($cachePath)) {
-            \Tk\Log::warning('Cannot write to cache path: ' . $cachePath);
-        }
         $this->constants = $constants;
-        $this->cache = new \Tk\Cache\Cache(new \Tk\Cache\Adapter\Filesystem($cachePath));
-    }
-
-    /**
-     * @param $b
-     * @return $this
-     */
-    public function enableCache($b)
-    {
-        $this->useCache = $b;
-        return $this;
+        if ($cachePath) {
+            if (!is_writable($cachePath)) {
+                \Tk\Log::warning('Cannot write to cache path: ' . $cachePath);
+            } else {
+                $this->cache = new \Tk\Cache\Cache(new \Tk\Cache\Adapter\Filesystem($cachePath));
+            }
+        }
     }
 
     /**
@@ -149,13 +136,15 @@ class Scss extends Iface
         $css = '';
         foreach ($this->source as $path => $v) {
             if (preg_match('/\.scss/', $path) && is_file($path)) {
-                $cCss = $this->cache->fetch($path);
+                $cCss = '';
+                if ($this->cache)
+                    $cCss = $this->cache->fetch($path);
                 if (!$cCss) {
                     $scss->setImportPaths(array($this->siteUrl, dirname($path)));
                     $src = file_get_contents($path);
                     $cCss = $scss->compile($src);
-                    // Storing the data in the cache for 10 minutes
-                    $this->cache->store($path, $cCss, $this->hours);
+                    if ($this->cache)
+                        $this->cache->store($path, $cCss, self::$CACHE_TIMEOUT);
                 }
                 $css .= $cCss;
             } else {

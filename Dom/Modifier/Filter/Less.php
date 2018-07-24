@@ -84,16 +84,6 @@ class Less extends Iface
     }
 
     /**
-     * @param $b
-     * @return $this
-     */
-    public function enableCache($b)
-    {
-        $this->useCache = $b;
-        return $this;
-    }
-
-    /**
      * @return boolean
      */
     public function isCompress()
@@ -214,7 +204,6 @@ class Less extends Iface
         if ($node->nodeName == 'link' && $node->hasAttribute('href') && preg_match('/\.less$/', $node->getAttribute('href'))) {
             $url = \Tk\Uri::create($node->getAttribute('href'));
             $path = $this->sitePath . $url->getRelativePath();
-
             $this->source[$path] = '';
             $this->sourcePaths[] = $path;   // For adding to data-paths attruibute
             $this->domModifier->removeNode($node);
