@@ -22,7 +22,7 @@ class ClassPath extends Iface
     /**
      * @var string
      */
-    protected $ext = '';
+    protected $ext = 'xtpl';
 
     /**
      * @var array
@@ -30,14 +30,28 @@ class ClassPath extends Iface
     protected $path = '';
 
     /**
+     * If set to true then the search path will be a single filename
+     * EG:
+     *    \App\Controller\Index   =>  {path}/App_Controller_index.xtpl
      *
-     * @param string $path   The path to the template folder
-     * @param string $ext   The template file extension, default 'xml'
+     * Normal path would be
+     *    \App\Controller\Index   =>  {path}/App/Controller/index.xtpl
+     *
+     * @var string
      */
-    public function __construct($path, $ext = 'xml')
+    protected $useUnderscores = 'true';
+
+    /**
+     *
+     * @param string $path The path to the template folder
+     * @param string $ext The template file extension, default 'xtpl'
+     * @param bools $useUnderscores
+     */
+    public function __construct($path, $ext = 'xtpl', $useUnderscores = true)
     {
         $this->path = $path;
         $this->ext = trim($ext, '.');
+        $this->useUnderscores = $useUnderscores;
     }
 
     /**
@@ -63,8 +77,12 @@ class ClassPath extends Iface
      */
     public function loadFile($path, $class)
     {
-        $class = trim(str_replace('\\', '_', $class), '_');
-        $tplPath = $this->path . '/' . $class . '.' . $this->ext;
+        $class = trim($class, '//');
+        $classPath = str_replace('\\', '/', $class);
+        if ($this->useUnderscores)
+            $classPath = str_replace('\\', '_', $class);
+
+        $tplPath = $this->path . '/' . trim($classPath, '/') . '.' . $this->ext;
         if (is_file($tplPath)) {
             return Template::loadFile($tplPath);
         }
