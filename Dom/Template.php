@@ -1209,6 +1209,23 @@ class Template
         return $this;
     }
 
+    /**
+     * Remove all contents from a var
+     * @param string $var
+     * @return Template
+     * @since 2.2.24
+     */
+    public function clear($var)
+    {
+        if (!$this->isWritable('var', $var))
+            return $this;
+        $nodes = $this->findVar($var);
+        /* @var \DOMElement $node */
+        foreach ($nodes as $node) {
+            $this->removeChildren($node);
+        }
+        return $this;
+    }
 
     /**
      * Replace the text of one or more var nodes
@@ -1323,6 +1340,7 @@ class Template
     }
 
     /**
+     * Set the inner HTML of a node
      * @param string $var
      * @param string $html
      * @return Template
@@ -1331,7 +1349,8 @@ class Template
      */
     public function setHtml($var, $html)
     {
-        return $this->insertHtml($var, $html);
+        $this->clear($var);
+        return $this->appendHtml($var, $html);
     }
 
 
@@ -1348,6 +1367,7 @@ class Template
      * @warn bug exists where after insertion the template loses
      *   reference to the node in repeat regions. The fix (for now)
      *   is to just do all operations on that var node before this call.
+     * @deprecated Will be removed Use appendHtml()
      */
     public function insertHtml($var, $html)
     {
@@ -1369,6 +1389,7 @@ class Template
      * @param string $encoding
      * @return \DOMElement
      * @throws Exception
+     * @deprecated Will be removed Use appendHtmlDom()
      */
     public static function insertHtmlDom($element, $html, $encoding = 'UTF-8')
     {
@@ -1400,6 +1421,7 @@ class Template
      * @param string $var
      * @param \DOMDocument $doc
      * @return Template
+     * @deprecated Will be removed Use appendDoc()
      */
     public function insertDoc($var, \DOMDocument $doc)
     {
@@ -1427,6 +1449,7 @@ class Template
      * @param Template $template
      * @param bool $parse Set to false to disable template parsing
      * @return Template
+     * @deprecated Will be removed Use appendTemplate()
      */
     public function insertTemplate($var, $template, $parse = true)
     {
