@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 2.2.26 [2018-07-30]:
+-------------------------------
+  - Added new cube template and updated action panel
+
+
 Ver 2.2.24 [2018-07-25]:
 -------------------------------
   - Added a new scss Dom modifier object to the template lib
