@@ -39,6 +39,12 @@ class Template
     public static $enableTracer = false;
 
     /**
+     * @var null|\Psr\Log\LoggerInterface
+     * @since 2.2.26
+     */
+    public static $logger = null;
+
+    /**
      * Customised array of node names or attribute names to collect the nodes for.
      * For example:
      *   Node Name = 'module': All DOMElements with the name <module></module> will be captured
@@ -73,7 +79,6 @@ class Template
      */
     private $serialDoc = '';
 
-
     /**
      * An array of var DOMElement objects
      * @var \DOMElement[][]
@@ -90,7 +95,7 @@ class Template
      * deprecated: An array of choice DOMElement objects
      * This array now stores all vars that are to be removed or ols choices that are set
      * @var array|\DOMElement[][]
-     * @remove v2.2.0
+     * @remove 2.2.0
      */
     protected $choice = array();
 
@@ -169,12 +174,6 @@ class Template
     protected $bodyTemplates = array();
 
     /**
-     * Set to true if this template has been parsed
-     * @var bool
-     */
-    protected $parsed = false;
-
-    /**
      * Set to true if this template uses HTML5
      * @var bool
      */
@@ -191,6 +190,13 @@ class Template
      * @var bool
      */
     protected $newlineReplace = true;
+
+
+    /**
+     * An array of errors thrown
+     * @var string[]|array
+     */
+    protected $errors = array();
 
 
     /**
@@ -211,6 +217,12 @@ class Template
      * @since 2.2.0
      */
     private $parsing = false;
+
+    /**
+     * Set to true if this template has been parsed
+     * @var bool
+     */
+    protected $parsed = false;
     
     
     
@@ -254,25 +266,6 @@ class Template
 
 
     /**
-     * Make a template from a file
-     *
-     * @param string $filename
-     * @param string $encoding
-     * @throws Exception
-     * @return Template
-     */
-    public static function loadFile($filename, $encoding = 'UTF-8')
-    {
-        if (!is_file($filename)) {
-            throw new Exception('Cannot locate XML/XHTML file: ' . $filename);
-        }
-        $html = file_get_contents($filename);
-        $obj = self::load($html, $encoding);
-        $obj->document->documentURI = $filename;
-        return $obj;
-    }
-
-    /**
      * Make a template from a string
      *
      * @param string $html
@@ -313,6 +306,25 @@ class Template
     }
 
     /**
+     * Make a template from a file
+     *
+     * @param string $filename
+     * @param string $encoding
+     * @return Template
+     * @throws Exception
+     */
+    public static function loadFile($filename, $encoding = 'UTF-8')
+    {
+        if (!is_file($filename)) {
+            throw new Exception('Cannot locate XML/XHTML file: ' . $filename);
+        }
+        $html = file_get_contents($filename);
+        $obj = self::load($html, $encoding);
+        $obj->document->documentURI = $filename;
+        return $obj;
+    }
+
+    /**
      * This will create a new template object containing the
      * HTML/XML content from the first var it finds with the same name
      * Duplicates are ignored.
@@ -322,8 +334,8 @@ class Template
      *
      *
      * @param string $var
-     * @throws Exception
      * @return \Dom\Template
+     * @throws Exception
      */
     public function createTemplateFromVar($var)
     {
@@ -739,8 +751,6 @@ class Template
     }
 
 
-
-
     /**
      * Return a form object from the document.
      *
@@ -922,7 +932,7 @@ class Template
     {
         if ($this->isWritable()) {
             if ($this->title == null) {
-                //throw new Exception('This document has no title node.');
+                $this->logNotice(__CLASS__.'::setTitleText() This document has no title node.');
                 return $this;
             }
             $this->removeChildren($this->title);
@@ -997,24 +1007,16 @@ class Template
         if (!$this->isWritable())
             return $this;
         $preKey = $elementName . $value;
-        // TODO: This should be configurable in the Template object (or some sort of header filter object)
-        // TODO:  Could be something more like array('mete' => array('content'), 'link' => array('type'));  ???
         $ignore = array('content', 'type');
         foreach ($attributes as $k => $v) {
             if (in_array($k, $ignore)) continue;
-            //if ($elementName == 'meta' && $k != 'name') continue;   // Only use the name attribute in the hash for meta tags
             $preKey .= $k . $v;
         }
         $hash = md5($preKey);
-//        if (isset($this->headers[$hash])) {
-//            // TODO: exception or log????
-//            vd($this->headers[$hash]);
-//        }
         $this->headers[$hash]['elementName'] = $elementName;
         $this->headers[$hash]['attributes'] = $attributes;
         $this->headers[$hash]['value'] = $value;
         $this->headers[$hash]['node'] = $node;
-
         return $this;
     }
 
@@ -1105,10 +1107,10 @@ class Template
     }
 
     /**
-     * Add the calling trace
+     * Add the calling trace to the node
      *
-     * @param $trace
-     * @param $attrs
+     * @param array $trace
+     * @param array $attrs
      * @return mixed
      */
     private function addTracer($trace, $attrs)
@@ -1164,7 +1166,6 @@ class Template
     {
         if (!$this->isWritable())
             return $this;
-        //vd($template->getRootElement()->getAttribute('class'));
         $this->bodyTemplates[] = $template;
         return $this;
     }
@@ -1344,13 +1345,16 @@ class Template
      * @param string $var
      * @param string $html
      * @return Template
-     * @throws Exception
-     * @since v2.0.15
+     * @since 2.0.15
      */
     public function setHtml($var, $html)
     {
         $this->clear($var);
-        return $this->appendHtml($var, $html);
+        try {
+            return $this->appendHtml($var, $html);
+        } catch (Exception $e) {
+            $this->logError($e->__toString());
+        }
     }
 
 
@@ -1363,7 +1367,6 @@ class Template
      * @param string $var
      * @param string $html
      * @return Template
-     * @throws Exception
      * @warn bug exists where after insertion the template loses
      *   reference to the node in repeat regions. The fix (for now)
      *   is to just do all operations on that var node before this call.
@@ -1375,7 +1378,11 @@ class Template
             return $this;
         $nodes = $this->findVar($var);
         foreach ($nodes as $i => $node) {
-            self::insertHtmlDom($node, $html, $this->encoding);
+            try {
+                self::insertHtmlDom($node, $html, $this->encoding);
+            } catch (\Exception $e) {
+                $this->logError($e->__toString());
+            }
         }
         return $this;
     }
@@ -1388,8 +1395,8 @@ class Template
      * @param string $html
      * @param string $encoding
      * @return \DOMElement
-     * @throws Exception
      * @deprecated Will be removed Use appendHtmlDom()
+     * @throws Exception
      */
     public static function insertHtmlDom($element, $html, $encoding = 'UTF-8')
     {
@@ -1469,7 +1476,6 @@ class Template
      * @param string $html
      * @param bool $preserveAttr Set to false to ignore copying of existing Attributes
      * @return Template
-     * @throws Exception
      */
     public function replaceHtml($var, $html, $preserveAttr = true)
     {
@@ -1477,7 +1483,11 @@ class Template
             return $this;
         $nodes = $this->findVar($var);
         foreach ($nodes as $i => $node) {
-            $newNode = self::replaceHtmlDom($node, $html, $this->encoding, $preserveAttr);
+            try {
+                $newNode = self::replaceHtmlDom($node, $html, $this->encoding, $preserveAttr);
+            } catch (Exception $e) {
+                $this->logError($e->__toString());
+            }
             if ($newNode) {
                 $this->var[$var][$i] = $newNode;
             }
@@ -1578,7 +1588,6 @@ class Template
      * @param string $var
      * @param string $html
      * @return Template
-     * @throws Exception
      */
     public function appendHtml($var, $html)
     {
@@ -1586,7 +1595,11 @@ class Template
             return $this;
         $nodes = $this->findVar($var);
         foreach ($nodes as $i => $node) {
-            self::appendHtmlDom($node, $html, $this->encoding);
+            try {
+                self::appendHtmlDom($node, $html, $this->encoding);
+            } catch (Exception $e) {
+                $this->logError($e->__toString());
+            }
         }
         return $this;
     }
@@ -1711,7 +1724,6 @@ class Template
      * @param string $var
      * @param string $html
      * @return Template
-     * @throws Exception
      */
     public function prependHtml($var, $html)
     {
@@ -1720,7 +1732,11 @@ class Template
         $nodes = $this->findVar($var);
         /* @var \DOMElement $node */
         foreach ($nodes as $i => $node) {
-            self::prependHtmlDom($node, $html);
+            try {
+                self::prependHtmlDom($node, $html);
+            } catch (Exception $e) {
+                $this->logError($e->__toString());
+            }
         }
         return $this;
     }
@@ -2129,6 +2145,34 @@ class Template
     public function removeCss($var, $class)
     {
         return $this->removeClass($var, $class);
+    }
+
+
+    /**
+     * @param string $msg
+     */
+    protected function logError($msg)
+    {
+        $this->errors[] = $msg;
+        $this->getLog()->error($msg);
+    }
+
+    /**
+     * @param string $msg
+     */
+    protected function logNotice($msg)
+    {
+        $this->getLog()->notice($msg);
+    }
+
+    /**
+     * @return \Psr\Log\LoggerInterface
+     */
+    protected function getLog()
+    {
+        if (self::$logger)
+            return self::$logger;
+        return new \Psr\Log\NullLogger();
     }
 
 }
