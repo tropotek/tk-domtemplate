@@ -138,11 +138,18 @@ class Loader
         }
         /* @var Loader\Adapter\Iface $adapter */
         foreach($this->adapterList as $adapter) {
+            if ($adapter instanceof Loader\Adapter\DefaultLoader) continue;
             $tpl = $adapter->load($xhtml, $this->callingClass);
             if ($tpl instanceof Template) {
                 $tpl = $this->triggerLoadEvent($tpl);
                 return $tpl;
             }
+        }
+        $adapter = new \Dom\Loader\Adapter\DefaultLoader();
+        $tpl = $adapter->load($xhtml, $this->callingClass);
+        if ($tpl instanceof Template) {
+            $tpl = $this->triggerLoadEvent($tpl);
+            return $tpl;
         }
         return null;
     }
@@ -161,11 +168,18 @@ class Loader
         }
         /* @var Loader\Adapter\Iface $adapter */
         foreach($this->adapterList as $adapter) {
+            if ($adapter instanceof Loader\Adapter\DefaultLoader) continue;
             $tpl = $adapter->loadFile($path, $this->callingClass);
             if ($tpl instanceof Template) {
                 $tpl = $this->triggerLoadEvent($tpl);
                 return $tpl;
             }
+        }
+        $adapter = new \Dom\Loader\Adapter\DefaultLoader();
+        $tpl = $adapter->loadFile($path, $this->callingClass);
+        if ($tpl instanceof Template) {
+            $tpl = $this->triggerLoadEvent($tpl);
+            return $tpl;
         }
         return null;
     }
@@ -197,6 +211,7 @@ class Loader
      */
     public function addAdapter(Loader\Adapter\Iface $adapter)
     {
+        if ($adapter instanceof Loader\Adapter\DefaultLoader) return $adapter;
         $adapter->setLoader($this);
         array_unshift($this->adapterList, $adapter);
         return $adapter;

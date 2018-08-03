@@ -1,6 +1,7 @@
 <?php
 namespace Dom\Loader\Adapter;
 
+use Dom\Exception;
 use \Dom\Template;
 use \Dom\Loader;
 
@@ -24,11 +25,12 @@ class DefaultLoader extends Iface
      * @param $xhtml
      * @param $class
      * @return Template
-     * @throws \Dom\Exception
      */
     public function load($xhtml, $class)
     {
-        return Template::load($xhtml);
+        try {
+            return Template::load($xhtml);
+        } catch (Exception $e) { }
     }
 
     /**
@@ -37,11 +39,12 @@ class DefaultLoader extends Iface
      * @param $path
      * @param $class
      * @return Template
-     * @throws \Dom\Exception
      */
     public function loadFile($path, $class)
     {
-        return Template::loadFile($path);
+        try {
+            return Template::loadFile($path);
+        } catch (Exception $e) { }
     }
 
 }

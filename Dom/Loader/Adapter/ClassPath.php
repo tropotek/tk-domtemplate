@@ -45,7 +45,7 @@ class ClassPath extends Iface
      *
      * @param string $path The path to the template folder
      * @param string $ext The template file extension, default 'xtpl'
-     * @param bools $useUnderscores
+     * @param bool $useUnderscores
      */
     public function __construct($path, $ext = 'xtpl', $useUnderscores = true)
     {
@@ -82,10 +82,13 @@ class ClassPath extends Iface
         if ($this->useUnderscores)
             $classPath = str_replace('\\', '_', $class);
 
+        $tpl = null;
         $tplPath = $this->path . '/' . trim($classPath, '/') . '.' . $this->ext;
         if (is_file($tplPath)) {
-            return Template::loadFile($tplPath);
+            $tpl = Template::loadFile($tplPath);
         }
+
+        return $tpl;
     }
 
 }
