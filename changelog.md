@@ -1,5 +1,9 @@
 #CHANGELOG#
 
+Ver 2.2.28 [2018-08-03]:
+-------------------------------
+
+
 Ver 2.2.26 [2018-07-30]:
 -------------------------------
   - Added new cube template and updated action panel
