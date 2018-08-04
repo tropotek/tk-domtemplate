@@ -129,6 +129,7 @@ class Loader
      *
      * @param $xhtml
      * @return null|Template
+     * @throws Exception
      */
     public function doLoad($xhtml)
     {
@@ -159,6 +160,7 @@ class Loader
      *
      * @param $path
      * @return Template
+     * @throws Exception
      */
     public function doLoadFile($path)
     {

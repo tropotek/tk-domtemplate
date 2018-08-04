@@ -25,12 +25,11 @@ class DefaultLoader extends Iface
      * @param $xhtml
      * @param $class
      * @return Template
+     * @throws Exception
      */
     public function load($xhtml, $class)
     {
-        try {
-            return Template::load($xhtml);
-        } catch (Exception $e) { }
+        return Template::load($xhtml);
     }
 
     /**
@@ -39,12 +38,11 @@ class DefaultLoader extends Iface
      * @param $path
      * @param $class
      * @return Template
+     * @throws Exception
      */
     public function loadFile($path, $class)
     {
-        try {
-            return Template::loadFile($path);
-        } catch (Exception $e) { }
+       return Template::loadFile($path);
     }
 
 }
