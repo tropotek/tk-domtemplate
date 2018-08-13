@@ -806,8 +806,7 @@ class Template
     {
         $nodes = $this->findVar($var);
         foreach ($nodes as $node) {
-            if ($node->hasAttribute(self::ATTR_HIDDEN))
-                $node->removeAttribute(self::ATTR_HIDDEN);
+            $node->removeAttribute(self::ATTR_HIDDEN);
         }
         return $this;
     }
@@ -824,8 +823,7 @@ class Template
     {
         $nodes = $this->findVar($var);
         foreach ($nodes as $node) {
-            if ($node->hasAttribute(self::ATTR_HIDDEN))
-                $node->setAttribute(self::ATTR_HIDDEN, self::ATTR_HIDDEN);
+            $node->setAttribute(self::ATTR_HIDDEN, 'true');
         }
         return $this;
     }
@@ -1723,12 +1721,13 @@ class Template
                 /** @var \DOMElement $node */
                 foreach ($nodes as $node) {
                     if (!$node || !isset($node->parentNode) || !$node->parentNode) continue;
-                    if ($node->hasAttribute(self::ATTR_HIDDEN) && $node->getAttribute(self::ATTR_HIDDEN) == 'true') {
+                    if ($node->hasAttribute(self::ATTR_HIDDEN)) {
                         $node->parentNode->removeChild($node);
                     }
                 }
             }
 
+            // Deprecated remove when we remove the setChoice() function
             // Remove choice node marked hidden
             foreach ($this->choice as $choice => $nodes) {
                 /** @var \DOMElement $node */
