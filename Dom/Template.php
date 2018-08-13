@@ -2075,7 +2075,7 @@ class Template
      * @deprecated use getVar()
      * @remove 2.6.0
      */
-    public function getVarList($var = null) { return $this->getVar($var); }
+    public function getVarList($var = null) { return $this->get($var); }
 
     /**
      * @param string $var
@@ -2083,7 +2083,7 @@ class Template
      * @deprecated use removeVar()
      * @remove 2.6.0
      */
-    public function removeVarElement($var) { return $this->removeVar($var); }
+    public function removeVarElement($var) { return $this->remove($var); }
 
     /**
      * Return the HTML/XML contents of a var node.
