@@ -2071,7 +2071,7 @@ class Template
     /**
      * @param null $var
      * @return mixed
-     * @deprecated use getVar()
+     * @deprecated use get()
      * @remove 2.6.0
      */
     public function getVarList($var = null) { return $this->get($var); }
@@ -2079,7 +2079,7 @@ class Template
     /**
      * @param string $var
      * @return Template
-     * @deprecated use removeVar()
+     * @deprecated use remove()
      * @remove 2.6.0
      */
     public function removeVarElement($var) { return $this->remove($var); }
