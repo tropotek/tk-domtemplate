@@ -808,6 +808,12 @@ class Template
         foreach ($nodes as $node) {
             $node->removeAttribute(self::ATTR_HIDDEN);
         }
+
+        if (empty($this->choice[$var])) return $this;
+        $nodes = $this->choice[$var];
+        foreach ($nodes as $node) {
+            $node->removeAttribute(self::ATTR_HIDDEN);
+        }
         return $this;
     }
 
@@ -823,7 +829,13 @@ class Template
     {
         $nodes = $this->findVar($var);
         foreach ($nodes as $node) {
-            $node->setAttribute(self::ATTR_HIDDEN, 'true');
+            $node->setAttribute(self::ATTR_HIDDEN, self::ATTR_HIDDEN);
+        }
+
+        if (empty($this->choice[$var])) return $this;
+        $nodes = $this->choice[$var];
+        foreach ($nodes as $node) {
+            $node->setAttribute(self::ATTR_HIDDEN, self::ATTR_HIDDEN);
         }
         return $this;
     }
@@ -1733,7 +1745,8 @@ class Template
                 /** @var \DOMElement $node */
                 foreach ($nodes as $node) {
                     if (!$node || !isset($node->parentNode) || !$node->parentNode) continue;
-                    if ($node->hasAttribute(self::ATTR_HIDDEN) && $node->getAttribute(self::ATTR_HIDDEN) == 'true') {
+                    //if ($node->hasAttribute(self::ATTR_HIDDEN) && $node->getAttribute(self::ATTR_HIDDEN) == 'true') {
+                    if ($node->hasAttribute(self::ATTR_HIDDEN)) {
                         $node->parentNode->removeChild($node);
                     }
                 }
@@ -2022,7 +2035,7 @@ class Template
      *
      * @param string $choice The name of the choice
      * @return Template
-     * @deprecated Use the new show($var) and hide($var)
+     * @deprecated Use the new show($var)
      * @remove 2.6.0
      */
     public function setChoice($choice)
@@ -2041,7 +2054,7 @@ class Template
      *
      * @param string $choice The name of the choice
      * @return Template
-     * @deprecated Use the new show($var) and hide($var)
+     * @deprecated Use the new hide($var)
      * @remove 2.6.0
      */
     public function unsetChoice($choice)
