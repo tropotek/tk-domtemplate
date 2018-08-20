@@ -79,9 +79,21 @@ class Scss extends Iface
         $this->siteUrl = $siteUrl;
         $this->constants = $constants;
         if ($cachePath) {
+            $cacheEnable = true;
             if (!is_writable($cachePath)) {
+                $cacheEnable = false;
                 \Tk\Log::warning('Cannot write to cache path: ' . $cachePath);
-            } else {
+            }
+            // Refresh the cache by using Ctrl+Shif+R
+            if (function_exists('apache_request_headers')) {
+                $headers = apache_request_headers();
+                if (isset($headers['Pragma']) && $headers['Pragma'] == 'no-cache')
+                    $cacheEnable = false;
+                if (isset($headers['Cache-Control']) && $headers['Cache-Control'] == 'no-cache')
+                    $cacheEnable = false;
+            }
+
+            if ($cacheEnable) {
                 $this->cache = new \Tk\Cache\Cache(new \Tk\Cache\Adapter\Filesystem($cachePath));
             }
         }
@@ -137,8 +149,9 @@ class Scss extends Iface
         foreach ($this->source as $path => $v) {
             if (preg_match('/\.scss/', $path) && is_file($path)) {
                 $cCss = '';
-                if ($this->cache)
+                if ($this->cache) {
                     $cCss = $this->cache->fetch($path);
+                }
                 if (!$cCss) {
                     \Tk\Log::notice('SCSS Compiling File: ' . $path);
                     $scss->setImportPaths(array($this->siteUrl, dirname($path)));

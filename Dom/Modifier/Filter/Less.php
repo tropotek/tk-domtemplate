@@ -57,7 +57,7 @@ class Less extends Iface
     /**
      * @var boolean
      */
-    protected $useCache = true;
+    protected $cacheEnabled = true;
 
     /**
      * @var array
@@ -76,9 +76,17 @@ class Less extends Iface
     {
         $this->sitePath = $sitePath;
         $this->siteUrl = $siteUrl;
-        $this->cachePath = $cachePath;
         if (!is_writable($cachePath)) {
-            \Tk\Log::warning('Cannot write to cache path: ' . $cachePath);
+            $cachePath = \Tk\Config::getInstance()->getCachePath() . '/less';
+        }
+        $this->cachePath = $cachePath;
+        // Refresh the cache by using Ctrl+Shif+R
+        if (function_exists('apache_request_headers')) {
+            $headers = apache_request_headers();
+            if (isset($headers['Pragma']) && $headers['Pragma'] == 'no-cache')
+                $this->cacheEnabled = false;
+            if (isset($headers['Cache-Control']) && $headers['Cache-Control'] == 'no-cache')
+                $this->cacheEnabled = false;
         }
         $this->lessConstants = $lessConstants;
     }
@@ -149,7 +157,7 @@ class Less extends Iface
     {
         $options = array('cache_dir' => $this->cachePath, 'compress' => $this->compress, 'import_dirs' => array($this->siteUrl),
             'import_callback' => array($this, 'doImport'));
-        if ($this->cachePath) {
+        if ($this->cacheEnabled) {
             foreach (array_keys($this->source) as $path) {
                 if (preg_match('/\.less$/', $path) && !is_file($path)) {
                     \Tk\Log::warning('Invalid LESS file: ' . $path);
@@ -160,8 +168,9 @@ class Less extends Iface
             $css_file_name = \Less_Cache::Get($this->source, $options);
             $css = trim(file_get_contents($this->cachePath . '/' . $css_file_name));
         } else {
-            \Less_Cache::Regen($this->source, $options);
-            throw new \Exception('LESS Parser: Non cached parser not implemented, please supply a valid `cachePath` value');
+            $css_file_name = \Less_Cache::Regen($this->source, $options);
+            $css = trim(file_get_contents($this->cachePath . '/' . $css_file_name));
+            //throw new \Exception('LESS Parser: Non cached parser not implemented, please supply a valid `cachePath` value');
         }
 
         if ($css) {
