@@ -65,6 +65,11 @@ class Scss extends Iface
      */
     protected $constants = array();
 
+    /**
+     * @var bool
+     */
+    protected $cacheEnabled = true;
+
 
     /**
      * __construct
@@ -73,29 +78,24 @@ class Scss extends Iface
      * @param string $cachePath
      * @param array $constants Any parameters you want accessible via the less file via @{paramName}
      */
-    public function __construct($sitePath, $siteUrl, $cachePath = '', $constants = array())
+    public function __construct($sitePath, $siteUrl, $cachePath, $constants = array())
     {
         $this->sitePath = $sitePath;
         $this->siteUrl = $siteUrl;
         $this->constants = $constants;
-        if ($cachePath) {
-            $cacheEnable = true;
-            if (!is_writable($cachePath)) {
-                $cacheEnable = false;
-                \Tk\Log::warning('Cannot write to cache path: ' . $cachePath);
-            }
-            // Refresh the cache by using Ctrl+Shif+R
-            if (function_exists('apache_request_headers')) {
-                $headers = apache_request_headers();
-                if (isset($headers['Pragma']) && $headers['Pragma'] == 'no-cache')
-                    $cacheEnable = false;
-                if (isset($headers['Cache-Control']) && $headers['Cache-Control'] == 'no-cache')
-                    $cacheEnable = false;
-            }
+        if (!is_writable($cachePath)) {
+            $this->cacheEnabled = false;
+            \Tk\Log::warning('Cannot write to cache path: ' . $cachePath);
+        }
+        $this->cache = new \Tk\Cache\Cache(new \Tk\Cache\Adapter\Filesystem($cachePath));
 
-            if ($cacheEnable) {
-                $this->cache = new \Tk\Cache\Cache(new \Tk\Cache\Adapter\Filesystem($cachePath));
-            }
+        // Refresh the cache by using Ctrl+Shif+R
+        if (function_exists('apache_request_headers')) {
+            $headers = apache_request_headers();
+            if (isset($headers['Pragma']) && $headers['Pragma'] == 'no-cache')
+                $this->cacheEnabled = false;
+            if (isset($headers['Cache-Control']) && $headers['Cache-Control'] == 'no-cache')
+                $this->cacheEnabled = false;
         }
     }
 
@@ -149,7 +149,7 @@ class Scss extends Iface
         foreach ($this->source as $path => $v) {
             if (preg_match('/\.scss/', $path) && is_file($path)) {
                 $cCss = '';
-                if ($this->cache) {
+                if ($this->cache && $this->cacheEnabled) {
                     $cCss = $this->cache->fetch($path);
                 }
                 if (!$cCss) {

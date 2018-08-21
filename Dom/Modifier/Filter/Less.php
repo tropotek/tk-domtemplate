@@ -72,12 +72,13 @@ class Less extends Iface
      * @param string $cachePath
      * @param array $lessConstants Any parameters you want accessable via the less file via @{paramName}
      */
-    public function __construct($sitePath, $siteUrl, $cachePath = '', $lessConstants = array())
+    public function __construct($sitePath, $siteUrl, $cachePath, $lessConstants = array())
     {
         $this->sitePath = $sitePath;
         $this->siteUrl = $siteUrl;
         if (!is_writable($cachePath)) {
-            $cachePath = \Tk\Config::getInstance()->getCachePath() . '/less';
+            $this->cacheEnabled = false;
+            \Tk\Log::warning('Cannot write to cache path: ' . $cachePath);
         }
         $this->cachePath = $cachePath;
         // Refresh the cache by using Ctrl+Shif+R
