@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 2.2.40 [2018-08-23]:
+-------------------------------
+  - Added PageLoading to tk2uni project
+  - Created new dynamic menu system
+
+
 Ver 2.2.38 [2018-08-20]:
 -------------------------------
 
