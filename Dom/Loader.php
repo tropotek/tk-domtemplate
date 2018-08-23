@@ -142,6 +142,7 @@ class Loader
             if ($adapter instanceof Loader\Adapter\DefaultLoader) continue;
             $tpl = $adapter->load($xhtml, $this->callingClass);
             if ($tpl instanceof Template) {
+                \Tk\Log::notice('Loading dynamic template: ' . $this->callingClass);
                 $tpl = $this->triggerLoadEvent($tpl);
                 return $tpl;
             }
@@ -173,6 +174,7 @@ class Loader
             if ($adapter instanceof Loader\Adapter\DefaultLoader) continue;
             $tpl = $adapter->loadFile($path, $this->callingClass);
             if ($tpl instanceof Template) {
+                \Tk\Log::notice('Loading dynamic template: ' . $this->callingClass);
                 $tpl = $this->triggerLoadEvent($tpl);
                 return $tpl;
             }
