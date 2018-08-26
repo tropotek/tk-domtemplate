@@ -133,16 +133,12 @@ class Loader
      */
     public function doLoad($xhtml)
     {
-        if (!$this->adapterList || !count($this->adapterList)) {
-            \Tk\Log::notice('No Template loaders defined!');
-            return null;
-        }
         /* @var Loader\Adapter\Iface $adapter */
         foreach($this->adapterList as $adapter) {
             if ($adapter instanceof Loader\Adapter\DefaultLoader) continue;
             $tpl = $adapter->load($xhtml, $this->callingClass);
             if ($tpl instanceof Template) {
-                \Tk\Log::notice('Loading dynamic template: ' . $this->callingClass);
+                //\Tk\Log::notice('Loading dynamic template: ' . $this->callingClass);
                 $tpl = $this->triggerLoadEvent($tpl);
                 return $tpl;
             }
@@ -165,16 +161,12 @@ class Loader
      */
     public function doLoadFile($path)
     {
-        if (!$this->adapterList || !count($this->adapterList)) {
-            \Tk\Log::notice('No Template loaders defined!');
-            return null;
-        }
         /* @var Loader\Adapter\Iface $adapter */
         foreach($this->adapterList as $adapter) {
             if ($adapter instanceof Loader\Adapter\DefaultLoader) continue;
             $tpl = $adapter->loadFile($path, $this->callingClass);
             if ($tpl instanceof Template) {
-                \Tk\Log::notice('Loading dynamic template: ' . $this->callingClass);
+                //\Tk\Log::notice('Loading dynamic template: ' . $this->callingClass);
                 $tpl = $this->triggerLoadEvent($tpl);
                 return $tpl;
             }
