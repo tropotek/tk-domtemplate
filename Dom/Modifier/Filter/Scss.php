@@ -141,6 +141,8 @@ class Scss extends Iface
         $scss = new \Leafo\ScssPhp\Compiler();
         $scss->setVariables($this->constants);
         $scss->setFormatter(new \Leafo\ScssPhp\Formatter\Expanded());
+        //$scss->addImportPath($this->siteUrl);
+
         if ($this->isCompress()) {
             $scss->setFormatter(new \Leafo\ScssPhp\Formatter\Crunched());
         }
@@ -161,6 +163,9 @@ class Scss extends Iface
                         $this->cache->store($path, $cCss, self::$CACHE_TIMEOUT);
                 }
                 $css .= $cCss;
+
+                //vd($scss->getParsedFiles());
+
             } else {
                 \Tk\Log::warning('Invalid file: ' . $path);
             }
