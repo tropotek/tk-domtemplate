@@ -88,15 +88,6 @@ class Scss extends Iface
             \Tk\Log::warning('Cannot write to cache path: ' . $cachePath);
         }
         $this->cache = new \Tk\Cache\Cache(new \Tk\Cache\Adapter\Filesystem($cachePath));
-
-        // Refresh the cache by using Ctrl+Shif+R
-        if (function_exists('apache_request_headers')) {
-            $headers = apache_request_headers();
-            if (isset($headers['Pragma']) && $headers['Pragma'] == 'no-cache')
-                $this->cacheEnabled = false;
-            if (isset($headers['Cache-Control']) && $headers['Cache-Control'] == 'no-cache')
-                $this->cacheEnabled = false;
-        }
     }
 
     /**
@@ -114,6 +105,16 @@ class Scss extends Iface
     public function setCompress($compress)
     {
         $this->compress = $compress;
+        return $this;
+    }
+
+    /**
+     * @param bool $cacheEnabled
+     * @return $this
+     */
+    public function setCacheEnabled(bool $cacheEnabled)
+    {
+        $this->cacheEnabled = $cacheEnabled;
         return $this;
     }
 
