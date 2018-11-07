@@ -1877,8 +1877,8 @@ class Template
         
         if ($this->cdataRemove)
             $str = str_replace(array('><![CDATA[', ']]><'), array('>', '<'), $str);
-        if ($this->newlineReplace)
-            $str = preg_replace ('/\s+$/m', "\n", $str);
+//        if ($this->newlineReplace)
+//            $str = preg_replace ('/\s+$/m', "\n", $str);
         
         return $str;
     }
