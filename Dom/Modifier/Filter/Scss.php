@@ -161,7 +161,7 @@ class Scss extends Iface
                     $src = file_get_contents($path);
                     $cCss = $scss->compile($src);
                     if ($this->cache)
-                        $this->cache->store($path, $cCss, self::$CACHE_TIMEOUT);
+                        $this->cache->store('scss_' . hash('md5', $path), $cCss, self::$CACHE_TIMEOUT);
                 }
                 $css .= $cCss;
 
