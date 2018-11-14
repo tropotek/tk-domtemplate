@@ -186,10 +186,11 @@ class Template
     protected $cdataRemove = true;
 
     /**
-     * Replace multi newlines with one.
+     * Replace multiple newlines with one.
      * @var bool
+     * @todo Make this configurable when we are sure it will work as expected
      */
-    protected $newlineReplace = true;
+    protected $newlineReplace = false;
 
 
     /**
@@ -284,6 +285,7 @@ class Template
             $isHtml5 = true;
         }
         $doc = new \DOMDocument();
+        //$doc->preserveWhiteSpace = false;
         libxml_use_internal_errors(true);
 
         //$html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
@@ -1619,6 +1621,54 @@ class Template
     }
 
     /**
+     * Removes all children from a node.
+     *
+     * @param \DOMNode $node
+     * @return $this
+     */
+    protected function removeChildren($node)
+    {
+        while ($node->hasChildNodes()) {
+            $node->removeChild($node->childNodes->item(0));
+        }
+        return $this;
+    }
+
+    /**
+     * Check if a repeat,choice,var,form (template property) Exists.
+     *
+     * @param string $property (var, choice, repeat)
+     * @param string $key
+     * @return bool
+     */
+    public function keyExists($property, $key)
+    {
+        if (!array_key_exists($key, $this->$property)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Check if a repeat,choice,var,form (template property) exist,
+     * and if the document has ben parsed.
+     *
+     * @param string $property
+     * @param string $key
+     * @return bool
+     */
+    public function isWritable($property = '', $key = '')
+    {
+        if ($this->isParsed())
+            return false;
+        if ($property && $key && is_string($key)) {
+            if (!$this->keyExists($property, $key))
+                return false;
+        }
+        return true;
+    }
+
+    /**
      * Get the parsed state of the template.
      * If true then no more changes can be made to the template
      *
@@ -1799,55 +1849,9 @@ class Template
             $this->parsing = false;
         }
 
+
+        $this->document->normalizeDocument();
         return $this->document;
-    }
-
-    /**
-     * Removes all children from a node.
-     *
-     * @param \DOMNode $node
-     * @return $this
-     */
-    protected function removeChildren($node)
-    {
-        while ($node->hasChildNodes()) {
-            $node->removeChild($node->childNodes->item(0));
-        }
-        return $this;
-    }
-
-    /**
-     * Check if a repeat,choice,var,form (template property) Exists.
-     *
-     * @param string $property (var, choice, repeat)
-     * @param string $key
-     * @return bool
-     */
-    public function keyExists($property, $key)
-    {
-        if (!array_key_exists($key, $this->$property)) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Check if a repeat,choice,var,form (template property) exist,
-     * and if the document has ben parsed.
-     *
-     * @param string $property
-     * @param string $key
-     * @return bool
-     */
-    public function isWritable($property = '', $key = '')
-    {
-        if ($this->isParsed())
-            return false;
-        if ($property && $key && is_string($key)) {
-            if (!$this->keyExists($property, $key))
-                return false;
-        }
-        return true;
     }
 
     /**
@@ -1877,9 +1881,10 @@ class Template
         
         if ($this->cdataRemove)
             $str = str_replace(array('><![CDATA[', ']]><'), array('>', '<'), $str);
-//        if ($this->newlineReplace)
-//            $str = preg_replace ('/\s+$/m', "\n", $str);
-        
+
+        if ($this->newlineReplace)
+            $str = preg_replace ('/\s{2,}$/m', "\n", $str);
+
         return $str;
     }
 
