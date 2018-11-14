@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 2.2.52 [2018-11-15]:
+-------------------------------
+  - Merge branch 'master' of https://github.com/tropotek/tk-domtemplate
+
+
 Ver 2.2.50 [2018-11-14]:
 -------------------------------
 
