@@ -18,11 +18,6 @@ use Dom\Modifier\Exception;
  */
 class Scss extends Iface
 {
-    /**
-     * The number of seconds to refresh the cache.
-     * @var int
-     */
-    static $CACHE_TIMEOUT = 60 * 60 * 6;
 
     /**
      * @var \Tk\Cache\Cache
@@ -48,6 +43,11 @@ class Scss extends Iface
      * @var null|\DOMElement
      */
     private $insNode = null;
+
+    /**
+     * @var int
+     */
+    protected $timeout = \Tk\Date::DAY * 2;
 
 
     /**
@@ -112,9 +112,27 @@ class Scss extends Iface
      * @param bool $cacheEnabled
      * @return $this
      */
-    public function setCacheEnabled(bool $cacheEnabled)
+    public function setCacheEnabled($cacheEnabled)
     {
         $this->cacheEnabled = $cacheEnabled;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTimeout()
+    {
+        return $this->timeout;
+    }
+
+    /**
+     * @param int $timeout
+     * @return Scss
+     */
+    public function setTimeout($timeout)
+    {
+        $this->timeout = $timeout;
         return $this;
     }
 
@@ -162,7 +180,7 @@ class Scss extends Iface
                     $src = file_get_contents($path);
                     $cCss = $scss->compile($src);
                     if ($this->cache)
-                        $this->cache->store($cacheKey, $cCss, self::$CACHE_TIMEOUT);
+                        $this->cache->store($cacheKey, $cCss, $this->timeout);
                 }
                 $css .= $cCss;
 
