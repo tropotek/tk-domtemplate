@@ -217,7 +217,8 @@ class Less extends Iface
             $url = \Tk\Uri::create($node->getAttribute('href'));
             $path = $this->sitePath . $url->getRelativePath();
             $this->source[$path] = '';
-            $this->sourcePaths[] = $path;   // For adding to data-paths attruibute
+            //$this->sourcePaths[] = $path;   // For adding to data-paths attruibute
+            $this->sourcePaths[] = $url->getRelativePath();
             $this->domModifier->removeNode($node);
             $this->insNode = $node;
         } else if ($node->nodeName == 'style' && $node->getAttribute('type') == 'text/less' ) {
