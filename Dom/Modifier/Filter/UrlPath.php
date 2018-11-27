@@ -138,14 +138,12 @@ class UrlPath extends Iface
                 ) {
                     continue;
                 }
-
                 $attr->value = htmlentities($this->prependPath($attr->value));
             } elseif (in_array(strtolower($attr->nodeName), $this->attrJs)) {       // replace javascript strings
                 $attr->value = htmlentities($this->replaceStr($attr->value));
             } elseif (strtolower($attr->nodeName) == 'style') {
                 if (preg_match_all('/url\(.*\)/', $attr->nodeValue)) {
                     $newValue = preg_replace_callback('/url\(((\"|\'|)?.*[\'"]?)\)/U', function ($matches) {
-                        // vd($matches);
                         $url = "'" . $this->prependPath(str_replace(array('"',"'"), '', $matches[1])) . "'";
                         return 'url('.$url.')';
                     }, $attr->nodeValue);
@@ -187,16 +185,7 @@ class UrlPath extends Iface
      */
     protected function addSiteUrl($path)
     {
-        $path = rtrim($path, '/');
-        $searchFor = \Tk\Uri::create($this->siteUrl)->getPath();
-        $fixedPath = preg_replace('/^'.preg_quote($searchFor, '/').'/', '', $path);
-        if ($fixedPath) {
-            $path = $fixedPath;
-        }
-        if ($path && $path[0] != '/' && $path[0] != '\\') $path = '/'.$path;
-        $path = preg_replace('/^\/\.\//', '/', $path);
-        $url = \Tk\Uri::create($this->siteUrl . $path)->toString();
-        return $url;
+        return $this->cleanUrl($path, \Tk\Uri::create($this->siteUrl)->getPath());
     }
 
     /**
@@ -214,16 +203,34 @@ class UrlPath extends Iface
      */
     protected function addTemplateUrl($path)
     {
-        $path = rtrim($path, '/');
-        $searchFor = \Tk\Uri::create($this->templateUrl)->getPath();
-        $fixedPath = preg_replace('/^'.preg_quote($searchFor, '/').'/', '', $path);
-        if ($fixedPath) {
-            $path = $fixedPath;
+        return $this->cleanUrl($path, \Tk\Uri::create($this->templateUrl)->getPath());
+    }
+
+    /**
+     * Clean a path so that there is no duplication of any path prefixes
+     *
+     * @param string $url
+     * @param string $replace
+     * @return string
+     */
+    protected function cleanUrl($url, $replace = '')
+    {
+        $url = rtrim($url, '/');
+        if ($replace) {
+            $fixedPath = preg_replace('/^' . preg_quote($replace, '/') . '/', '', $url);
+            if ($fixedPath) {
+                $url = $fixedPath;
+            }
         }
-        if ($path[0] != '/' && $path[0] != '\\') $path = '/'.$path;
-        $path = preg_replace('/^\/\.\//', '/', $path);
-        $url = \Tk\Uri::create($this->templateUrl . $path)->toString();
-        return $url;
+        //if ($path[0] != '/' && $path[0] != '\\') $path = '/'.$path;
+        $processedUrl = \Tk\Uri::create($url)->toString();
+        //if ($url && ($url[0] == '/' || $url[0] == '\\')) {
+        if ($url &&preg_match('/^\.?(\/|\/)(.+)/', $url, $regs)) {
+            //$url = preg_replace('/^\/\.\//', '/', $url);
+            $url = '/' . $regs[2];
+            $processedUrl = \Tk\Uri::create($replace . $url)->toString();
+        }
+        return $processedUrl;
     }
 
     /**
