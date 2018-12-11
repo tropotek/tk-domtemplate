@@ -1292,6 +1292,8 @@ class Template
     /**
      * Replace HTML formatted text into a var element.
      *
+     * This will replace the existing node not just its inner contents
+     *
      * @param string $var
      * @param string $html
      * @param bool $preserveAttr Set to false to ignore copying of existing Attributes
@@ -1317,6 +1319,7 @@ class Template
 
     /**
      * Replace a node with HTML formatted text.
+     * This will replace the existing node not just its inner contents
      *
      * @param \DOMElement $element
      * @param string $html
@@ -1353,6 +1356,7 @@ class Template
     /**
      * Replace a node with the supplied DOMDocument
      * The DOMDocument's topmost node will be used to replace the destination node
+     * This will replace the existing node not just its inner contents
      *
      * @param string $var
      * @param \DOMDocument $doc
@@ -1381,6 +1385,7 @@ class Template
      * The DOMDocument's topmost node will be used to replace the destination node
      *
      * This will also copy any headers in the supplied template.
+     * This will replace the existing node not just its inner contents
      *
      * @param string $var
      * @param Template $template
@@ -2135,8 +2140,6 @@ class Template
      * @warn bug exists where after insertion the template loses
      *   reference to the node in repeat regions. The fix (for now)
      *   is to just do all operations on that var node before this call.
-     * @deprecated Will be removed Use appendHtml()
-     * @remove 2.6.0
      */
     public function insertHtml($var, $html)
     {
@@ -2161,9 +2164,7 @@ class Template
      * @param string $html
      * @param string $encoding
      * @return \DOMElement
-     * @deprecated Will be removed Use appendHtmlDom()
      * @throws Exception
-     * @remove 2.6.0
      */
     public static function insertHtmlDom($element, $html, $encoding = 'UTF-8')
     {
@@ -2195,8 +2196,6 @@ class Template
      * @param string $var
      * @param \DOMDocument $doc
      * @return Template
-     * @deprecated Will be removed Use appendDoc()
-     * @remove 2.6.0
      */
     public function insertDoc($var, \DOMDocument $doc)
     {
@@ -2224,8 +2223,6 @@ class Template
      * @param Template $template
      * @param bool $parse Set to false to disable template parsing
      * @return Template
-     * @deprecated Will be removed Use appendTemplate()
-     * @remove 2.6.0
      */
     public function insertTemplate($var, $template, $parse = true)
     {

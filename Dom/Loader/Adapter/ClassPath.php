@@ -11,7 +11,7 @@ use \Dom\Template;
  *      if the supplied class is \App\Module\Index
  *      The class is converted to App_Module_Index
  *      The adapter will look for a template in the supplied path for example:
- *          /supplied/template/path/App_Module_Index.xml
+ *          /supplied/template/path/App_Module_Index.xtpl
  *
  * @author Michael Mifsud <info@tropotek.com>
  * @see http://www.tropotek.com/
