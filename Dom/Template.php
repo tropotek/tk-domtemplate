@@ -2011,27 +2011,6 @@ class Template
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      * @param string $var
      * @return bool
