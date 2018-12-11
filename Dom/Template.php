@@ -960,11 +960,12 @@ class Template
         if (!$this->isWritable())
             return $this;
         $preKey = $elementName . $value;
-        $ignore = array('content', 'type');
+        $ignore = array('content', 'type', 'data-tracer');
         foreach ($attributes as $k => $v) {
             if (in_array($k, $ignore)) continue;
             $preKey .= $k . $v;
         }
+        vd($preKey);
         $hash = md5($preKey);
         $this->headers[$hash]['elementName'] = $elementName;
         $this->headers[$hash]['attributes'] = $attributes;
