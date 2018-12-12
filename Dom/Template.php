@@ -297,7 +297,7 @@ class Template
                 $str .= sprintf("\n[%s:%s] %s", $error->line, $error->column, trim($error->message));
             }
             libxml_clear_errors();
-            $str .= "\n\n" . $html . "\n";
+            $str .= "\n\n" . \Tk\Str::lineNumbers($html) . "\n";
             $e = new Exception('Error Parsing DOM Template', 0, null, $str);
             throw $e;
         }
