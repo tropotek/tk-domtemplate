@@ -222,11 +222,10 @@ class UrlPath extends Iface
                 $url = $fixedPath;
             }
         }
-        //if ($path[0] != '/' && $path[0] != '\\') $path = '/'.$path;
+
+        if (!$url) $url = '/';
         $processedUrl = \Tk\Uri::create($url)->toString();
-        //if ($url && ($url[0] == '/' || $url[0] == '\\')) {
         if ($url &&preg_match('/^\.?(\/|\/)(.+)/', $url, $regs)) {
-            //$url = preg_replace('/^\/\.\//', '/', $url);
             $url = '/' . $regs[2];
             $processedUrl = \Tk\Uri::create($replace . $url)->toString();
         }
