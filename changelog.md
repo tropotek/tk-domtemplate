@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 2.2.60 [2018-12-13]:
+-------------------------------
+  - Updated teh code to use the newest libs
+  - Added maintenance mode to site settings
+
+
 Ver 2.2.58 [2018-11-28]:
 -------------------------------
 
