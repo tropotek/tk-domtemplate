@@ -163,7 +163,6 @@ class UrlPath extends Iface
      */
     private function prependPath($path)
     {
-
         if (!$path) return $path;
         if (preg_match('|^\.\/|', $path)) {
             $retPath = $this->addTemplateUrl($path);
