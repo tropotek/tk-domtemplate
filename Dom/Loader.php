@@ -120,7 +120,10 @@ class Loader
         if (!empty($caller['object'])) {
             return get_class($caller['object']);
         }
-        return $caller['class'];
+        $class = '';
+        if (isset($caller['class']))
+            $class = $caller['class'];
+        return $class;
     }
 
 
