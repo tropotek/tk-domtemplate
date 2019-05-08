@@ -3,9 +3,9 @@
     "type": "library",
     "description": "A PHP DOM Template library using XML/HTML files for templates",
     "keywords": ["Dom", "tropotek", "dom-template"],
-    "time":  "2011-12-09",
+    "time": "2019-04-09",
     "license": "MIT",
-    "version": "trunk",
+    "version": "3.0.0",
     "authors": [
         {
             "name": "Michael Mifsud",
@@ -19,13 +19,13 @@
         }
     },
     "require": {
-        "php": ">=5.3.0",
+        "php": ">=7.0.0",
         "oyejorge/less.php": "~1.6",
         "leafo/scssphp": "~0.7.7"
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "2.2.x-dev"
+            "dev-master": "3.0.x-dev"
         }
     }
 }
