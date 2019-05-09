@@ -40,13 +40,13 @@ class Loader
     protected $params = array();
 
     /**
-     * @var null|\Tk\Event\Dispatcher
+     * @var null|\Symfony\Component\EventDispatcher\EventDispatcherInterface
      */
     protected $dispatcher = null;
 
 
     /**
-     * @param null|\Tk\Event\Dispatcher $dispatcher
+     * @param null|\Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
      */
     protected function __construct($dispatcher = null)
     {
@@ -192,7 +192,7 @@ class Loader
         if ($this->dispatcher) {
             $e = new \Dom\Event\DomEvent($template);
             $e->set('callingClass', $this->getCallingClass());
-            $this->dispatcher->dispatch(\Dom\DomEvents::DOM_TEMPLATE_LOAD, $e);
+            $this->dispatcher->dispatch($e, \Dom\DomEvents::DOM_TEMPLATE_LOAD);
         }
         return $template;
     }
