@@ -192,7 +192,7 @@ class Loader
         if ($this->dispatcher) {
             $e = new \Dom\Event\DomEvent($template);
             $e->set('callingClass', $this->getCallingClass());
-            $this->dispatcher->dispatch($e, \Dom\DomEvents::DOM_TEMPLATE_LOAD);
+            $this->dispatcher->dispatch(\Dom\DomEvents::DOM_TEMPLATE_LOAD, $e);
         }
         return $template;
     }
