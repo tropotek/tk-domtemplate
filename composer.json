@@ -20,8 +20,8 @@
     },
     "require": {
         "php": ">=7.0.0",
-        "oyejorge/less.php": "~1.7",
-        "leafo/scssphp": "~0.7.7"
+        "oyejorge/less.php": "1.7.*.*",
+        "leafo/scssphp": "0.7.*"
     },
     "extra": {
         "branch-alias": {
