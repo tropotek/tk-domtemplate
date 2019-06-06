@@ -797,47 +797,29 @@ class Template
         return false;
     }
 
-    /**
-     * Show a hidden var
-     *
-     * @param string $var
-     * @since 2.0.15
-     * @return Template
-     */
-    public function show($var)
-    {
-        $nodes = $this->findVar($var);
-        foreach ($nodes as $node) {
-            $node->removeAttribute(self::ATTR_HIDDEN);
-        }
-
-        if (empty($this->choice[$var])) return $this;
-        $nodes = $this->choice[$var];
-        foreach ($nodes as $node) {
-            $node->removeAttribute(self::ATTR_HIDDEN);
-        }
-        return $this;
-    }
 
     /**
-     * Remove a var from the template, this will not remove the node until it is parsed
-     * so calling show($var) before the template is parsed will undo this action
+     * Replaces setChoice() and show()
      *
-     * @param string $var
-     * @since 2.0.15
-     * @return Template
+     * Show/Hide a choice node
+     *
+     * @param $choice
+     * @param bool $b
+     * @return $this
      */
-    public function hide($var)
+    public function setVisible($choice, $b = true)
     {
-        $nodes = $this->findVar($var);
-        foreach ($nodes as $node) {
-            $node->setAttribute(self::ATTR_HIDDEN, self::ATTR_HIDDEN);
-        }
-
-        if (empty($this->choice[$var])) return $this;
-        $nodes = $this->choice[$var];
-        foreach ($nodes as $node) {
-            $node->setAttribute(self::ATTR_HIDDEN, self::ATTR_HIDDEN);
+        $nodes = $this->findVar($choice);
+        if ($b) {
+            foreach ($nodes as $node) $node->removeAttribute(self::ATTR_HIDDEN);
+            if (empty($this->choice[$choice])) return $this;
+            $nodes = $this->choice[$choice];
+            foreach ($nodes as $node) $node->removeAttribute(self::ATTR_HIDDEN);
+        } else {
+            foreach ($nodes as $node) $node->setAttribute(self::ATTR_HIDDEN, self::ATTR_HIDDEN);
+            if (empty($this->choice[$choice])) return $this;
+            $nodes = $this->choice[$choice];
+            foreach ($nodes as $node) $node->setAttribute(self::ATTR_HIDDEN, self::ATTR_HIDDEN);
         }
         return $this;
     }
@@ -2012,30 +1994,16 @@ class Template
 
 
     /**
-     * @param string $var
-     * @return bool
-     * @deprecated Use has($var)
-     * @remove 2.6.0
-     */
-    public function hasVar($var) { return $this->has($var); }
-
-    /**
      * Set a choice node to become visible in a document.
      *
      * @param string $choice The name of the choice
      * @return Template
-     * @deprecated Use the new show($var)
+     * @deprecated use setVisible($choice)
      * @remove 2.6.0
      */
     public function setChoice($choice)
     {
-        if (empty($this->choice[$choice])) return $this;
-        $nodes = $this->choice[$choice];
-        foreach ($nodes as $node) {
-            if ($node->hasAttribute(self::ATTR_HIDDEN))
-                $node->removeAttribute(self::ATTR_HIDDEN);
-        }
-        return $this;
+        return $this->setVisible($choice);
     }
 
     /**
@@ -2043,19 +2011,48 @@ class Template
      *
      * @param string $choice The name of the choice
      * @return Template
-     * @deprecated Use the new hide($var)
+     * @deprecated use setVisible($choice, false)
      * @remove 2.6.0
      */
     public function unsetChoice($choice)
     {
-        if (empty($this->choice[$choice])) return $this;
-        $nodes = $this->choice[$choice];
-        foreach ($nodes as $node) {
-            if ($node->hasAttribute(self::ATTR_HIDDEN))
-                $node->removeAttribute(self::ATTR_HIDDEN);
-        }
-        return $this;
+        return $this->setVisible($choice, false);
     }
+
+    /**
+     * Show a hidden var
+     *
+     * @param string $var
+     * @since 2.0.15
+     * @deprecated use setVisible($choice)
+     * @return Template
+     */
+    public function show($choice)
+    {
+        return $this->setVisible($choice);
+    }
+
+    /**
+     * Remove a var from the template, this will not remove the node until it is parsed
+     * so calling show($var) before the template is parsed will undo this action
+     *
+     * @param string $var
+     * @since 2.0.15
+     * @deprecated use setVisible($choice, false)
+     * @return Template
+     */
+    public function hide($choice)
+    {
+        return $this->setVisible($choice, false);
+    }
+
+    /**
+     * @param string $var
+     * @return bool
+     * @deprecated Use has($var)
+     * @remove 2.6.0
+     */
+    public function hasVar($var) { return $this->has($var); }
 
 
     /**
