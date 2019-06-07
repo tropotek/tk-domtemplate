@@ -81,10 +81,10 @@ class Repeat extends Template
         $appendNode = $this->repeatNode;
         if ($var) {
             if ($this->repeatParent) {
-                $appendNode = $this->repeatParent->getVarElement($var);
+                $appendNode = $this->repeatParent->getVar($var);
             }
-            if ($destRepeat && $destRepeat->getVarElement($var)) {
-                $appendNode = $destRepeat->getVarElement($var);
+            if ($destRepeat && $destRepeat->getVar($var)) {
+                $appendNode = $destRepeat->getVar($var);
             }
         }
 
@@ -121,10 +121,10 @@ class Repeat extends Template
         $appendNode = $this->repeatNode;
         if ($var) {
             if ($this->repeatParent) {
-                $appendNode = $this->repeatParent->getVarElement($var);
+                $appendNode = $this->repeatParent->getVar($var);
             }
-            if ($destRepeat && $destRepeat->getVarElement($var)) {
-                $appendNode = $destRepeat->getVarElement($var);
+            if ($destRepeat && $destRepeat->getVar($var)) {
+                $appendNode = $destRepeat->getVar($var);
             }
         }
         $insertNode = $appendNode->ownerDocument->importNode($this->getDocument()->documentElement, true);

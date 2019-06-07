@@ -766,6 +766,19 @@ class Template
     }
 
     /**
+     * @param $var
+     * @return array|\DOMElement|\DOMElement[]|mixed
+     */
+    public function getVar($var)
+    {
+        $nodes = $this->get($var);
+        if (is_array($nodes) && count($nodes)) {
+            return $nodes[0];
+        }
+        return $nodes;
+    }
+
+    /**
      * It is recommended to use hide($var) unless you specifically want to remove the node from the tree.
      * This cannot be undone and you will not be able to show the var unless you re-insert the node
      *
@@ -2214,7 +2227,7 @@ class Template
      *
      * @param string $var
      * @return \DOMElement[]|\DOMElement
-     * @deprecated use getVar()
+     * @deprecated use getVar($var)
      * @remove 2.6.0
      */
     public function getVarElement($var)
