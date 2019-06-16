@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 3.0.6 [2019-06-17]:
+-------------------------------
+  - In the middle of updating the EMS Institutions pages
+  - Cleaning up a lot of managers and editors
+
+
 Ver 3.0.4 [2019-05-15]:
 -------------------------------
 
