@@ -20,6 +20,7 @@
     },
     "require": {
         "php": ">=7.0.0",
+        "ext-dom": "*",
         "oyejorge/less.php": "1.7.*",
         "leafo/scssphp": "0.7.*"
     },
