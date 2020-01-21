@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 3.0.8 [2020-01-21]:
+-------------------------------
+  - Some major updates to the \Tk\Ui\Dialog\Dialog objects
+
+
 Ver 3.0.6 [2019-06-17]:
 -------------------------------
   - In the middle of updating the EMS Institutions pages
