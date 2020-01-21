@@ -160,6 +160,7 @@ class Less extends Iface
     {
         $options = array('cache_dir' => $this->cachePath, 'compress' => $this->compress, 'import_dirs' => array($this->siteUrl),
             'import_callback' => array($this, 'doImport'));
+        $css = '';
         if ($this->cacheEnabled) {
             foreach (array_keys($this->source) as $path) {
                 if (preg_match('/\.less$/', $path) && !is_file($path)) {
@@ -169,7 +170,10 @@ class Less extends Iface
             // TODO: Cache bug for inline styles, the compiled_file hash does not include them, this can cause inline styles to remain
             // TODO: Regen() the css files seems to fix this, this may only be a real issue in Debug mode.
             $css_file_name = \Less_Cache::Get($this->source, $options);
-            $css = trim(file_get_contents($this->cachePath . '/' . $css_file_name));
+
+            $path = $this->cachePath . '/' . $css_file_name;
+            if (is_file($path))
+                $css = trim(file_get_contents($path));
         } else {
             $css_file_name = \Less_Cache::Regen($this->source, $options);
             $css = trim(file_get_contents($this->cachePath . '/' . $css_file_name));
