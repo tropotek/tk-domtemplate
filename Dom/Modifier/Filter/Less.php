@@ -10,7 +10,7 @@ use Dom\Modifier\Exception;
  *
  * {
  *   "require": {
- *     "oyejorge/less.php": "~1.5"
+ *     "wikimedia/less.php": "~1.5"
  *   }
  * }
  *
@@ -120,7 +120,7 @@ class Less extends Iface
     public function init($doc)
     {
         if (!class_exists('Less_Parser')) {
-            \Tk\Log::warning('Please install lessphp. (http://lessphp.gpeasy.com/) [Composer: "oyejorge/less.php": "~1.5"]');
+            \Tk\Log::warning('Please install lessphp. (https://github.com/wikimedia/less.php) [Composer: "wikimedia/less.php": "1.7.*"]');
         }
 
         $src = '';
