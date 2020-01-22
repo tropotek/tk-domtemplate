@@ -22,7 +22,7 @@
         "php": ">=7.0.0",
         "ext-dom": "*",
         "ext-tidy": "*",
-        "oyejorge/less.php": "1.7.*",
+        "wikimedia/less.php": "1.7.*",
         "leafo/scssphp": "0.7.*"
     },
     "extra": {
