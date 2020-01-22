@@ -18,6 +18,4 @@ class DomEvents
     const DOM_TEMPLATE_LOAD = 'dom.template.load';
 
 
-
-
 }
