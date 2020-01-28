@@ -161,7 +161,6 @@ class Scss extends Iface
         $scss->setVariables($this->constants);
         $scss->setFormatter(new \ScssPhp\ScssPhp\Formatter\Expanded());
         //$scss->addImportPath($this->siteUrl);
-
         if ($this->isCompress()) {
             $scss->setFormatter(new \ScssPhp\ScssPhp\Formatter\Crunched());
         }
