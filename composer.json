@@ -22,7 +22,7 @@
         "ext-dom": "*",
         "ext-tidy": "*",
         "wikimedia/less.php": "1.7.*",
-        "leafo/scssphp": "0.7.*"
+        "scssphp/scssphp": "1.0.*"
     },
     "extra": {
         "branch-alias": {
