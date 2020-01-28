@@ -143,8 +143,8 @@ class Scss extends Iface
      */
     public function init($doc)
     {
-        if (!class_exists('Leafo\ScssPhp\Compiler')) {
-            \Tk\Log::warning('Please install scssphp. (http://leafo.github.io/scssphp/) [Composer: "leafo/scssphp": "~0.7.7"]');
+        if (!class_exists('ScssPhp\ScssPhp\Compiler')) {
+            \Tk\Log::warning('Please install scssphp. (https://packagist.org/packages/scssphp/scssphp) [Composer: "scssphp/scssphp": "1.0.*"]');
         }
     }
 
@@ -157,13 +157,13 @@ class Scss extends Iface
      */
     public function postTraverse($doc)
     {
-        $scss = new \Leafo\ScssPhp\Compiler();
+        $scss = new \ScssPhp\ScssPhp\Compiler();
         $scss->setVariables($this->constants);
-        $scss->setFormatter(new \Leafo\ScssPhp\Formatter\Expanded());
+        $scss->setFormatter(new \ScssPhp\ScssPhp\Formatter\Expanded());
         //$scss->addImportPath($this->siteUrl);
 
         if ($this->isCompress()) {
-            $scss->setFormatter(new \Leafo\ScssPhp\Formatter\Crunched());
+            $scss->setFormatter(new \ScssPhp\ScssPhp\Formatter\Crunched());
         }
 
         $css = '';
