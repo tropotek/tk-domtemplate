@@ -100,12 +100,12 @@ if (isset($_REQUEST['process'])) {
     $email = $_REQUEST['email'];
     if (!preg_match('/^[0-9a-zA-Z]([-_.]*[0-9a-zA-Z])*@[0-9a-zA-Z]([-.]?[0-9a-zA-Z])*$/', $email)) {
         $template->insertText('email-error', 'Invalid email.');
-        $template->setChoice('email-error');
+        $template->setVisible('email-error');
     } else {
         // If all is valid send a quick email (Please note that this is for demo pourposes only and you must check for security)
         if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], $_SERVER['HTTP_HOST']) !== false) {
             //mail($email, 'Email from ' . $_REQUEST['name'] . '(' . $_REQUEST['country'] . ')', $_REQUEST['comments']);
-            $template->setChoice('success');
+            $template->setVisible('success');
         } else {
             die('You must not use this form as a mailgate!');
         }

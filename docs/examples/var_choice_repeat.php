@@ -56,7 +56,7 @@ $template->appendHtml('content02', $content);
 // Add some list data --> <ul choice="list">...
 $listData = array('http://www.tropotek.com/' => 'Tropotek Home Page', 'http://www.phpdruid.com/' => 'PHPDruid Home Page', 'http://www.domtemplate.com' => 'Php Dom Template');
 if (count($listData) > 0) {
-    $template->setChoice('list');
+    $template->setVisible('list');
 }
 foreach ($listData as $url => $value) {
     $repeat = $template->getRepeat('listRow');

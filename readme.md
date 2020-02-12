@@ -112,7 +112,7 @@ so by default this node would be removed from the DOM tree. To keep it visible s
 $template = new \Dom\Template::loadFile('index.html');
 
 // Add some text content inside the anchor node
-$template->setChoice('showNode');
+$template->setVisible('showNode');
 
 ...
 ```
