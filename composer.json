@@ -23,10 +23,5 @@
         "ext-tidy": "*",
         "wikimedia/less.php": "1.7.*",
         "scssphp/scssphp": "1.0.*"
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "3.0.x-dev"
-        }
     }
 }
