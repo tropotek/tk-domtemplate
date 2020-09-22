@@ -947,7 +947,7 @@ class Template
      * @param string $elementName
      * @param array $attributes An associative array of (attr, value) pairs.
      * @param string $value The element value.
-     * @param \DOMElement $node If sent this head element will append after the supplied node
+     * @param \DOMElement|null $node If sent this head element will append after the supplied node
      * @return Template
      */
     public function appendHeadElement($elementName, $attributes, $value = '', $node = null)
@@ -973,7 +973,7 @@ class Template
      *
      * @param string $name
      * @param string $content
-     * @param \DOMElement $node If sent this head element will append after the supplied node
+     * @param \DOMElement|null $node If sent this head element will append after the supplied node
      * @return Template
      */
     public function appendMetaTag($name, $content, $node = null)
@@ -986,7 +986,7 @@ class Template
      *
      * @param string $urlString
      * @param array $attrs
-     * @param \DOMElement $node If sent this head element will append after the supplied node
+     * @param \DOMElement|null $node If sent this head element will append after the supplied node
      * @return $this
      */
     public function appendCssUrl($urlString, $attrs = array(), $node = null)
@@ -1005,7 +1005,7 @@ class Template
      *
      * @param $css
      * @param array $attrs
-     * @param \DOMElement $node If sent this head element will append after the supplied node
+     * @param \DOMElement|null $node If sent this head element will append after the supplied node
      * @return Template
      */
     public function appendCss($css, $attrs = array(), $node = null)
@@ -1022,7 +1022,7 @@ class Template
      *
      * @param string $urlString
      * @param array $attrs
-     * @param \DOMElement $node If sent this head element will append after the supplied node
+     * @param \DOMElement|null $node If sent this head element will append after the supplied node
      * @return Template
      */
     public function appendJsUrl($urlString, $attrs = array(), $node = null)
@@ -1041,7 +1041,7 @@ class Template
      *
      * @param string $js
      * @param array $attrs
-     * @param \DOMElement $node If sent this head element will append after the supplied node
+     * @param \DOMElement|null $node If supplied, this element will append after the supplied node
      * @return Template
      */
     public function appendJs($js, $attrs = array(), $node = null)
