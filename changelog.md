@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 3.0.26 [2020-11-23]:
+-------------------------------
+  - Tagging and releasing branch `3.0` with version `3.0.22`.
+  - Tagging and releasing branch `3.0` with version `3.0.20`.
+
+
 Ver 3.0.22 [2020-10-19]:
 -------------------------------
 
