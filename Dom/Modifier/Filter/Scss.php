@@ -176,6 +176,7 @@ class Scss extends Iface
                 if (!$cCss) {
                     \Tk\Log::notice('SCSS Compiling File: ' . $path);
                     $scss->setImportPaths(array($this->siteUrl, dirname($path)));
+                    // TODO: Test if this is a file or dir
                     $src = file_get_contents($path);
                     $cCss = $scss->compile($src);
                     if ($this->cache)
