@@ -1029,8 +1029,11 @@ class Template
     {
         if (!$this->isWritable())
             return $this;
-        $attrs['type'] = 'text/javascript';
-        $attrs['src'] = $urlString;
+        //if (!isset($attrs['type']) && !$this->isHtml5)    // TODO
+        if (!isset($attrs['type']))
+            $attrs['type'] = 'text/javascript';
+        if (!isset($attrs['src']))
+            $attrs['src'] = $urlString;
         $attrs = $this->addTracer(debug_backtrace(), $attrs);
         $this->appendHeadElement('script', $attrs, '', $node);
         return $this;
@@ -1048,7 +1051,10 @@ class Template
     {
         if (!$this->isWritable())
             return $this;
-        $attrs['type'] = 'text/javascript';
+        if (!isset($attrs['type']))
+        //if (!isset($attrs['type']) && !$this->isHtml5)    // TODO
+            $attrs['type'] = 'text/javascript';
+
         $attrs = $this->addTracer(debug_backtrace(), $attrs);
         $this->appendHeadElement('script', $attrs, $js, $node);
         return $this;
