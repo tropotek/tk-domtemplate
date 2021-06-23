@@ -16,6 +16,12 @@
       "homepage": "http://www.tropotek.com/"
     }
   ],
+  "funding": [
+    {
+      "type": "Paypal",
+      "url": "https://www.paypal.me/tropotek"
+    }
+  ],
   "autoload": {
     "psr-0": {
       "Dom\\": ""
