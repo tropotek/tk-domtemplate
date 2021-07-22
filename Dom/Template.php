@@ -226,7 +226,6 @@ class Template
     protected $parsed = false;
     
     
-    
 
     /**
      * The constructor
@@ -239,7 +238,9 @@ class Template
         $this->init($doc, $encoding);
     }
 
-    
+    /**
+     * @return string[]
+     */
     public function __sleep()
     {
         $this->serialDoc = $this->document->saveXML();
@@ -247,6 +248,9 @@ class Template
         return array('serialDoc', 'serialOrigDoc', 'encoding', 'headers', 'parsed', 'isHtml5');
     }
 
+    /**
+     *
+     */
     public function __wakeup()
     {
         $doc = new \DOMDocument();
@@ -258,13 +262,15 @@ class Template
         $this->serialDoc = '';
         $this->serialOrigDoc = '';
     }
-    
+
+    /**
+     *
+     */
     public function __clone()
     {
         $this->parsed = false;
         $this->init(clone $this->original, $this->encoding);
     }
-
 
     /**
      * Make a template from a string
@@ -589,8 +595,8 @@ class Template
 
 
     /**
-     * @param $var
-     * @param $class
+     * @param string|\DOMElement $var
+     * @param string $class
      * @return Template
      */
     public function addClass($var, $class) {
@@ -611,8 +617,8 @@ class Template
     }
 
     /**
-     * @param $var
-     * @param $class
+     * @param string|\DOMElement $var
+     * @param string $class
      * @return Template
      */
     public function removeClass($var, $class)
@@ -626,7 +632,7 @@ class Template
     /**
      * Replace an attribute value.
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param string|array $attr
      * @param string|null $value
      * @return Template
@@ -653,7 +659,7 @@ class Template
     /**
      * Retrieve the text contained within an attribute of a node.
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param string $attr
      * @return string
      */
@@ -672,7 +678,7 @@ class Template
     /**
      * Remove an attribute
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param string $attr
      * @return Template
      */
@@ -729,7 +735,7 @@ class Template
     /**
      * Internal method to enable var to be a DOMElement or array of DOMElements...
      *
-     * @param mixed $var
+     * @param string|\DOMElement $var
      * @return array|\DOMElement[]
      */
     protected function findVar($var)
@@ -752,7 +758,7 @@ class Template
      * Get a var element node from the document.
      * If no var name is provided the entire var array is returned.
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @return array|\DOMElement[]
      * @since 2.2.30
      */
@@ -766,7 +772,7 @@ class Template
     }
 
     /**
-     * @param $var
+     * @param string|\DOMElement $var
      * @return array|\DOMElement|\DOMElement[]|mixed
      */
     public function getVar($var)
@@ -782,7 +788,7 @@ class Template
      * It is recommended to use hide($var) unless you specifically want to remove the node from the tree.
      * This cannot be undone and you will not be able to show the var unless you re-insert the node
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @return Template
      * @since 2.2.30
      */
@@ -798,7 +804,7 @@ class Template
 
     /**
      * Check if this document has a var
-     * @param string $var
+     * @param string|\DOMElement $var
      * @return bool
      */
     public function has($var)
@@ -816,7 +822,7 @@ class Template
      *
      * Show/Hide a choice node
      *
-     * @param $choice
+     * @param string|\DOMElement $choice
      * @param bool $b
      * @return $this
      */
@@ -1164,7 +1170,7 @@ class Template
 
     /**
      * Remove all child nodes from a var
-     * @param string $var
+     * @param string|\DOMElement $var
      * @return Template
      * @since 2.2.24
      */
@@ -1183,7 +1189,7 @@ class Template
     /**
      * Replace the text of one or more var nodes
      *
-     * @param string $var The var's name.
+     * @param string|\DOMElement $var The var's name.
      * @param string $value The vars value inside the tags.
      * @return Template
      */
@@ -1204,7 +1210,7 @@ class Template
     /**
      * Append the text of one or more var nodes
      *
-     * @param string $var The var's name.
+     * @param string|\DOMElement $var The var's name.
      * @param string $value The vars value inside the tags.
      * @return Template
      */
@@ -1224,7 +1230,7 @@ class Template
     /**
      * Get the text inside a var node.
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @return string
      */
     public function getText($var)
@@ -1239,7 +1245,7 @@ class Template
     }
 
     /**
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param string $text
      * @return Template
      * @since v2.0.15
@@ -1252,7 +1258,7 @@ class Template
     /**
      * Return the html including the node contents
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @return string
      * @since v2.0.15
      */
@@ -1272,7 +1278,7 @@ class Template
 
     /**
      * Set the inner HTML of a node
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param string $html
      * @return Template
      * @since 2.0.15
@@ -1295,7 +1301,7 @@ class Template
      *
      * This will replace the existing node not just its inner contents
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param string $html
      * @param bool $preserveAttr Set to false to ignore copying of existing Attributes
      * @return Template
@@ -1359,7 +1365,7 @@ class Template
      * The DOMDocument's topmost node will be used to replace the destination node
      * This will replace the existing node not just its inner contents
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param \DOMDocument $doc
      * @return Template
      */
@@ -1388,7 +1394,7 @@ class Template
      * This will also copy any headers in the supplied template.
      * This will replace the existing node not just its inner contents
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param Template $template
      * @return Template
      */
@@ -1411,7 +1417,7 @@ class Template
     /**
      * Append HTML formatted text into a var element.
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param string $html
      * @return Template
      */
@@ -1462,7 +1468,7 @@ class Template
     /**
      * Append documents to the var node
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param \DOMDocument $doc
      * @return Template
      */
@@ -1506,7 +1512,7 @@ class Template
      * Prepend a template to a var element, it will parse the template before appending it
      * This will also copy any headers in the $template.
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param Template $template
      * @return Template
      */
@@ -1521,7 +1527,7 @@ class Template
     /**
      * Prepend documents to the var node
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param \DOMDocument $doc
      * @return Template
      */
@@ -1547,7 +1553,7 @@ class Template
     /**
      * Append HTML formatted text into a var element.
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param string $html
      * @return Template
      */
@@ -1855,7 +1861,6 @@ class Template
             $this->parsing = false;
         }
 
-
         $this->document->normalizeDocument();
         return $this->document;
     }
@@ -1953,7 +1958,7 @@ class Template
     /**
      * Add a css class if it does not exist
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param string|array $class
      * @return Template
      * @notes Alias to Template::addClass()
@@ -1966,7 +1971,7 @@ class Template
     /**
      * Remove the class if it exists
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param string $class
      * @return Template
      * @notes Alias to Template::removeClass()
@@ -2015,7 +2020,7 @@ class Template
     /**
      * Set a choice node to become visible in a document.
      *
-     * @param string $choice The name of the choice
+     * @param string|\DOMElement $choice The name of the choice
      * @return Template
      * @deprecated use setVisible($choice)
      * @remove 2.6.0
@@ -2028,7 +2033,7 @@ class Template
     /**
      * Set a choice node to become invisible in a document.
      *
-     * @param string $choice The name of the choice
+     * @param string|\DOMElement $choice The name of the choice
      * @return Template
      * @deprecated use setVisible($choice, false)
      * @remove 2.6.0
@@ -2041,7 +2046,7 @@ class Template
     /**
      * Show a hidden var
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @since 2.0.15
      * @deprecated use setVisible($choice)
      * @return Template
@@ -2055,7 +2060,7 @@ class Template
      * Remove a var from the template, this will not remove the node until it is parsed
      * so calling show($var) before the template is parsed will undo this action
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @since 2.0.15
      * @deprecated use setVisible($choice, false)
      * @return Template
@@ -2066,7 +2071,7 @@ class Template
     }
 
     /**
-     * @param string $var
+     * @param string|\DOMElement $var
      * @return bool
      * @deprecated Use has($var)
      * @remove 2.6.0
@@ -2087,7 +2092,7 @@ class Template
     }
 
     /**
-     * @param null $var
+     * @param null|string|\DOMElement $var
      * @return mixed
      * @deprecated use get()
      * @remove 2.6.0
@@ -2095,7 +2100,7 @@ class Template
     public function getVarList($var = null) { return $this->get($var); }
 
     /**
-     * @param string $var
+     * @param string|\DOMElement $var
      * @return Template
      * @deprecated use remove()
      * @remove 2.6.0
@@ -2108,7 +2113,7 @@ class Template
      * the first one is selected by default.
      * Use the $idx if there is more than one var block
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param int $idx
      * @return string
      * @deprecated Use Template::getHtml()
@@ -2129,7 +2134,7 @@ class Template
     /**
      * Insert HTML formatted text into a var element.
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param string $html
      * @return Template
      * @warn bug exists where after insertion the template loses
@@ -2188,7 +2193,7 @@ class Template
      * Insert a DOMDocument into a var element
      * The var tag will not be replaced only its contents
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param \DOMDocument $doc
      * @return Template
      */
@@ -2214,7 +2219,7 @@ class Template
      *
      * This will also grab any headers in the supplied template.
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param Template $template
      * @param bool $parse Set to false to disable template parsing
      * @return Template
@@ -2231,7 +2236,7 @@ class Template
     /**
      * Get a var element node from the document.
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @return \DOMElement[]|\DOMElement
      * @deprecated use getVar($var)
      * @remove 2.6.0
