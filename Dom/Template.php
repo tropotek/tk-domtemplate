@@ -1486,7 +1486,7 @@ class Template
      * Append a template to a var element, it will parse the template before appending it
      * This will also copy any headers in the $template.
      *
-     * @param string $var
+     * @param string|\DOMElement $var
      * @param Template $template
      * @return Template
      */
