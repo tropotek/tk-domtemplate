@@ -1,6 +1,8 @@
 <?php
 namespace Dom\Modifier\Filter;
 
+use Tk\ConfigTrait;
+
 /**
  * Convert Urls to Template relative and project relative
  *
@@ -34,6 +36,7 @@ namespace Dom\Modifier\Filter;
  */
 class UrlPath extends Iface
 {
+    use ConfigTrait;
 
     /**
      * @var array
@@ -96,13 +99,11 @@ class UrlPath extends Iface
      */
     public function init($doc)
     {
-        // TODO: Remove the config object from here.......
-        $config = \Tk\Config::getInstance();
-        // Try to automatically determin the template path
+        // Try to automatically determine the template path
         if (!$this->templateUrl && $doc->documentURI) {
-            $urlStr = str_replace($config->getSitePath(), '', $doc->documentURI);
+            $urlStr = str_replace($this->getConfig()->getSitePath(), '', $doc->documentURI);
             $urlStr = dirname($urlStr);
-            $urlStr = $config->getSiteUrl() . $urlStr;
+            $urlStr = $this->getConfig()->getSiteUrl() . $urlStr;
             $this->templateUrl = $urlStr;
         }
     }
@@ -125,16 +126,34 @@ class UrlPath extends Iface
     public function executeNode(\DOMElement $node)
     {
         // Modify local paths to full path url's
+        /** @var \DOMAttr $attr */
         foreach ($node->attributes as $attr) {
             if (in_array(strtolower($attr->nodeName), $this->attrSrc)) {
                 if (preg_match('/^#$/', $attr->value)) {    // ignore hash urls
                     $attr->value = 'javascript:;';      // Because of the '#' double redirect bug on old FF browsers
                     continue;
                 }
+
+                // Dissable conversion of nodes with 'data-no-rel="data-no-rel"`
+                $noRel = false;
+                foreach ($node->attributes as $a) {
+                    if ($a->nodeName == 'data-no-rel') {
+                        $noRel = true;
+                    }
+                }
+                if ($noRel) continue;
+
+                // And start of URL  matched existing dev path, then ignore.
+                // Temp fix to stop conversion of WYSIWYG links in debug mode.
+                if ($this->getConfig()->isDebug() && substr($attr->value, 0, strlen($this->siteUrl)) === $this->siteUrl) {
+                    continue;
+                }
+
                 if (
                     preg_match('/^#/', $attr->value) ||     // ignore fragment urls
                     preg_match('/(\S+):(\S+)/', $attr->value) || preg_match('/^\/\//', $attr->value) ||   // ignore full urls and schema-less urls
                     preg_match('/^[a-z0-9]{1,10}:/', $attr->value)  // ignore Full URL's
+
                 ) {
                     continue;
                 }
