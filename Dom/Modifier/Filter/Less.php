@@ -2,6 +2,7 @@
 namespace Dom\Modifier\Filter;
 
 use Dom\Modifier\Exception;
+use Tk\Log;
 
 /**
  * Compile all CSS LESS code to CSS
@@ -176,7 +177,10 @@ class Less extends Iface
                 $css = trim(file_get_contents($path));
         } else {
             $css_file_name = \Less_Cache::Regen($this->source, $options);
-            $css = trim(file_get_contents($this->cachePath . '/' . $css_file_name));
+            if (is_file($this->cachePath . '/' . $css_file_name))
+                $css = trim(file_get_contents($this->cachePath . '/' . $css_file_name));
+            else
+                Log::error('Path is a directory: ' . $this->cachePath . '/' . $css_file_name );
             //throw new \Exception('LESS Parser: Non cached parser not implemented, please supply a valid `cachePath` value');
         }
 
