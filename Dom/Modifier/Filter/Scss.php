@@ -184,8 +184,6 @@ class Scss extends Iface
                 }
                 $css .= $cCss;
 
-                //vd($scss->getParsedFiles());
-
             } else {
                 \Tk\Log::warning('Invalid file: ' . $path);
             }

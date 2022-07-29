@@ -95,7 +95,6 @@ class PageBytes extends Iface
 
     private function url2path($url)
     {
-        //vd($this->baseUrl, $this->baseUrlPath);
         if (preg_match('/^' . preg_quote($this->baseUrl, '/') . '/', $url)) {
             $url = preg_replace('/^' . preg_quote($this->baseUrl, '/') . '/', '', $url);
         }
