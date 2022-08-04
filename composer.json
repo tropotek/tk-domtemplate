@@ -1,5 +1,5 @@
 {
-  "name": "uom/tk-domtemplate",
+  "name": "ttek/tk-domtemplate",
   "type": "library",
   "description": "A PHP DOM Template library using XML/HTML files for templates",
   "keywords": [
@@ -13,6 +13,12 @@
     {
       "name": "Michael Mifsud",
       "homepage": "http://www.tropotek.com/"
+    }
+  ],
+  "funding": [
+    {
+      "type": "Paypal",
+      "url": "https://www.paypal.me/tropotek"
     }
   ],
   "autoload": {
