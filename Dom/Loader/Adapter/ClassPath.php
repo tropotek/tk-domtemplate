@@ -13,7 +13,7 @@ use \Dom\Template;
  *      The adapter will look for a template in the supplied path for example:
  *          /supplied/template/path/App_Module_Index.xtpl
  *
- * @author Michael Mifsud <info@tropotek.com>
+ * @author Michael Mifsud <http://www.tropotek.com/>
  * @see http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */

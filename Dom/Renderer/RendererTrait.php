@@ -9,7 +9,7 @@ use Dom\Template;
  * In rare cases use this to add the get/set template to your renderer object
  * Do not forget to implement the DisplayInterface if you need the show() method
  *
- * @author Michael Mifsud <info@tropotek.com>
+ * @author Michael Mifsud <http://www.tropotek.com/>
  * @see http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */

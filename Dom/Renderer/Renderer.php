@@ -21,7 +21,7 @@ use Dom\Template;
  * do not forget to implement the DisplayInterface if you need the show() method
  *
  *
- * @author Michael Mifsud <info@tropotek.com>
+ * @author Michael Mifsud <http://www.tropotek.com/>
  * @see http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  */

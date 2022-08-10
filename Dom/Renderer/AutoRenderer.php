@@ -23,7 +23,7 @@ use Dom\Exception;
  * library and introduces the need for logic into the template which is what we are trying to avoid.
  *
  *
- * @author Michael Mifsud <info@tropotek.com>
+ * @author Michael Mifsud <http://www.tropotek.com/>
  * @see http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  * @deprecated Use this as a template to create something to suit your own requirements...

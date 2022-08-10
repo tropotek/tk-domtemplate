@@ -11,7 +11,7 @@ namespace Dom;
  * @see https://en.wikipedia.org/wiki/LIFO_%28education%29
  *
  *
- * @author Michael Mifsud <info@tropotek.com>
+ * @author Michael Mifsud <http://www.tropotek.com/>
  * @see http://www.tropotek.com/
  * @license Copyright 2015 Michael Mifsud
  */
