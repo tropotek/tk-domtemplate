@@ -77,6 +77,7 @@ class UrlPath extends Iface
     {
         $this->siteUrl = rtrim($siteUrl, '/');
         $this->templateUrl = rtrim($templateUrl, '/');
+        vd($this->siteUrl, $this->templateUrl);
     }
 
     /**
@@ -145,7 +146,7 @@ class UrlPath extends Iface
 
                 // And start of URL  matched existing dev path, then ignore.
                 // Temp fix to stop conversion of WYSIWYG links in debug mode.
-                if ($this->getConfig()->isDebug() && substr($attr->value, 0, strlen($this->siteUrl)) === $this->siteUrl) {
+                if ($this->getConfig()->isDebug() && !empty(rtrim($this->siteUrl, '/')) && substr($attr->value, 0, strlen($this->siteUrl)) === $this->siteUrl) {
                     continue;
                 }
 
