@@ -77,7 +77,6 @@ class UrlPath extends Iface
     {
         $this->siteUrl = rtrim($siteUrl, '/');
         $this->templateUrl = rtrim($templateUrl, '/');
-        vd($this->siteUrl, $this->templateUrl);
     }
 
     /**
