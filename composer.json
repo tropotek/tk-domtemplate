@@ -1,41 +1,41 @@
 {
-    "name": "ttek/tk-domtemplate",
-    "type": "library",
-    "description": "A PHP DOM Template library using XML/HTML files for templates",
-    "keywords":  [
-        "Dom",
-        "tropotek",
-        "dom-template"
-    ],
-    "time": "2022-08-11",
-    "license": "MIT",
-    "authors":  [
-         {
-            "name": "Michael Mifsud",
-            "homepage": "http://www.tropotek.com/"
-        }
-    ],
-    "funding":  [
-         {
-            "type": "Paypal",
-            "url": "https://www.paypal.me/tropotek"
-        }
-    ],
-    "autoload":  {
-        "psr-0":  {
-            "Dom\\": ""
-        }
-    },
-    "require":  {
-        "php": "^7.3||^8.0",
-        "ext-dom": "*",
-        "ext-tidy": "*",
-        "wikimedia/less.php": "1.7.*",
-        "scssphp/scssphp": "1.0.*"
-    },
-    "extra":  {
-        "branch-alias":  {
-            "dev-master": "3.2.x-dev"
-        }
+  "name": "ttek/tk-domtemplate",
+  "type": "library",
+  "description": "A PHP DOM Template library using XML/HTML files for templates",
+  "keywords": [
+    "Dom",
+    "tropotek",
+    "dom-template"
+  ],
+  "time": "2019-04-09",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Michael Mifsud",
+      "homepage": "http://www.tropotek.com/"
     }
+  ],
+  "funding": [
+    {
+      "type": "Paypal",
+      "url": "https://www.paypal.me/tropotek"
+    }
+  ],
+  "autoload": {
+    "psr-0": {
+      "Dom\\": ""
+    }
+  },
+  "require": {
+    "php": "^7.3||^8.0",
+    "ext-dom": "*",
+    "ext-tidy": "*",
+    "wikimedia/less.php": "1.7.*",
+    "scssphp/scssphp": "1.0.*"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "3.2.x-dev"
+    }
+  }
 }
