@@ -12,6 +12,7 @@ use Dom\Template;
  * @author Michael Mifsud
  * @author Darryl Ross
  * @see http://www.domtemplate.com/
+ * @see http://www.tropotek.com/
  * @license Copyright 2007
  */
 class Textarea extends Element
@@ -21,9 +22,8 @@ class Textarea extends Element
      * Set the value of this form element
      *
      * @param string $value
-     * @return Textarea
      */
-    public function setValue($value)
+    public function setValue($value): Textarea
     {
         $dom = $this->element->ownerDocument;
         $textNode = $dom->createTextNode($value);

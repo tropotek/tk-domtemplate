@@ -38,20 +38,26 @@ ob_start();
 $path = dirname(dirname(dirname(__FILE__)));
 include_once $path . '/Dom/Exception.php';
 include_once $path . '/Dom/Template.php';
+include_once $path . '/Dom/Repeat.php';
 
 // Create a template from the html in the buffer
 $buff = ob_get_clean();
 $template = \Dom\Template::load($buff);
 
 // Set the pageTitle tag  --> <h1 var="pageTitle">Default Text</h1>
-$template->insertText('pageTitle', 'Dynamic Page Title');
+$template->setText('pageTitle', 'Dynamic Page Title');
 
 // Add some dynamic page content  --> <p var="content01"></p>
 $content = sprintf('<b>Dynamic Text</b> Phasellus metus lorem, ornare non; aliquam convallis, luctus sed, sem.
 Cras vel urna nec magna euismod sollicitudin. Morbi vehicula. Nunc consequat.
 In hac habitasse platea dictumst.');
+$content = sprintf('<p><b>Dynamic Text</b> Phasellus metus lorem, ornare non; aliquam convallis, luctus sed, sem.
+Cras vel urna nec magna euismod sollicitudin. Morbi vehicula. Nunc consequat.
+In hac habitasse platea dictumst.</p>');
 $template->appendText('content01', $content);
 $template->appendHtml('content02', $content);
+$template->appendHtml('content02', $content);
+//$template->replaceHtml('content02', $content);
 
 // Add some list data --> <ul choice="list">...
 $listData = array('http://www.tropotek.com/' => 'Tropotek Home Page', 'http://www.phpdruid.com/' => 'PHPDruid Home Page', 'http://www.domtemplate.com' => 'Php Dom Template');
@@ -60,7 +66,7 @@ if (count($listData) > 0) {
 }
 foreach ($listData as $url => $value) {
     $repeat = $template->getRepeat('listRow');
-    $repeat->insertText('listUrl', $value);
+    $repeat->setText('listUrl', $value);
     $repeat->setAttr('listUrl', 'href', $url);
     $repeat->setAttr('listUrl', 'title', $value);
     $repeat->setAttr('listUrl', 'onclick', 'window.open(this.href);return false;');

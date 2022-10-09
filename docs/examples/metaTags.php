@@ -35,8 +35,9 @@ include_once $path . '/Dom/Template.php';
 
 // Create a template from the html in the buffer
 $buff = ob_get_clean();
+
 $template = \Dom\Template::load($buff);
-$template->insertText('helloWorld', 'This is the `Hello World` Dynamic text.');
+$template->setText('helloWorld', 'This is the `Hello World` Dynamic text.');
 // Create some css styles
 $css = <<<CSS
 body {font-size: 80%; background-color: #CCC; }

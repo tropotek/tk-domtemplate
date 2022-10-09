@@ -30,7 +30,6 @@
     "php": "^7.3||^8.0",
     "ext-dom": "*",
     "ext-tidy": "*",
-    "wikimedia/less.php": "1.7.*",
     "scssphp/scssphp": "1.0.*"
   },
   "extra": {

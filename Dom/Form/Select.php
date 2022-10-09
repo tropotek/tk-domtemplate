@@ -10,39 +10,27 @@ use Dom\Template;
  * @author Michael Mifsud
  * @author Darryl Ross
  * @see http://www.domtemplate.com/
+ * @see http://www.tropotek.com/
  * @license Copyright 2007
  */
 class Select extends Element
 {
 
     /**
-     * set to false to add spaces (&#160; or &nbsp;)
-     * @var bool
+     * If set to true then option text will be added using createTextNode()
+     * Else the text will be set to the nodeValue param and & will be escaped to &amp;
      */
-    private $useTextNode = true;
+    public static bool $OPTIONS_USE_TEXT_NODE = true;
 
-    /**
-     * Use Text Nodes, Set to True by default
-     *
-     * @param bool $b
-     */
-    public function useTextNodes($b)
-    {
-        $this->useTextNode = $b;
-    }
 
     /**
      * Append an 'Option' to this 'Select' object
      *
      * If no value is supplied the text parameter is used as the value.
      *
-     * NOTE: Ensure no comment nodes are in the select's node tree.
-     * @param string $text The text shown in the dropdown
-     * @param string $value The value for the select option
-     * @param string $optGroup Use this optgroup if it exists
-     * @return \DOMElement
+     * @note Ensure no comment nodes are in the select's node tree.
      */
-    public function appendOption($text, $value = null, $optGroup = '')
+    public function appendOption(string $text, ?string $value = null, string $optGroup = ''): \DOMElement
     {
         $doc = $this->element->ownerDocument;
         $nl = $doc->createTextNode("\n");
@@ -53,7 +41,7 @@ class Select extends Element
             $option->setAttribute('value', $value);
         }
 
-        if ($this->useTextNode) {
+        if (self::$OPTIONS_USE_TEXT_NODE) {
             $text_el = $doc->createTextNode($text);
             $option->appendChild($text_el);
         } else {
@@ -81,13 +69,8 @@ class Select extends Element
 
     /**
      * Append an 'OptGroup' to the base node or the optGroup
-     *
-     *
-     * @param string $label The label for the optGroup
-     * @param string $optGroup Append to this optgroup if it exists
-     * @return \DOMElement
      */
-    public function appendOptGroup($label, $optGroup = '')
+    public function appendOptGroup(string $label, string $optGroup = ''): \DOMElement
     {
         $doc = $this->element->ownerDocument;
         $nl = $doc->createTextNode("\n");
@@ -111,11 +94,8 @@ class Select extends Element
 
     /**
      * Set the selected value of the form element
-     *
-     * @param string|array $value A string for single, an array for multiple
-     * @return $this
      */
-    public function setValue($value)
+    public function setValue($value): Select
     {
         if (is_array($value)) {
             if ($this->isMultiple()) {
@@ -145,18 +125,18 @@ class Select extends Element
 
     /**
      * Return the selected value,
-     * Will return an array if  multiple select is enabled.
+     * Will return an array if multiple select is enabled.
      *
-     * @return \DOMNode|\DOMNode[] Returns null if nothing selected.
+     * @return string|array
      */
     public function getValue()
     {
         $selected = $this->findSelected($this->element);
         if (count($selected) > 0) {
             if ($this->isMultiple()) {
-                return $selected;
+                return array_map(fn($r) => $r->textContent, $selected);
             } else {
-                return $selected[0];
+                return $selected[0]->textContent;
             }
         }
         return null;
@@ -164,10 +144,8 @@ class Select extends Element
 
     /**
      * Clear this 'select' element of all its 'option' elements.
-     *
-     * @return $this
      */
-    public function removeOptions()
+    public function removeOptions(): Select
     {
         while ($this->element != null && $this->element->hasChildNodes()) {
             $this->element->removeChild($this->element->childNodes->item(0));
@@ -177,22 +155,17 @@ class Select extends Element
 
     /**
      * Clear all selected elements
-     *
-     * @return $this
      */
-    public function clearSelected()
+    public function clearSelected(): Select
     {
         $this->clearSelectedFunction($this->element);
         return $this;
     }
 
     /**
-     * Find the opt group node with the name
-     *
-     * @param \DOMElement $node
-     * @return \DOMElement|Select
+     * Find the option group node with the name
      */
-    private function clearSelectedFunction($node)
+    private function clearSelectedFunction(\DOMNode $node): void
     {
         if ($node->nodeType == \XML_ELEMENT_NODE) {
             if ($node->nodeName == 'option' && $node->hasAttribute('selected')) {
@@ -202,17 +175,12 @@ class Select extends Element
                 $this->clearSelectedFunction($child);
             }
         }
-        return $this;
     }
 
     /**
-     * Find the opt group node with the name
-     *
-     * @param \DOMElement $node
-     * @param string $name
-     * @return \DOMElement
+     * Find the option group node with the name
      */
-    public function findOptGroup($node, $name)
+    public function findOptGroup(\DOMNode $node, string $name): ?\DOMNode
     {
         $foundNode = null;
         if ($node->nodeType == \XML_ELEMENT_NODE) {
@@ -231,12 +199,8 @@ class Select extends Element
 
     /**
      * Find an option node
-     *
-     * @param \DOMElement $node
-     * @param string $value
-     * @return \DOMElement
      */
-    public function findOption($node, $value)
+    public function findOption(\DOMNode $node, string $value): ?\DOMNode
     {
         $foundNode = null;
         if ($node->nodeType == \XML_ELEMENT_NODE) {
@@ -256,10 +220,10 @@ class Select extends Element
     /**
      * Find the selected values to this select box
      *
-     * @param \DOMElement $node
-     * @return \DOMElement|\DOMElement[]
+     * @param \DOMNode $node
+     * @return \DOMNode|\DOMNode[]
      */
-    public function findSelected($node)
+    public function findSelected(\DOMNode $node)
     {
         $foundNodes = array();
         if ($node->nodeType == XML_ELEMENT_NODE) {
@@ -278,11 +242,8 @@ class Select extends Element
 
     /**
      * Check if the opt group exists
-     *
-     * @param string $name
-     * @return bool
      */
-    public function optGroupExists($name)
+    public function optGroupExists(string $name): bool
     {
         return $this->findOptGroup($this->element, $name) != null;
     }
@@ -291,11 +252,8 @@ class Select extends Element
      * Set the select list to handle multiple selections
      * <b>NOTE:</b> When multiple is disabled and multiple elements are selected
      *  it behaviour is unknown and browser specific.
-     *
-     * @param bool $b
-     * @return $this
      */
-    public function enableMultiple($b)
+    public function enableMultiple(bool $b): Select
     {
         if ($b) {
             $this->element->setAttribute('multiple', 'multiple');
@@ -308,9 +266,9 @@ class Select extends Element
     /**
      * Return if this is a multiple select or not.
      *
-     * @return bool Returns true if multiple selects are allowed
+     * Returns true if multiple selects are allowed
      */
-    public function isMultiple()
+    public function isMultiple(): bool
     {
         return $this->element->hasAttribute('multiple');
     }

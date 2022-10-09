@@ -11,6 +11,7 @@ use Dom\Template;
  * @author Michael Mifsud
  * @author Darryl Ross
  * @see http://www.domtemplate.com/
+ * @see http://www.tropotek.com/
  * @license Copyright 2007
  */
 class Input extends Element
@@ -18,11 +19,8 @@ class Input extends Element
 
     /**
      * Set the checked attribute of an element
-     *
-     * @param bool $b
-     * @return $this
      */
-    public function setChecked($b)
+    public function setChecked(bool $b): Input
     {
         if ($b) {
             $this->element->setAttribute('checked', 'checked');
@@ -34,21 +32,16 @@ class Input extends Element
 
     /**
      * Get the checked state of this element
-     *
-     * @return bool
      */
-    public function isChecked()
+    public function isChecked(): bool
     {
         return $this->element->hasAttribute('checked');
     }
 
     /**
      * Set the value of this form element.
-     *
-     * @param string $value
-     * @return Input
      */
-    public function setValue($value)
+    public function setValue($value): Input
     {
         if ($this->getType() == 'checkbox' || $this->getType() == 'radio') {
             $this->form->setCheckedByValue($this->getName(), $value);
@@ -60,8 +53,6 @@ class Input extends Element
 
     /**
      * Return the value of this form element
-     *
-     * @return string
      */
     public function getValue()
     {

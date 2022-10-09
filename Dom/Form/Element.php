@@ -11,29 +11,18 @@ use Dom\Template;
  * @author Michael Mifsud
  * @author Darryl Ross
  * @see http://www.domtemplate.com/
+ * @see http://www.tropotek.com/
  * @license Copyright 2007
  */
 abstract class Element
 {
 
-    /**
-     * This could be a single DOMElement or an array of DOMElement
-     * @var \DOMElement
-     */
-    protected $element = null;
+    protected ?\DOMElement $element = null;
 
-    /**
-     * @var Form
-     */
-    protected $form = null;
+    protected ?Form $form = null;
 
-    /**
-     * __construct
-     *
-     * @param \DOMElement $element
-     * @param Form $form
-     */
-    public function __construct($element, $form = null)
+
+    public function __construct(\DOMElement $element, Form $form = null)
     {
         $this->element = $element;
         $this->form = $form;
@@ -41,11 +30,8 @@ abstract class Element
 
     /**
      * Set the name of this element
-     *
-     * @param string $name
-     * @return $this
      */
-    public function setName($name)
+    public function setName(string $name): Element
     {
         $this->element->setAttribute('name', $name);
         return $this;
@@ -53,40 +39,32 @@ abstract class Element
 
     /**
      * Get the name of this element
-     *
-     * @return string The name of this element.
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->element->getAttribute('name');
     }
 
     /**
      * Get the DomElement node for this form element
-     *
-     * @return \DOMElement
      */
-    public function getNode()
+    public function getNode(): ?\DOMElement
     {
         return $this->element;
     }
 
     /**
      * Get the parent DOM form object
-     *
-     * @return Form
      */
-    public function getForm()
+    public function getForm(): ?Form
     {
         return $this->form;
     }
 
     /**
      * Get the Type's Template
-     *
-     * @return Template
      */
-    public function getTemplate()
+    public function getTemplate(): ?Template
     {
         if ($this->form) {
             return $this->form->getTemplate();
@@ -103,10 +81,9 @@ abstract class Element
      *  o select => The value of the option to be selected
      *  o textarea => the content of the textarea
      *
-     * @param string $value
-     * @return Element
+     * @param string|array $value
      */
-    abstract function setValue($value);
+    abstract function setValue($value): Element;
 
     /**
      * Return the value of the element, or the selected value.
@@ -117,10 +94,8 @@ abstract class Element
 
     /**
      * Return the form element type attribute
-     *
-     * @return string
      */
-    public function getType()
+    public function getType(): string
     {
         return $this->element->getAttribute('type');
     }
@@ -128,10 +103,8 @@ abstract class Element
 
     /**
      * Disable this element, adds a disable attribute to the node
-     *
-     * @return $this
      */
-    public function disable()
+    public function disable(): Element
     {
         $this->element->setAttribute('disabled', 'disabled');
         return $this;
@@ -139,10 +112,8 @@ abstract class Element
 
     /**
      * get the disabled state of this node
-     *
-     * @return bool
      */
-    public function isDisabled()
+    public function isDisabled(): bool
     {
         return $this->element->hasAttribute('disabled');
 
@@ -150,12 +121,8 @@ abstract class Element
 
     /**
      * Set the attribute name and value
-     *
-     * @param string $name
-     * @param string $value
-     * @return $this
      */
-    public function setAttribute($name, $value)
+    public function setAttribute(string $name, string $value): Element
     {
         $this->element->setAttribute($name, $value);
         return $this;
@@ -163,11 +130,8 @@ abstract class Element
 
     /**
      * Set the name of this element
-     *
-     * @param string $name
-     * @return string
      */
-    public function getAttribute($name)
+    public function getAttribute(string $name): string
     {
         return $this->element->getAttribute($name);
     }

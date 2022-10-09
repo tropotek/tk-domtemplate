@@ -4,13 +4,15 @@
  * @see http://www.tropotek.com/
  * @license Copyright 2007 Michael Mifsud
  */
-namespace tests;
+namespace Dom;
 
+use PHPUnit\Framework\TestCase;
 use \Dom\Template as Template;
+
 /**
  *
  */
-class TemplateTest extends \PHPUnit_Framework_TestCase
+class TemplateTest extends TestCase
 {
     /**
      * @var string
@@ -55,23 +57,28 @@ HTML;
 
     }
 
-    public function setUp()
+    /**
+     * This method is called before each test.
+     */
+    protected function setUp(): void
     {
 
     }
 
-    public function tearDown()
+    /**
+     * This method is called after each test.
+     */
+    protected function tearDown(): void
     {
 
     }
-
 
     /**
      * Test basic template features
      * Load, Attr, text
      *
      */
-    public function testDomTemplateLoadFile()
+    public function test_domTemplateLoadFile()
     {
         // test the load file and string methods
         $tpl = Template::loadFile(dirname(__FILE__).'/data/test.html');
@@ -84,14 +91,14 @@ HTML;
      * Load, Attr, text
      *
      */
-    public function testDomTemplateBasic()
+    public function test_domTemplateBasic()
     {
         // test the load file and string methods
         $tpl = Template::loadFile(dirname(__FILE__).'/data/test.html');
 
 
         $tpl = Template::load($this->tplStr);
-        $tpl->insertText('title', 'Test Title');
+        $tpl->setText('title', 'Test Title');
         $tpl->setAttr('title', 'id', 'title');
 
         $result1 = <<<HTML
@@ -116,7 +123,7 @@ HTML;
      * Test
      *
      */
-    public function testDomTemplateInsertTemplate()
+    public function test_domTemplateInsertTemplate()
     {
         $tpl = Template::load($this->tplStr);
 
@@ -145,7 +152,7 @@ HTML;
      * Test
      *
      */
-    public function testDomTemplateInsertHtml()
+    public function test_domTemplateInsertHtml()
     {
 
         $tpl = Template::load($this->tplStr);
@@ -174,7 +181,7 @@ HTML;
      * Test
      *
      */
-    public function testDomTemplateReplaceTemplate()
+    public function test_domTemplateReplaceTemplate()
     {
         $tpl = Template::load($this->tplStr);
         $tpl1 = Template::load($this->tplStr1);
@@ -204,7 +211,7 @@ HTML;
      * Test
      *
      */
-    public function testDomTemplateReplaceHtml()
+    public function test_domTemplateReplaceHtml()
     {
         $tpl = Template::load($this->tplStr);
         $tpl->replaceHtml('content', $this->tplStr1);
@@ -232,7 +239,7 @@ HTML;
      * Test
      *
      */
-    public function testDomTemplateAppendTemplate()
+    public function test_domTemplateAppendTemplate()
     {
         $tpl = Template::load($this->tplStr);
         $tpl1 = Template::load($this->tplStr1);
@@ -263,7 +270,7 @@ HTML;
      * Test
      *
      */
-    public function testDomTemplateAppendHtml()
+    public function test_domTemplateAppendHtml()
     {
         $tpl = Template::load($this->tplStr);
         $tpl->appendHtml('content', $this->tplStr1);

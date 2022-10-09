@@ -206,7 +206,7 @@ Then we can access the form through the code lik this:
 $template = \Dom\Template::load($buff);
 
 // Set the pageTitle tag  --> <h1 var="pageTitle">Default Text</h1>
-$template->insertText('pageTitle', 'Dynamic Form Example');
+$template->setText('pageTitle', 'Dynamic Form Example');
 
 $domForm = $template->getForm('contactForm');
 // Init any form elements to a default status

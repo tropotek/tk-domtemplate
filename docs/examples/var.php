@@ -34,6 +34,6 @@ include_once $path . '/Dom/Template.php';
 $buff = trim(ob_get_clean());
 
 $template = \Dom\Template::load($buff);
-$template->insertText('helloWorld', 'This is the `Hello World` Dynamic text.');
+$template->setText('helloWorld', 'This is the `Hello World` Dynamic text.');
 echo $template->toString();
 ?>

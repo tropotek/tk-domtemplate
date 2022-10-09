@@ -7,37 +7,23 @@ namespace Dom;
  * @author Michael Mifsud
  * @author Darryl Ross
  * @see http://www.domtemplate.com/
+ * @see http://www.tropotek.com/
  * @license Copyright 2007
  */
 class Repeat extends Template
 {
+    protected ?\DOMElement $repeatNode = null;
 
-    /**
-     * @var \DOMElement
-     */
-    protected $repeatNode = null;
+    protected string $repeatName = '';
 
-    /**
-     * @var string
-     */
-    protected $repeatName = '';
+    protected ?Template $parent = null;
 
-    /**
-     * @var Template
-     */
-    protected $repeatParent = null;
 
-    /**
-     * __construct
-     *
-     * @param \DOMElement $node
-     * @param Template $parent
-     */
-    public function __construct($node, Template $parent)
+    public function __construct(\DOMElement $node, Template $parent)
     {
         $this->repeatNode = $node;
         $this->repeatName = $node->getAttribute('repeat');
-        $this->repeatParent = $parent;
+        $this->parent = $parent;
         $node->removeAttribute('repeat');
 
         $repeatDoc = new \DOMDocument();
@@ -47,56 +33,35 @@ class Repeat extends Template
         parent::__construct($repeatDoc, $parent->getEncoding());
     }
 
-
-    public function __clone()
-    {
-        parent::__clone();
-        // TODO: To implement this we need a function like addVar that checks if a node
-        //       already exists in the list under a different name, or we check when we append
-        //       nodes to a var and only add it once pre not even if it is under a different var name?????
-        //       All this may slow it down to much.
-        //$this->var[$this->repeatName][] = $this->document->documentElement;
-    }
-
-
     /**
      * Append a repeating region to the document.
      * Repeating regions are appended to the supplied var.
      * If the var is null or '' then the repeating region is appended
      * to is original location in the parent template.
-     *
-     * @param string $var
-     * @param Template $destRepeat
-     * @return \DOMElement|\DOMNode
+     * @throws \DOMException
      */
-    public function appendRepeat($var = '', Template $destRepeat = null)
+    public function appendRepeat(string $var = '', Template $destRepeat = null): ?\DOMElement
     {
-        if (!$this->isWritable()) {
-            return null;
-        }
-        // $this->mergeTemplate($template);
-        $this->repeatParent->setHeaderList(array_merge($this->repeatParent->getHeaderList(), $this->getHeaderList()));
-        $this->repeatParent->setBodyTemplateList(array_merge($this->repeatParent->getBodyTemplateList(), $this->getBodyTemplateList()));
+        if ($this->getParent()->isParsed()) return null;
+
+        $this->parent->headers = array_merge($this->parent->getHeaderList(), $this->getHeaderList());
+        $this->parent->bodyTemplates = array_merge($this->parent->getBodyTemplateList(), $this->getBodyTemplateList());
 
         $appendNode = $this->repeatNode;
         if ($var) {
-            if ($this->repeatParent) {
-                $appendNode = $this->repeatParent->getVar($var);
-            }
+            $appendNode = $this->parent->getVar($var);
             if ($destRepeat && $destRepeat->getVar($var)) {
                 $appendNode = $destRepeat->getVar($var);
             }
         }
 
         $insertNode = $appendNode->ownerDocument->importNode($this->getDocument()->documentElement, true);
-
         if ($appendNode->parentNode) {
             if (!$var) {
                 $appendNode->parentNode->insertBefore($insertNode, $appendNode);
                 return $insertNode;
             }
         }
-
         $appendNode->appendChild($insertNode);
 
         return $insertNode;
@@ -107,49 +72,37 @@ class Repeat extends Template
      * Repeating regions are appended to the supplied var.
      * If the var is null or '' then the repeating region is appended
      * to is original location in the parent template.
-     *
-     * @param string $var
-     * @param Template $destRepeat
-     * @return \DOMElement|\DOMNode
      */
-    public function prependRepeat($var = '', Template $destRepeat = null)
+    public function prependRepeat(string $var = '', Template $destRepeat = null): ?\DOMElement
     {
-        if (!$this->isWritable()) {
-            return null;
-        }
-        $this->repeatParent->setHeaderList(array_merge($this->repeatParent->getHeaderList(), $this->getHeaderList()));
+        if ($this->getParent()->isParsed()) return null;
+
+        $this->parent->headers = array_merge($this->parent->getHeaderList(), $this->getHeaderList());
+        $this->parent->bodyTemplates = array_merge($this->parent->getBodyTemplateList(), $this->getBodyTemplateList());
         $appendNode = $this->repeatNode;
         if ($var) {
-            if ($this->repeatParent) {
-                $appendNode = $this->repeatParent->getVar($var);
-            }
+            $appendNode = $this->parent->getVar($var);
             if ($destRepeat && $destRepeat->getVar($var)) {
                 $appendNode = $destRepeat->getVar($var);
             }
         }
-        $insertNode = $appendNode->ownerDocument->importNode($this->getDocument()->documentElement, true);
-
-        return $insertNode;
+        return $appendNode->ownerDocument->importNode($this->getDocument()->documentElement, true);
     }
 
     /**
      * Return the repeat node...
-     *
-     * @return \DOMElement
      */
-    public function getRepeatNode()
+    public function getRepeatNode(): ?\DOMElement
     {
         return $this->repeatNode;
     }
 
     /**
      * get the parent template this repeat belongs to.
-     *
-     * @return Template
      */
-    public function getParentTemplate()
+    public function getParent()
     {
-        return $this->repeatParent;
+        return $this->parent;
     }
 
 }
