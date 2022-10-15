@@ -4,20 +4,23 @@ namespace Dom\Renderer;
 use Dom\Template;
 
 /**
- * Template Bootstrap interface
+ * use this on objects that use a show() method and return a template.
  *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
+ * Extend the Renderer class if you want more template functionality.
+ *
+ * @author Tropotek <http://www.tropotek.com/>
  */
 interface DisplayInterface extends RendererInterface
 {
+
     /**
-     * Execute the renderer.
-     * Return an object that your framework can interpret and display.
+     * Implement this in your object to be rendered.
+     * All the code to modfy the Template object should reside here
+     * and once done return the Template.
+     * Be sure to avoid calling this after the template has been parsed
      *
-     * @return null|Template|Renderer
+     * You can call $template->isParsed() and if true return the template to be sure.
      */
-    public function show();
+    function show(): ?Template;
 
 }

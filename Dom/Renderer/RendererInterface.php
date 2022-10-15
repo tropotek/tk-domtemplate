@@ -4,26 +4,20 @@ namespace Dom\Renderer;
 use Dom\Template;
 
 /**
- * Template Renderer interface
- *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
+ * @author Template <http://www.tropotek.com/>
  */
 interface RendererInterface
 {
     /**
      * Get the Template
-     *
-     * @return Template
      */
-    public function getTemplate();
+    public function getTemplate(): ?Template;
 
     /**
      * Set the Template
      *
      * @param Template $template
      */
-    public function setTemplate($template);
+    public function setTemplate(Template $template);
 
 }

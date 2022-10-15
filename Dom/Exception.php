@@ -45,4 +45,9 @@ class Exception extends \Exception {
         }
         return $str;
     }
+
+    public function getAsString(): string
+    {
+        return $this->__toString();
+    }
 }

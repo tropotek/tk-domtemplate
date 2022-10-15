@@ -1,5 +1,5 @@
 <?php
-namespace Dom\Modifier\Filter;
+namespace Dom\Mvc\Modifier;
 
 /**
  * Append all scripts to the bottom of the body tag.
@@ -7,62 +7,37 @@ namespace Dom\Modifier\Filter;
  * for mobile devices to load faster.
  *
  */
-class JsLast extends Iface
+class JsLast extends FilterInterface
 {
     /**
      * Used to set an order priority to a node
      * if < 0 the node is placed higher in the tree 
-     * if > 0 the node is placed lower in the tree 
-     * @var string
+     * if > 0 the node is placed lower in the tree
      */
-    public static $ATTR_PRIORITY = 'data-jsl-priority';
+    public static string $ATTR_PRIORITY = 'data-jsl-priority';
 
     /**
      * Used to ensure the node is not moved/sorted.
-     * @var string
      */
-    public static $ATTR_STATIC = 'data-jsl-static';
+    public static string $ATTR_STATIC = 'data-jsl-static';
     
     /**
-     * Flag to ensure its run once only 
-     * @var bool
+     * Flag to ensure the filter is run once only
      */
-    private $notRun = true;
+    private bool $notRun = true;
 
-    
-    
-    private $head = array();
-    private $body = array();
-    
+    private array $head = [];
 
-    
-    
-    /**
-     * __construct
-     *
-     */
-    public function __construct()
-    {
-
-    }
-
+    private array $body = [];
 
 
     /**
      * pre init the front controller
-     *
-     * @param \DOMDocument $doc
      */
-    public function init($doc)
-    {
-
-    }
-
+    public function init(\DOMDocument $doc) { }
 
     /**
      * Call this method to travers a document
-     *
-     * @param \DOMElement $node
      */
     public function executeNode(\DOMElement $node)
     {
@@ -75,14 +50,11 @@ class JsLast extends Iface
         }
     }
 
-
-
     /**
      * called after DOM tree is traversed
-     *
-     * @param \DOMDocument $doc
      */
-    public function postTraverse($doc) {
+    public function postTraverse(\DOMDocument $doc)
+    {
         if ($this->domModifier->getBody() && $this->notRun) {
             $nodeList = array_merge($this->body, $this->head);
             $this->notRun = false;
@@ -111,8 +83,7 @@ class JsLast extends Iface
                 $this->domModifier->getBody()->appendChild($newNode);
             }
         }
-        
-        
+
     }
 
     /**
@@ -120,24 +91,22 @@ class JsLast extends Iface
      * keep the original order when items are not to be sorted.
      * 
      * @param array $array
-     * @param $value_compare_func
-     * @return mixed
+     * @param callable $value_compare_func
      * @see https://github.com/vanderlee/PHP-stable-sort-functions/blob/master/classes/StableSort.php
      */
-    private function usort(array &$array, $value_compare_func)
+    private function usort(array &$array, callable $value_compare_func): void
     {
         $index = 0;
         foreach ($array as &$item) {
             $item = array($index++, $item);
         }
-        $result = usort($array, function($a, $b) use($value_compare_func) {
+        usort($array, function($a, $b) use($value_compare_func) {
             $result = call_user_func($value_compare_func, $a[1], $b[1]);
             return $result == 0 ? $a[0] - $b[0] : $result;
         });
         foreach ($array as &$item) {
             $item = $item[1];
         }
-        return $result;
     }
 
 }

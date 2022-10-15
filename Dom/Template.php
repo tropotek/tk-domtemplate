@@ -233,6 +233,11 @@ class Template
         libxml_use_internal_errors(true);
 
         $xml = self::cleanXml($xml, $encoding);
+        $isHtml5 = false;
+        if ('<!doctype html>' == strtolower(substr($xml, 0, 15))) {
+            $isHtml5 = true;
+            $xml = substr($xml, 16);
+        }
         $ok = $doc->loadXML($xml);
         if (!$ok) {
             $str = '';
@@ -241,11 +246,12 @@ class Template
             }
             libxml_clear_errors();
             $str .= "\n\n" . \Tk\Str::lineNumbers($xml) . "\n";
-            $e = new Exception('Error Parsing DOM Template', 0, null, $str);
+            $e = new Exception('Error Parsing DOM Template', 500, null, $str);
             throw $e;
         }
 
         $obj = new self($doc, $encoding, $xml);
+        $obj->html5 = $isHtml5;
         return $obj;
     }
 
@@ -308,12 +314,8 @@ class Template
         $this->parsed = false;
         $this->html5 = false;
         $this->orgDocument = clone $doc;
-
         if (!$this->xml) {
             $this->xml = $this->document->saveXML();
-        }
-        if ('<!doctype html>' == strtolower(substr($this->xml, 0, 15))) {
-            $this->html5 = true;
         }
 
         $this->prepareDoc($this->document->documentElement);
@@ -563,7 +565,7 @@ class Template
      * @param string|\DOMElement $var
      * @return array|\DOMElement[]
      */
-    private function getVarList($var = null): array
+    public function getVarList($var = null): array
     {
         if ($var === null) return $this->var;
         if ($var instanceof \DOMElement) return [$var];

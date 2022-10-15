@@ -1,5 +1,5 @@
 <?php
-namespace Dom\Renderer;
+namespace Dom\Renderer\Traits;
 
 use Dom\Template;
 
@@ -9,36 +9,29 @@ use Dom\Template;
  * In rare cases use this to add the get/set template to your renderer object
  * Do not forget to implement the DisplayInterface if you need the show() method
  *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2015 Michael Mifsud
+ * @author Tropotek <http://www.tropotek.com/>
  */
 trait RendererTrait
 {
-    /**
-     * @var Template
-     */
-    protected $template = null;
+
+    protected ?Template $template = null;
 
 
     /**
      * Set a new template for this renderer.
-     *
-     * @param \Dom\Template $template
      */
-    public function setTemplate($template)
+    public function setTemplate(Template $template)
     {
         $this->template = $template;
+        return $this;
     }
 
     /**
      * Get the template
      * This method will try to call the magic method __makeTemplate
      * to create a template if non exits.
-     *
-     * @return \Dom\Template
      */
-    public function getTemplate()
+    public function getTemplate(): ?Template
     {
         $magic = '__makeTemplate';
         if (!$this->hasTemplate() && method_exists($this, $magic)) {
@@ -49,14 +42,9 @@ trait RendererTrait
 
     /**
      * Test if this renderer has a template and is not NULL
-     *
-     * @return bool
      */
-    public function hasTemplate()
+    public function hasTemplate(): bool
     {
-        if ($this->template) {
-            return true;
-        }
-        return false;
+        return ($this->template != null);
     }
 }

@@ -1,7 +1,6 @@
 <?php
-namespace Dom\Modifier\Filter;
+namespace Dom\Mvc\Modifier;
 
-use Dom\Modifier\Exception;
 
 /**
  * This class is meant to be an indicator of sizes not an exact measurement
@@ -9,106 +8,56 @@ use Dom\Modifier\Exception;
  * For example any styles loaded using @import or flies loaded by dynamic javascript
  * will not be calculated.
  *
- * Also no image sizes are calculated.
- *
+ * Note: No image sizes are calculated.
+ * Note: Do not use in production environments.
  */
-class PageBytes extends Iface
+class PageBytes extends FilterInterface
 {
 
-    /**
-     * @var int
-     */
-    private $cssTotal = 0;
+    private int $cssTotal = 0;
 
-    /**
-     * @var int
-     */
-    private $jsTotal = 0;
+    private int $jsTotal = 0;
 
-    /**
-     * @var int
-     */
-    private $htmlTotal = 0;
+    private int $htmlTotal = 0;
 
-    /**
-     * @var array
-     */
-    private $checkedHash = array();
+    private array $checkedHash = [];
+
+    protected string $baseUrl = '';
+
+    protected string $baseUrlPath = '';
+
+    protected string $basePath = '';
 
 
-    protected $baseUrl = '';
-    protected $baseUrlPath = '';
-
-    protected $basePath = '';
-
-
-    /**
-     * __construct
-     * @param $basePath
-     */
-    public function __construct($basePath)
+    public function __construct(string $basePath)
     {
         $this->basePath = $basePath;
         $this->baseUrl = rtrim(\Tk\Uri::create('/')->toString(), '/');
         $this->baseUrlPath = rtrim(\Tk\Uri::create('/')->getPath(), '/');
     }
 
-    function getCssBytes()
+    function getCssBytes(): int
     {
         return $this->cssTotal;
     }
 
-    function getJsBytes()
+    function getJsBytes(): int
     {
         return $this->jsTotal;
     }
 
-    function getHtmlBytes()
+    function getHtmlBytes(): int
     {
         return $this->htmlTotal;
     }
 
     /**
      * pre init the Filter
-     *
-     * @param \DOMDocument $doc
      */
-    public function init($doc)
-    {
-
-    }
-
-    /**
-     * pre init the Filter
-     *
-     * @param \DOMDocument $doc
-     * @throws \Exception
-     *
-     */
-    public function postTraverse($doc)
-    {
-        $str = $doc->saveXML();
-        if ($str) {
-            $this->htmlTotal = \Tk\File::string2Bytes(strlen($str));
-        }
-    }
-
-    private function url2path($url)
-    {
-        if (preg_match('/^' . preg_quote($this->baseUrl, '/') . '/', $url)) {
-            $url = preg_replace('/^' . preg_quote($this->baseUrl, '/') . '/', '', $url);
-        }
-        if (preg_match('/^' . preg_quote($this->baseUrlPath, '/') . '/', $url)) {
-            $url = preg_replace('/^' . preg_quote($this->baseUrlPath, '/') . '/', '', $url);
-        }
-        if ($url[0] != '/' && $url[0] != '\\') $url = '/'.$url;
-        return $this->basePath . $url;
-    }
+    public function init(\DOMDocument $doc) { }
 
     /**
      * Call this method to traverse a document
-     *
-     * @param \DOMElement $node
      */
     public function executeNode(\DOMElement $node)
     {
@@ -125,7 +74,7 @@ class PageBytes extends Iface
                 }
                 $hash = md5($str);
                 if ($str && !in_array($hash, $this->checkedHash)) {
-                    $this->jsTotal += \Tk\File::string2Bytes(strlen($str));
+                    $this->jsTotal += \Tk\FileUtil::string2Bytes(strlen($str));
                 }
                 $this->checkedHash[] = $hash;
                 $str = null;
@@ -135,7 +84,7 @@ class PageBytes extends Iface
                 $str = $node->nodeValue;
                 $hash = md5($str);
                 if ($str && !in_array($hash, $this->checkedHash)) {
-                    $this->cssTotal += \Tk\File::string2Bytes(strlen($str));
+                    $this->cssTotal += \Tk\FileUtil::string2Bytes(strlen($str));
                 }
                 $this->checkedHash[] = $hash;
                 $str = null;
@@ -148,7 +97,7 @@ class PageBytes extends Iface
                 }
                 $hash = md5($str);
                 if ($str && !in_array($hash, $this->checkedHash)) {
-                    $this->cssTotal += \Tk\File::string2Bytes(strlen($str));
+                    $this->cssTotal += \Tk\FileUtil::string2Bytes(strlen($str));
                 }
                 $this->checkedHash[] = $hash;
                 $str = null;
@@ -156,13 +105,32 @@ class PageBytes extends Iface
             }
             $str = null;
         } catch (\Exception $e) {}
-
     }
 
     /**
-     * @return string
+     * called after DOM tree is traversed
      */
-    public function toString()
+    public function postTraverse(\DOMDocument $doc)
+    {
+        $str = $doc->saveXML();
+        if ($str) {
+            $this->htmlTotal = \Tk\FileUtil::string2Bytes(strlen($str));
+        }
+    }
+
+    private function url2path(string $url): string
+    {
+        if (preg_match('/^' . preg_quote($this->baseUrl, '/') . '/', $url)) {
+            $url = preg_replace('/^' . preg_quote($this->baseUrl, '/') . '/', '', $url);
+        }
+        if (preg_match('/^' . preg_quote($this->baseUrlPath, '/') . '/', $url)) {
+            $url = preg_replace('/^' . preg_quote($this->baseUrlPath, '/') . '/', '', $url);
+        }
+        if ($url[0] != '/' && $url[0] != '\\') $url = '/'.$url;
+        return $this->basePath . $url;
+    }
+
+    public function toString(): string
     {
         $str = '';
         $j = $this->getJsBytes();
@@ -171,11 +139,11 @@ class PageBytes extends Iface
         $t = $j + $c +$h;
 
         $str .= '------- Page Totals -------' . \PHP_EOL;
-        $str .= sprintf('JS:      %6s   %6s b', \Tk\File::bytes2String($j), $j) . \PHP_EOL;
-        $str .= sprintf('CSS:     %6s   %6s b', \Tk\File::bytes2String($c), $c) . \PHP_EOL;
-        $str .= sprintf('HTML:    %6s   %6s b', \Tk\File::bytes2String($h), $h) . \PHP_EOL;
+        $str .= sprintf('JS:      %6s   %6s b', \Tk\FileUtil::bytes2String($j), $j) . \PHP_EOL;
+        $str .= sprintf('CSS:     %6s   %6s b', \Tk\FileUtil::bytes2String($c), $c) . \PHP_EOL;
+        $str .= sprintf('HTML:    %6s   %6s b', \Tk\FileUtil::bytes2String($h), $h) . \PHP_EOL;
         $str .= '---------------------------' . \PHP_EOL;
-        $str .= sprintf('TOTAL:   %6s   %6s b', \Tk\File::bytes2String($t), $t) . \PHP_EOL;
+        $str .= sprintf('TOTAL:   %6s   %6s b', \Tk\FileUtil::bytes2String($t), $t) . \PHP_EOL;
         $str .= '---------------------------';
         return $str;
     }

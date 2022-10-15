@@ -282,12 +282,13 @@ default templates. Adapters can be added/created that search for alternate templ
 
 First you need to setup the Loader and add any adapters that will look for existing templates. This uses a LIFO queue.
 So the Last added Adapter is the first to be executed.
+
 ```php
 <?php
 // * Setup the Template loader, create adapters to look for templates as needed
 /* @var \Dom\Loader $dl */
 $dl = \Dom\Loader::getInstance();
-$dl->addAdapter(new \Dom\Loader\Adapter\DefaultLoader());
+$dl->addAdapter(new \Dom\Loader\Adapter\DefaultAdapter());
 $dl->addAdapter(new \Dom\Loader\Adapter\ClassPath($config->getAppPath().'/html/xml'));
 ```
 

@@ -1,6 +1,8 @@
 <?php
-namespace Dom\Renderer;
+namespace Dom\Renderer\Util;
 
+use Dom\Renderer\DisplayInterface;
+use Dom\Renderer\RendererInterface;
 use Dom\Template;
 use Dom\Exception;
 
@@ -153,7 +155,7 @@ class AutoRenderer implements RendererInterface, DisplayInterface
         foreach ($vars as $paramStr) {
             $val = $this->getParameter($paramStr, $varVal);
             if ($val != null) {
-                $template->setChoice($paramStr);
+                $template->setVisible($paramStr);
             }
         }
         return $this;
@@ -298,7 +300,7 @@ class AutoRenderer implements RendererInterface, DisplayInterface
      * @param Template $template
      * @return $this
      */
-    public function setTemplate($template)
+    public function setTemplate(Template $template)
     {
         $this->template = $template;
         return $this;
