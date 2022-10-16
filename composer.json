@@ -7,7 +7,7 @@
     "tropotek",
     "dom-template"
   ],
-  "time": "2019-04-09",
+  "time": "2022-10-15",
   "license": "MIT",
   "authors": [
     {
@@ -34,7 +34,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "3.2.x-dev"
+      "dev-master": "4.0.x-dev"
     }
   }
 }
