@@ -3,6 +3,8 @@ namespace Dom\Mvc\Modifier;
 
 
 use Dom\Exception;
+use ScssPhp\ScssPhp\OutputStyle;
+use ScssPhp\ScssPhp\ValueConverter;
 use Tk\Cache\Adapter\Filesystem;
 use Tk\Cache\Cache;
 
@@ -97,11 +99,13 @@ class Scss extends FilterInterface
     public function postTraverse(\DOMDocument $doc)
     {
         $scss = new \ScssPhp\ScssPhp\Compiler();
-        $scss->replaceVariables($this->constants);
-        $scss->setOutputStyle(\ScssPhp\ScssPhp\Formatter\Expanded::class);
-        if ($this->isCompress()) {
-            $scss->setOutputStyle(\ScssPhp\ScssPhp\Formatter\Crunched::class);
+
+        foreach ($this->constants as $k => $v) {
+            $this->constants[$k] = ValueConverter::fromPhp($v);
         }
+        $scss->addVariables($this->constants);
+
+        $scss->setOutputStyle($this->isCompress() ? OutputStyle::COMPRESSED : OutputStyle::EXPANDED);
 
         $css = '';
         foreach ($this->source as $path => $v) {
@@ -116,11 +120,10 @@ class Scss extends FilterInterface
                     $scss->setImportPaths(array($this->baseUrl, dirname($path)));
                     // TODO: Test if this path is a file or dir
                     $src = file_get_contents($path);
-                    $cCss = $scss->compile($src);
+                    $cCss = $scss->compileString($src);
                     $this->cache->store($cacheKey, $cCss, $this->cacheTimeout);
                 }
-                $css .= $cCss;
-
+                $css .= $cCss->getCss();
             } else {
                 \Tk\Log::warning('Invalid file: ' . $path);
             }
@@ -129,7 +132,6 @@ class Scss extends FilterInterface
         if ($css) {
             $newNode = $doc->createElement('style');
             $newNode->setAttribute('type', 'text/css');
-            //$newNode->setAttribute('data-author', 'scssphp_compiler');
             if ($this->isDebug()) {
                 $newNode->setAttribute('data-paths', implode(',', $this->sourcePaths));
             }
