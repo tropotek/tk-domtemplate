@@ -97,12 +97,10 @@ class Scss extends FilterInterface
     public function postTraverse(\DOMDocument $doc)
     {
         $scss = new \ScssPhp\ScssPhp\Compiler();
-        $scss->setVariables($this->constants);
-        //$scss->setFormatter(new \ScssPhp\ScssPhp\Formatter\Expanded());
-        $scss->setFormatter(\ScssPhp\ScssPhp\Formatter\Expanded::class);
+        $scss->replaceVariables($this->constants);
+        $scss->setOutputStyle(\ScssPhp\ScssPhp\Formatter\Expanded::class);
         if ($this->isCompress()) {
-            //$scss->setFormatter(new \ScssPhp\ScssPhp\Formatter\Crunched());
-            $scss->setFormatter(\ScssPhp\ScssPhp\Formatter\Crunched::class);
+            $scss->setOutputStyle(\ScssPhp\ScssPhp\Formatter\Crunched::class);
         }
 
         $css = '';
