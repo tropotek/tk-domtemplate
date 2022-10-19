@@ -27,14 +27,14 @@
     }
   },
   "require": {
-    "php": "^7.3||^8.0",
+    "php": "^8.0",
     "ext-dom": "*",
     "ext-tidy": "*",
     "scssphp/scssphp": "^1.11.0"
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "7.0.x-dev"
+      "dev-master": "8.0.x-dev"
     }
   }
 }
