@@ -67,7 +67,7 @@ class Scss extends FilterInterface
     public function init(\DOMDocument $doc)
     {
         if (!class_exists('ScssPhp\ScssPhp\Compiler')) {
-            throw new Exception('Please install composer package scssphp. (https://packagist.org/packages/scssphp/scssphp) [Composer: "scssphp/scssphp": "1.0.*"]');
+            throw new Exception('Please install composer package scssphp. (https://packagist.org/packages/scssphp/scssphp) [Installer: "scssphp/scssphp": "1.0.*"]');
         }
     }
 
