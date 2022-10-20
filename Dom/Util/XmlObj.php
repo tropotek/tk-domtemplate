@@ -6,9 +6,7 @@ use Dom\Exception;
 /**
  * Class XmlObj
  *
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2015 Michael Mifsud
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class XmlObj
 {

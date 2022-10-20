@@ -1,16 +1,11 @@
 <?php
-/*
- * @author Michael Mifsud <http://www.tropotek.com/>
- * @see http://www.tropotek.com/
- * @license Copyright 2007 Michael Mifsud
- */
 namespace Dom;
 
 use PHPUnit\Framework\TestCase;
 use \Dom\Template as Template;
 
 /**
- *
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class TemplateTest extends TestCase
 {
