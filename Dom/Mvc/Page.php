@@ -57,7 +57,7 @@ class Page extends Renderer
      * Execute the rendering of a template.
      * This method must return a Template object
      *
-     * @return null|Template
+     * @throws \DOMException
      */
     public function show(): ?Template
     {
@@ -86,9 +86,9 @@ class Page extends Renderer
 </body>
 </html>
 HTML;
-            return $this->getFactory()->getTemplateLoader()->loadFile($html);
+            return $this->loadTemplate($html);
         } else {
-            return $this->getFactory()->getTemplateLoader()->loadFile($this->getTemplatePath());
+            return $this->loadTemplateFile($this->getTemplatePath());
         }
     }
 }
