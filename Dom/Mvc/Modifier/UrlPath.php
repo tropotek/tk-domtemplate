@@ -31,7 +31,7 @@ namespace Dom\Mvc\Modifier;
  *       <img src="/img/image.png" />  TO  <img src="/project/img/image.png" />
  *       All relative and template URLS can be removed...
  *
- * @author Tropotek <info@tropotek.com>
+ * @author Tropotek <https://www.tropotek.com/>
  */
 class UrlPath extends FilterInterface
 {

@@ -52,13 +52,13 @@ ob_start();
                 </table>
             </form>
             <p>&#160;</p>
-            
+
             <div choice="success">
               <pre var="formData"></pre>
             </div>
-            
+
         </div>
-        
+
         <div class="footer">
             <p class="home"><a href="index.html">Home</a></p>
             <p class="copyright"><a href="http://www.domtemplate.com" target="_blank">Copyright 2008 PHP DOMTemplate</a></p>
@@ -68,7 +68,7 @@ ob_start();
 </html>
 <?php
 // Include lib, you should use use composer if available.
-$path = dirname(dirname(dirname(__FILE__)));
+$path = dirname(__FILE__, 3);
 include_once $path . '/Dom/Exception.php';
 include_once $path . '/Dom/Template.php';
 include_once $path . '/Dom/Form.php';
@@ -110,7 +110,7 @@ if (isset($_REQUEST['process'])) {
     $domForm->getFormElement('country')->setValue($_REQUEST['country']);
     $domForm->getFormElement('cars[]')->setValue($_REQUEST['cars']);
     $domForm->getFormElement('comments')->setValue($_REQUEST['comments']);
-    
+
     // Do some basic validation
     $email = $_REQUEST['email'];
     if (!preg_match('/^[0-9a-zA-Z]([-_.]*[0-9a-zA-Z])*@[0-9a-zA-Z]([-.]?[0-9a-zA-Z])*$/', $email)) {
@@ -118,7 +118,7 @@ if (isset($_REQUEST['process'])) {
         $template->setVisible('email-error');
     } else {
         // TODO: Send your email here!!!
-        
+
         $template->setVisible('success');
         $template->setText('formData', print_r($_REQUEST, true));
     }

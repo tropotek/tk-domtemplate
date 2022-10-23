@@ -35,7 +35,7 @@ ob_start();
 </html>
 <?php
 // Include lib, you should use use composer if available.
-$path = dirname(dirname(dirname(__FILE__)));
+$path = dirname(__FILE__, 3);
 include_once $path . '/Dom/Exception.php';
 include_once $path . '/Dom/Template.php';
 include_once $path . '/Dom/Repeat.php';
