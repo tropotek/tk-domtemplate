@@ -10,6 +10,7 @@ class Page extends Renderer
 {
     use SystemTrait;
 
+    private string $title = '';
 
     private string $templatePath = '';
 
@@ -39,6 +40,17 @@ class Page extends Renderer
     public function getTemplatePath(): string
     {
         return $this->templatePath;
+    }
+
+    public function getTitle(): string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(string $title): Page
+    {
+        $this->title = $title;
+        return $this;
     }
 
     /**
