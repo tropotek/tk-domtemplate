@@ -5,7 +5,7 @@ use Dom\Template;
 
 /**
  * Class RendererTrait
- * 
+ *
  * In rare cases use this to add the get/set template to your renderer object
  * Do not forget to implement the DisplayInterface if you need the show() method
  *
@@ -20,7 +20,7 @@ trait RendererTrait
     /**
      * Set a new template for this renderer.
      */
-    public function setTemplate(Template $template)
+    public function setTemplate(Template $template): static
     {
         $this->template = $template;
         return $this;
