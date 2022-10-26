@@ -258,9 +258,6 @@ class Template
     /**
      * Make a template from a file
      *
-     * @param string $filename
-     * @param string $encoding
-     * @return Template
      * @throws Exception
      */
     public static function loadFile(string $filename, string $encoding = 'UTF-8'): Template
@@ -330,7 +327,7 @@ class Template
     /**
      * A private recursive method to initialise the template.
      */
-    private function prepareDoc(\DOMNode $node, string $form = '')
+    private function prepareDoc(\DOMNode $node, string $form = ''): void
     {
         if ($this->isParsed()) return;
         if ($node->nodeType == \XML_ELEMENT_NODE) {
@@ -504,7 +501,6 @@ class Template
      *   'node' => null,            // (optional) \DOMElement to append to
      * ]
      *
-     * @return array
      */
     public function getHeaderList(): array
     {
@@ -558,15 +554,11 @@ class Template
 
     /**
      * Internal method to enable var to be a DOMElement or array of DOMElements...
-     *
-     * @param string|\DOMElement $var
-     * @return array|\DOMElement[]
      */
-    public function getVarList($var = null): array
+    public function getVarList(null|string|\DOMElement $var = null): array
     {
         if ($var === null) return $this->var;
         if ($var instanceof \DOMElement) return [$var];
-        if (is_array($var) && count($var)) return $var;
         if ($this->keyExists(self::$ATTR_VAR, $var)) {
             return $this->var[$var];
         }
@@ -577,10 +569,8 @@ class Template
      * Get a single var element node from the document.
      * Only use this if there is only one element
      * with that var name. If more exists the first found is returned
-     *
-     * @param string|\DOMElement $var
      */
-    public function getVar($var): ?\DOMElement
+    public function getVar(string|\DOMElement $var): ?\DOMElement
     {
         $nodes = $this->getVarList($var);
         return $nodes[0] ?? null;
@@ -588,19 +578,16 @@ class Template
 
     /**
      * Check if this document has a var node
-     * @param string|\DOMElement $var
      */
-    public function hasVar($var): bool
+    public function hasVar(string|\DOMElement $var): bool
     {
         return (count($this->getVarList($var)) > 0);
     }
 
     /**
      * It is recommended to use hide($var) unless you specifically want to remove the node from the tree.
-     *
-     * @param string|\DOMElement $var
      */
-    public function removeVar($var): Template
+    public function removeVar(string|\DOMElement $var): Template
     {
         foreach($this->getVarList($var) as $node) {
             $node->parentNode->removeChild($node);
@@ -620,8 +607,6 @@ class Template
 
     /**
      * Show/Hide a choice or a var node
-     *
-     * @param string|\DOMElement $choice
      */
     public function setVisible(string|\DOMElement $choice, bool $b = true): Template
     {
@@ -948,7 +933,6 @@ class Template
 
     /**
      * Remove all child nodes from a var
-     * @param string|\DOMElement $var
      */
     public function empty(string|\DOMElement $var): Template
     {
@@ -963,8 +947,6 @@ class Template
 
     /**
      * Get the text inside a var node.
-     *
-     * @param string|\DOMElement $var
      */
     public function getText(string|\DOMElement $var): string
     {
@@ -977,8 +959,6 @@ class Template
 
     /**
      * Replace the text of a var element
-     *
-     * @param string|\DOMElement $var
      */
     public function setText(string|\DOMElement $var, string $value): Template
     {
@@ -994,10 +974,8 @@ class Template
 
     /**
      * Append text to a var element
-     *
-     * @param string|\DOMElement $var
      */
-    public function appendText($var, string $value): Template
+    public function appendText(string|\DOMElement $var, string $value): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -1010,10 +988,8 @@ class Template
 
     /**
      * Prepend text to a var element
-     *
-     * @param string|\DOMElement $var
      */
-    public function prependText($var, string $value): Template
+    public function prependText(string|\DOMElement $var, string $value): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -1027,10 +1003,8 @@ class Template
 
     /**
      * Return the html including the node contents
-     *
-     * @param string|\DOMElement $var
      */
-    public function getHtml($var): string
+    public function getHtml(string|\DOMElement $var): string
     {
         $html = '';
         $nodes = $this->getVarList($var);
@@ -1045,11 +1019,10 @@ class Template
     /**
      * Replace a template var element with the supplied HTML
      *
-     * @param string|\DOMElement $var
      * @param bool $preserveRootAttr Copy existing attributes of destination element to new node
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
-    public function replaceHtml($var, string $html, bool $preserveRootAttr = true): Template
+    public function replaceHtml(string|\DOMElement $var, string $html, bool $preserveRootAttr = true): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -1070,13 +1043,11 @@ class Template
     /**
      * Insert HTML formatted text into a var element.
      *
-     * @param string|\DOMElement $var
-     * @param string $html
      * @note After insertion the template will lose
      *   reference to any contained repeat element nodes. The fix
      *   is to just do all operations on the repeat templates/elements before this call.
      */
-    public function insertHtml($var, string $html): Template
+    public function insertHtml(string|\DOMElement $var, string $html): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -1092,10 +1063,8 @@ class Template
 
     /**
      * Append HTML into a var element
-     *
-     * @param string|\DOMElement $var
      */
-    public function appendHtml($var, string $html): Template
+    public function appendHtml(string|\DOMElement $var, string $html): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -1111,10 +1080,8 @@ class Template
 
     /**
      * Append HTML into a var element
-     *
-     * @param string|\DOMElement $var
      */
-    public function prependHtml($var, string $html): Template
+    public function prependHtml(string|\DOMElement $var, string $html): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -1142,7 +1109,7 @@ class Template
         if (!$html) return null;
 
         $html = self::cleanXml($html, $encoding);
-        if (substr($html, 0, 5) == '<?xml') {
+        if (str_starts_with($html, '<?xml')) {
             $html = substr($html, strpos($html, "\n", 5) + 1);
         }
         $elementDoc = $element->ownerDocument;
@@ -1162,10 +1129,6 @@ class Template
     /**
      * Insert HTML formatted text into a dom element.
      *
-     * @param \DOMElement $element
-     * @param string $html
-     * @param string $encoding
-     * @return \DOMElement
      * @throws Exception
      */
     public static function insertDomHtml(\DOMElement $element, string $html, string $encoding = 'UTF-8'): ?\DOMElement
@@ -1177,7 +1140,7 @@ class Template
             $element->removeChild($element->childNodes->item(0));
         }
         $html = self::cleanXml($html, $encoding);
-        if (substr($html, 0, 5) == '<?xml') {
+        if (str_starts_with($html, '<?xml')) {
             $html = substr($html, strpos($html, "\n", 5) + 1);
         }
 
@@ -1199,7 +1162,7 @@ class Template
         if (!$html) return null;
 
         $html = self::cleanXml($html, $encoding);
-        if (substr($html, 0, 5) == '<?xml') {
+        if (str_starts_with($html, '<?xml')) {
             $html = substr($html, strpos($html, "\n", 5) + 1);
         }
         $elementDoc = $element->ownerDocument;
@@ -1234,18 +1197,16 @@ class Template
         return $contentNode;
     }
 
-
     /**
      * Replace a var element with a DOMDocument contents
      *
      * The DOMDocument's topmost node will be used to replace the destination node
      * This will replace the existing node not just its inner contents
      *
-     * @param string|\DOMElement $var
      * @param bool $preserveRootAttr Copy existing attributes of destination element to new node
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
-    public function replaceDocHtml($var, \DOMDocument $doc, bool $preserveRootAttr = true): Template
+    public function replaceDocHtml(string|\DOMElement $var, \DOMDocument $doc, bool $preserveRootAttr = true): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         if (!$doc->documentElement) return $this;
@@ -1269,10 +1230,8 @@ class Template
     /**
      * Insert a DOMDocument into a var element
      * The var tag will not be replaced only its contents
-     *
-     * @param string|\DOMElement $var
      */
-    public function insertDocHtml($var, \DOMDocument $doc): Template
+    public function insertDocHtml(string|\DOMElement $var, \DOMDocument $doc): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -1288,10 +1247,8 @@ class Template
 
     /**
      * Append a var element with a DOMDocument contents
-     *
-     * @param string|\DOMElement $var
      */
-    public function appendDocHtml($var, \DOMDocument $doc): Template
+    public function appendDocHtml(string|\DOMElement $var, \DOMDocument $doc): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         if (!$doc->documentElement) return $this;
@@ -1306,10 +1263,8 @@ class Template
 
     /**
      * Prepend documents to the var node
-     *
-     * @param string|\DOMElement $var
      */
-    public function prependDocHtml($var, \DOMDocument $doc): Template
+    public function prependDocHtml(string|\DOMElement $var, \DOMDocument $doc): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         if (!$doc->documentElement) return $this;
@@ -1326,17 +1281,15 @@ class Template
         return $this;
     }
 
-
     /**
      * Parse and Insert a template into a var element
      * The var tag will not be replaced only its contents
      *
      * This will also grab any headers in the supplied template.
      *
-     * @param string|\DOMElement $var
      * @throws \DOMException
      */
-    public function insertTemplate($var, Template $template): Template
+    public function insertTemplate(string|\DOMElement $var, Template $template): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $this->mergeTemplate($template);
@@ -1350,12 +1303,11 @@ class Template
      * This will also copy any headers in the supplied template.
      * This will replace the existing node not just its inner contents
      *
-     * @param string|\DOMElement $var
      * @param bool $preserveRootAttr Copy existing attributes of destination element to new node
      * @throws \DOMException
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
-    public function replaceTemplate($var, Template $template, bool $preserveRootAttr = true): Template
+    public function replaceTemplate(string|\DOMElement $var, Template $template, bool $preserveRootAttr = true): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $this->mergeTemplate($template);
@@ -1366,10 +1318,9 @@ class Template
      * Append a template to a var element, it will parse the template before appending it
      * This will also copy any headers in the $template.
      *
-     * @param string|\DOMElement $var
      * @throws \DOMException
      */
-    public function appendTemplate($var, Template $template): Template
+    public function appendTemplate(string|\DOMElement $var, Template $template): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $this->mergeTemplate($template);
@@ -1380,10 +1331,9 @@ class Template
      * Prepend a template to a var element, it will parse the template before appending it
      * This will also copy any headers in the $template.
      *
-     * @param string|\DOMElement $var
      * @throws \DOMException
      */
-    public function prependTemplate($var, Template $template): Template
+    public function prependTemplate(string|\DOMElement $var, Template $template): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $this->mergeTemplate($template);
@@ -1639,23 +1589,17 @@ class Template
 
     /**
      * Return a string representation of this object
-     *
-     * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->toString();
     }
 
     /**
      * Get the xml/html and return the cleaned string
-     * A good place to clean any nasty html entities and other non valid XML/XHTML elements
-     *
-     * @param string $xml
-     * @param string $encoding
-     * @return string
+     * A good place to clean any nasty html entities and other non-valid XML/XHTML elements
      */
-    static function cleanXml($xml, $encoding = 'UTF-8')
+    static function cleanXml(string $xml, string $encoding = 'UTF-8'): string
     {
         static $mapping = null;
         if (!$mapping) {
@@ -1687,19 +1631,13 @@ class Template
         return $k2 * 256 + $k1;
     }
 
-    /**
-     * @param string $msg
-     */
-    protected function logError($msg)
+    protected function logError(string $msg): void
     {
         $this->errors[] = $msg;
         $this->getLogger()->error($msg);
     }
 
-    /**
-     * @return \Psr\Log\LoggerInterface
-     */
-    protected function getLogger()
+    protected function getLogger(): LoggerInterface
     {
         if (!self::$LOGGER) {
             self::$LOGGER = new \Psr\Log\NullLogger();
