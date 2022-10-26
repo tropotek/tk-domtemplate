@@ -81,13 +81,14 @@ class Template
 
     /**
      * This is the original string document sent to the template
+     * before template initialisation
      */
-    private string $xml = '';
+    private string $html = '';
 
     /**
      * Cache the string state of this template when being serialized
      */
-    private ?string $serialXml = null;
+    private ?string $serialHtml = null;
 
     /**
      * Cache of the string document of the template after is has been parsed
@@ -101,6 +102,7 @@ class Template
 
     /**
      * The original template document
+     * before template initialisation
      */
     private ?\DOMDocument $orgDocument = null;
 
@@ -214,7 +216,7 @@ class Template
 
     public function __construct(\DOMDocument $doc, string $xml = '', string $encoding = 'UTF-8')
     {
-        $this->xml = $xml;
+        $this->html = $xml;
         $this->init($doc, $encoding);
     }
 
@@ -222,35 +224,36 @@ class Template
      * Make a template from a string
      * @throws Exception
      */
-    public static function load(string $xml, string $encoding = 'UTF-8'): Template
+    public static function load(string $html, string $encoding = 'UTF-8'): Template
     {
-        $xml = trim($xml);
-        if ($xml == '' || $xml[0] != '<') {
+        $html = trim($html);
+        if ($html == '' || $html[0] != '<') {
             throw new Exception('Please supply a valid XHTML/XML string to create the DOMDocument.');
         }
 
         $doc = new \DOMDocument();
         libxml_use_internal_errors(true);
 
-        $xml = self::cleanXml($xml, $encoding);
+        $html = self::cleanHtml($html, $encoding);
         $isHtml5 = false;
-        if ('<!doctype html>' == strtolower(substr($xml, 0, 15))) {
+        if ('<!doctype html>' == strtolower(substr($html, 0, 15))) {
             $isHtml5 = true;
-            $xml = substr($xml, 16);
+            $html = substr($html, 16);
         }
-        $ok = $doc->loadXML($xml);
+        //$ok = $doc->loadXML($xml);
+        $ok = $doc->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         if (!$ok) {
             $str = '';
             foreach (libxml_get_errors() as $error) {
                 $str .= sprintf("\n[%s:%s] %s", $error->line, $error->column, trim($error->message));
             }
             libxml_clear_errors();
-            $str .= "\n\n" . \Tk\Str::lineNumbers($xml) . "\n";
+            $str .= "\n\n" . \Tk\Str::lineNumbers($html) . "\n";
             $e = new Exception('Error Parsing DOM Template', 500, null, $str);
             throw $e;
         }
 
-        $obj = new self($doc, $xml, $encoding);
+        $obj = new self($doc, $html, $encoding);
         $obj->html5 = $isHtml5;
         return $obj;
     }
@@ -263,7 +266,7 @@ class Template
     public static function loadFile(string $filename, string $encoding = 'UTF-8'): Template
     {
         if (!is_file($filename)) {
-            throw new Exception('Cannot locate XML/XHTML file: ' . $filename);
+            throw new Exception('Cannot locate file: ' . $filename);
         }
         $html = file_get_contents($filename);
         $obj = self::load($html, $encoding);
@@ -273,14 +276,16 @@ class Template
 
     public function __sleep(): array
     {
-        $this->serialXml = $this->document->saveXML();
-        return array('xml', 'serialXml', 'encoding', 'headers', 'parsed');
+        //$this->serialHtml = $this->document->saveXML();
+        $this->serialHtml = $this->document->saveHTML();
+        return array('html', 'serialHtml', 'encoding', 'headers', 'parsed');
     }
 
     public function __wakeup()
     {
         $doc = new \DOMDocument();
-        $doc->loadXML($this->serialXml);
+        //$doc->loadXML($this->serialHtml);
+        $doc->loadHTML($this->serialHtml, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         $this->init($doc, $this->encoding);
     }
 
@@ -311,8 +316,9 @@ class Template
         $this->parsed = false;
         $this->html5 = false;
         $this->orgDocument = clone $doc;
-        if (!$this->xml) {
-            $this->xml = $this->document->saveXML();
+        if (!$this->html) {
+            //$this->html = $this->document->saveXML();
+            $this->html = $this->document->saveHTML();
         }
 
         $this->prepareDoc($this->document->documentElement);
@@ -444,13 +450,13 @@ class Template
     /**
      * Get the original text used to create this Template
      */
-    public function getXml(): string
+    public function getTemplateHtml(): string
     {
-        return $this->xml;
+        return $this->html;
     }
 
     /**
-     * Return a copy of the original \DOMDocument
+     * Return a copy of the original \DOMDocument before the template ini
      */
     public function getOriginalDocument(): \DOMDocument
     {
@@ -777,7 +783,7 @@ class Template
      * NOTE: Only allows unique headers. An md5 hash is referenced from all input parameters.
      *  Any duplicate headers are discarded.
      *
-     * I this template does not have a <head> tag the elements will be added to
+     * If this template does not have a <head> tag the elements will be added to
      * any parent templates that this template is appended/inserted/prepended etc to.
      *
      * @param array $attributes An associative array of (attr, value) pairs.
@@ -834,6 +840,7 @@ class Template
     {
         if ($this->isParsed()) return $this;
         $this->addTracer($attrs);
+        vd($attrs);
         $this->appendHeadElement('style', $attrs, "\n" . $styles . "\n", $node);
         return $this;
     }
@@ -880,6 +887,7 @@ class Template
     private function addTracer(array &$attrs): void
     {
         $trace = debug_backtrace();
+
         $i = 2;
         if (self::$ENABLE_TRACER && !empty($trace[$i]) && empty($attrs[self::ATTR_DATA_TRACE])) {
             $attrs[self::ATTR_DATA_TRACE] = (!empty($trace[$i]['class']) ? $trace[$i]['class'] . '::' : '').(!empty($trace[$i]['function']) ? $trace[$i]['function'] . '()' : '');
@@ -1108,7 +1116,7 @@ class Template
     {
         if (!$html) return null;
 
-        $html = self::cleanXml($html, $encoding);
+        $html = self::cleanHtml($html, $encoding);
         if (str_starts_with($html, '<?xml')) {
             $html = substr($html, strpos($html, "\n", 5) + 1);
         }
@@ -1139,7 +1147,7 @@ class Template
         while ($element->hasChildNodes()) {
             $element->removeChild($element->childNodes->item(0));
         }
-        $html = self::cleanXml($html, $encoding);
+        $html = self::cleanHtml($html, $encoding);
         if (str_starts_with($html, '<?xml')) {
             $html = substr($html, strpos($html, "\n", 5) + 1);
         }
@@ -1161,7 +1169,7 @@ class Template
     {
         if (!$html) return null;
 
-        $html = self::cleanXml($html, $encoding);
+        $html = self::cleanHtml($html, $encoding);
         if (str_starts_with($html, '<?xml')) {
             $html = substr($html, strpos($html, "\n", 5) + 1);
         }
@@ -1351,12 +1359,14 @@ class Template
      */
     public static function makeContentNode(string $markup, string $encoding = 'UTF-8'): \DOMElement
     {
-        $markup = self::cleanXml($markup, $encoding);
+        $markup = self::cleanHtml($markup, $encoding);
         $id = '_c_o_n__';
-        $xml = sprintf('<?xml version="1.0" encoding="%s"?><div xml:id="%s">%s</div>', $encoding, $id, $markup);
+        //$html = sprintf('<?xml version="1.0" encoding="%s" ? ><div xml:id="%s">%s</div>', $encoding, $id, $markup);
+        $html = sprintf('<div id="%s">%s</div>', $encoding, $id, $markup);
         $doc = new \DOMDocument();
         libxml_use_internal_errors(true);
-        $ok = $doc->loadXML($xml);
+        //$ok = $doc->loadXML($html);
+        $ok = $doc->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         if (!$ok) {
             $str = '';
             foreach (libxml_get_errors() as $error) {
@@ -1560,14 +1570,15 @@ class Template
         $str = '';
         try {
             $doc = $this->getDocument($parse);
-            $str = $doc->saveXML($doc->documentElement);
+            //$str = $doc->saveXML($doc->documentElement);
+            $str = $doc->saveHTML($doc->documentElement);
 
             // Cleanup Document
-            if (substr($str, 0, 5) == '<?xml') {    // Remove xml declaration
+            if (substr($str, 0, 5) == '<' . '?xml') {    // Remove xml declaration
                 $str = substr($str, strpos($str, "\n") + 1);
             }
             if ($this->html5 && strtolower(substr($str, 0, 15)) != '<!doctype html>') {
-                $str = "<!DOCTYPE html>\n" . $str;
+                $str = "<!doctype html>\n" . $str;
             }
 
             // fix allowable non-closeable tags
@@ -1578,10 +1589,10 @@ class Template
                 }, $str);
 
             if (self::$REMOVE_CDATA) {
-                $str = str_replace(array('><![CDATA[', ']]><'), array('>', '<'), $str);
+                $str = preg_replace('~<!\[CDATA\[\s*|\s*\]\]>~', '', $str);
             }
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->logError($e->__toString());
         }
         return $str;
@@ -1599,7 +1610,7 @@ class Template
      * Get the xml/html and return the cleaned string
      * A good place to clean any nasty html entities and other non-valid XML/XHTML elements
      */
-    static function cleanXml(string $xml, string $encoding = 'UTF-8'): string
+    static function cleanHtml(string $xml, string $encoding = 'UTF-8'): string
     {
         static $mapping = null;
         if (!$mapping) {
