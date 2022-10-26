@@ -210,7 +210,7 @@ class Template
      * @var null|callable
      */
     protected $onPostParse = null;
-    
+
 
     public function __construct(\DOMDocument $doc, string $xml = '', string $encoding = 'UTF-8')
     {
@@ -250,7 +250,7 @@ class Template
             throw $e;
         }
 
-        $obj = new self($doc, $encoding, $xml);
+        $obj = new self($doc, $xml, $encoding);
         $obj->html5 = $isHtml5;
         return $obj;
     }
@@ -339,10 +339,6 @@ class Template
             if ($node->hasAttribute(self::$ATTR_REPEAT)) {
                 $repeatName = $node->getAttribute(self::$ATTR_REPEAT);
                 $this->repeat[$repeatName] = new Repeat($node, $this);
-                if (!array_key_exists($repeatName, $this->var)) {
-                    $this->var[$repeatName] = [];
-                }
-                $this->var[$repeatName][] = $node;
                 $node->removeAttribute(self::$ATTR_REPEAT);
                 return;
             }
@@ -362,6 +358,7 @@ class Template
                 $arrAtts = explode(' ', $node->getAttribute(self::$ATTR_CHOICE));
                 foreach ($arrAtts as $choice) {
                     $this->choice[$choice][] = $node;
+                    $this->var[$choice][] = $node;
                     $node->setAttribute(self::ATTR_HIDDEN, 'true');
                 }
                 $node->removeAttribute(self::$ATTR_CHOICE);
@@ -626,7 +623,7 @@ class Template
      *
      * @param string|\DOMElement $choice
      */
-    public function setVisible($choice, bool $b = true): Template
+    public function setVisible(string|\DOMElement $choice, bool $b = true): Template
     {
         $nodes = $this->getVarList($choice);
         if ($b) {
@@ -697,12 +694,7 @@ class Template
         return null;
     }
 
-    /**
-     * Add a css class to an element
-     * @param string|\DOMElement $var
-     * @param string|array $class
-     */
-    public function addClass($var, $class): Template
+    public function addCss(string|\DOMElement $var, array|string $class): Template
     {
         $list = $class;
         if (!is_array($class)) {
@@ -719,12 +711,7 @@ class Template
         return $this;
     }
 
-    /**
-     * @param string|\DOMElement $var
-     * @param string $class
-     * @return Template
-     */
-    public function removeClass($var, string $class): Template
+    public function removeCss(string|\DOMElement $var, string $class): Template
     {
         $str = $this->getAttr($var, 'class');
         $str = preg_replace('/(' . $class . ')\s?/', '', trim($str));
@@ -732,15 +719,7 @@ class Template
         return $this;
     }
 
-    /**
-     * Replace an attribute value.
-     *
-     * @param string|\DOMElement $var
-     * @param string|array $attr
-     * @param string|null $value
-     * @return Template
-     */
-    public function setAttr($var, $attr, ?string $value = null): Template
+    public function setAttr(string|\DOMElement $var, array|string $attr, ?string $value = null): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         if (!is_array($attr)) $attr = [$attr => $value];
@@ -756,12 +735,7 @@ class Template
         return $this;
     }
 
-    /**
-     * Retrieve the text contained within an attribute of a node.
-     *
-     * @param string|\DOMElement $var
-     */
-    public function getAttr($var, string $attr): string
+    public function getAttr(string|\DOMElement $var, string $attr): string
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return '';
         $nodes = $this->getVarList($var);
@@ -771,12 +745,7 @@ class Template
         return '';
     }
 
-    /**
-     * Remove an attribute
-     *
-     * @param string|\DOMElement $var
-     */
-    public function removeAttr($var, string $attr): Template
+    public function removeAttr(string|\DOMElement $var, string $attr): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -789,11 +758,8 @@ class Template
 
     /**
      * Return a form object from the document.
-     *
-     * @param string|int $id The id or name of the form
-     * @return Form|null
      */
-    public function getForm($id = ''): ?Form
+    public function getForm(string $id = ''): ?Form
     {
         if (!$this->isParsed() && isset($this->form[$id])) {
             return new Form($this->form[$id], $this->formElement[$id], $this);
@@ -946,7 +912,6 @@ class Template
         return $this;
     }
 
-
     /**
      * Merging a template copies all the headers and bodyTemplate
      * from the $srcTemplate to this template
@@ -985,7 +950,7 @@ class Template
      * Remove all child nodes from a var
      * @param string|\DOMElement $var
      */
-    public function empty($var): Template
+    public function empty(string|\DOMElement $var): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -1001,7 +966,7 @@ class Template
      *
      * @param string|\DOMElement $var
      */
-    public function getText($var): string
+    public function getText(string|\DOMElement $var): string
     {
         $nodes = $this->getVarList($var);
         if (count($nodes)) {
@@ -1015,7 +980,7 @@ class Template
      *
      * @param string|\DOMElement $var
      */
-    public function setText($var, string $value): Template
+    public function setText(string|\DOMElement $var, string $value): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);

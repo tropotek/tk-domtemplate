@@ -25,6 +25,7 @@ class Repeat extends Template
         $this->repeatName = $node->getAttribute('repeat');
         $this->parent = $parent;
         $node->removeAttribute('repeat');
+        $node->setAttribute('var', $this->repeatName);
 
         $repeatDoc = new \DOMDocument();
         $tplNode = $repeatDoc->importNode($node, true);
