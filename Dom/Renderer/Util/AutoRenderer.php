@@ -1,8 +1,7 @@
 <?php
 namespace Dom\Renderer\Util;
 
-use Dom\Renderer\DisplayInterface;
-use Dom\Renderer\RendererInterface;
+use Dom\Renderer\Renderer;
 use Dom\Template;
 use Dom\Exception;
 
@@ -21,33 +20,20 @@ use Dom\Exception;
  *
  *
  *
- * @note I have ceased development on this object as I feel it does not belong with this
- * library and introduces the need for logic into the template which is what we are trying to avoid.
- *
+ * @note development on this object as it does not belong with this
+ * library. It introduces the need for logic into the template which is what we are trying to avoid.
+ * It is left here as a reference so if you wish to build on the base Template system
+ * this shows how you could create an automated template renderer by sending array of params
+ * and build your own template logic renderer
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
-class AutoRenderer implements RendererInterface, DisplayInterface
+class AutoRenderer extends Renderer
 {
-
-    /**
-     * @var Template
-     */
-    protected $template = null;
-
-    /**
-     * @var \stdClass
-     */
-    private $data = null;
+    private \stdClass $data;
 
 
-    /**
-     * Constructor
-     *
-     * @param array $data
-     * @param Template $template
-     */
-    public function __construct($template = null, $data = null)
+    public function __construct(Template $template = null, array|\stdClass $data = null)
     {
         if ($template) {
             $this->template = $template;
@@ -60,35 +46,32 @@ class AutoRenderer implements RendererInterface, DisplayInterface
 
     /**
      * Test if an array key exists in the renderer data list
-     *
-     * @param $name
-     * @return bool
      */
-    public function exists($name)
+    public function exists(string $name): bool
     {
         return property_exists($this->data, $name);
     }
 
     /**
      * Add an item to the renderer data list
-     *
-     * @param string $name
-     * @param mixed $val
      */
-    public function set($name, $val)
+    public function set(string $name, string $val)
     {
         $this->data->$name = $val;
     }
 
     /**
      * Get an element from the renderer data list
-     *
-     * @param string $name If not set then all the data array is returned
-     * @return mixed
      */
-    public function get($name = null)
+    public function get(string $name, mixed $default = null): mixed
     {
+        if (!isset($this->data->$name)) return $default;
         return $this->data->$name;
+    }
+
+    public function all(): \stdClass
+    {
+        return $this->data;
     }
 
 
@@ -96,11 +79,8 @@ class AutoRenderer implements RendererInterface, DisplayInterface
      * Execute the renderer.
      * This method can optionally return a Template Object
      * or HTML/XML string depending on your framework requirements
-     *
-     * @return Template | string
-     * @throws Exception
      */
-    public function show()
+    public function show(): ?Template
     {
         $template = $this->getTemplate();
         // VAR
@@ -116,13 +96,8 @@ class AutoRenderer implements RendererInterface, DisplayInterface
 
     /**
      * Render all vars found in the template
-     *
-     * @param Template $template
-     * @param string|null $varVal
-     * @return $this
-     * @throws Exception
      */
-    protected function showRepeat($template, $varVal = null)
+    protected function showRepeat(Template $template, ?string $varVal = null): static
     {
         $vars = array_keys($template->getRepeatList());
         foreach ($vars as $i => $paramStr) {
@@ -141,12 +116,8 @@ class AutoRenderer implements RendererInterface, DisplayInterface
 
     /**
      * Render all vars found in the template
-     *
-     * @param Template $template
-     * @param string|null $varVal
-     * @return $this
      */
-    protected function showChoice($template, $varVal = null)
+    protected function showChoice(Template $template, ?string $varVal = null): static
     {
         $vars = array_keys($template->getChoiceList());
         foreach ($vars as $paramStr) {
@@ -160,13 +131,8 @@ class AutoRenderer implements RendererInterface, DisplayInterface
 
     /**
      * Render all vars found in the template
-     *
-     * @param Template    $template
-     * @param string|null $varVal
-     * @return $this
-     * @throws Exception
      */
-    protected function showVars($template, $varVal = null)
+    protected function showVars(Template $template, ?string $varVal = null): static
     {
         $vars = array_keys($template->getVarList());
         foreach ($vars as $paramStr) {
@@ -206,19 +172,15 @@ class AutoRenderer implements RendererInterface, DisplayInterface
 
     /**
      * getParameter
-     *
-     * @param string $rawParam
-     * @param string|null $varVal
-     * @return mixed
      */
-    protected function getParameter($rawParam, $varVal = null)
+    protected function getParameter(string $rawParam, ?string $varVal = null): mixed
     {
         $arr = explode('.', $rawParam);
         if ($varVal === null) {
             $varVal = (object)$this->data;
         }
         foreach ($arr as $varPeice) {
-            if (strpos($varPeice, '[') === false) {
+            if (!str_contains($varPeice, '[')) {
                 if (!isset($varVal->$varPeice)) {
                     $varVal = null;
                     break;
@@ -242,13 +204,8 @@ class AutoRenderer implements RendererInterface, DisplayInterface
 
     /**
      * accessArray
-     *
-     * @param array $array
-     * @param string $keys Example "['test'][0]['item']"
-     * @return mixed
-     * @throws \InvalidArgumentException
      */
-    protected function accessArray($array, $keys)
+    protected function accessArray(array $array, string $keys): mixed
     {
         if (!preg_match_all('~\[([^\]]+)\]~', $keys, $matches)) {
             throw new \InvalidArgumentException();
@@ -264,12 +221,8 @@ class AutoRenderer implements RendererInterface, DisplayInterface
 
     /**
      * Get the string from an object/array/string...
-     *
-     * @param mixed $val
-     * @param int $i Used to get the index from an array Default 0 the first item
-     * @return string
      */
-    protected function varToStr($val, $i = 0)
+    protected function varToStr(mixed $val, int $i = 0): string
     {
         if (is_object($val)) {
             if (method_exists($val, 'toString')) {
@@ -290,60 +243,10 @@ class AutoRenderer implements RendererInterface, DisplayInterface
         return (string)$val;
     }
 
-
-    /**
-     * Set a new template for this renderer.
-     *
-     * @param Template $template
-     * @return $this
-     */
-    public function setTemplate(Template $template)
-    {
-        $this->template = $template;
-        return $this;
-    }
-
-    /**
-     * Get the template
-     * This method will try to call the magic method __makeTemplate
-     * to get a template if none exits.
-     * Use this for objects that use internal templates.
-     *
-     * @return Template
-     */
-    public function getTemplate()
-    {
-        if ($this->hasTemplate()) {
-            return $this->template;
-        }
-        $magic = '__makeTemplate';
-        if (!$this->hasTemplate() && method_exists($this, $magic)) {
-            $this->template = $this->$magic();
-        }
-        return $this->template;
-    }
-
-    /**
-     * Test if this renderer has a template and is not NULL
-     *
-     * @return bool
-     */
-    public function hasTemplate()
-    {
-        if ($this->template) {
-            return true;
-        }
-        return false;
-    }
-
-
     /**
      * Parse the template with the supplied params
-     *
-     * @param array $params
-     * @return string
      */
-    public function toString($params = null)
+    public function toString(array $params = []): string
     {
         $str = "";
         $ext = true;
@@ -369,11 +272,6 @@ class AutoRenderer implements RendererInterface, DisplayInterface
         return $str;
     }
 
-    /**
-     * __toString
-     *
-     * @return string
-     */
     public function __toString()
     {
         return $this->toString();

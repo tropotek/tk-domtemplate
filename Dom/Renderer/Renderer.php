@@ -2,6 +2,7 @@
 namespace Dom\Renderer;
 
 use Dom\Renderer\Traits\RendererTrait;
+use Dom\Template;
 
 /**
  * For classes that render \Dom\Templates.
@@ -11,13 +12,11 @@ use Dom\Renderer\Traits\RendererTrait;
  *
  * If the current template is null then
  * the magic method __makeTemplate() will be called to create an internal template.
- * This is a good way to create a default template. But be aware that this will
- * be a new template and will have to be inserted into its parent using the \Dom_Template::insertTemplate()
- * method.
+ * This is a good way to create a default template.
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
-abstract class Renderer implements RendererInterface, DisplayInterface
+abstract class Renderer implements RendererInterface
 {
     use RendererTrait;
 
@@ -26,4 +25,17 @@ abstract class Renderer implements RendererInterface, DisplayInterface
         $this->template = clone $this->template;
     }
 
+    /**
+     * Get the template
+     * This method will try to call the magic method __makeTemplate
+     * to create a template within the object if non exits.
+     */
+    public function getTemplate(): ?Template
+    {
+        $magic = '__makeTemplate';
+        if (!$this->hasTemplate() && method_exists($this, $magic)) {
+            $this->template = $this->$magic();
+        }
+        return $this->template;
+    }
 }

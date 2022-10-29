@@ -10,12 +10,12 @@ use Dom\Template;
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
-interface DisplayInterface extends RendererInterface
+interface DisplayInterface
 {
 
     /**
      * Implement this in your object to be rendered.
-     * All the code to modfy the Template object should reside here
+     * All the code to modify the Template object should reside here
      * and once done return the Template.
      * Be sure to avoid calling this after the template has been parsed
      *

@@ -33,10 +33,6 @@ trait RendererTrait
      */
     public function getTemplate(): ?Template
     {
-        $magic = '__makeTemplate';
-        if (!$this->hasTemplate() && method_exists($this, $magic)) {
-            $this->template = $this->$magic();
-        }
         return $this->template;
     }
 
