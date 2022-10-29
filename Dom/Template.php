@@ -1112,7 +1112,7 @@ class Template
      * @throws Exception
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
-    public static function replaceDomHtml(\DOMElement $element, string $html, string $encoding = 'UTF-8', bool $preserveRootAttr = true): ?\DOMElement
+    public static function replaceDomHtml(\DOMElement $element, string $html, string $encoding = 'UTF-8', bool $preserveRootAttr = true): ?\DOMNode
     {
         if (!$html) return null;
 
@@ -1139,7 +1139,7 @@ class Template
      *
      * @throws Exception
      */
-    public static function insertDomHtml(\DOMElement $element, string $html, string $encoding = 'UTF-8'): ?\DOMElement
+    public static function insertDomHtml(\DOMElement $element, string $html, string $encoding = 'UTF-8'): ?\DOMNode
     {
         if ($html == null) return null;
 
@@ -1165,7 +1165,7 @@ class Template
      *
      * @throws Exception
      */
-    public static function appendDomHtml(\DOMElement $element, string $html, string $encoding = 'UTF-8'): ?\DOMElement
+    public static function appendDomHtml(\DOMElement $element, string $html, string $encoding = 'UTF-8'): ?\DOMNode
     {
         if (!$html) return null;
 
@@ -1188,7 +1188,7 @@ class Template
      *
      * @throws Exception
      */
-    public static function prependDomHtml(\DOMElement $element, string $html): ?\DOMElement
+    public static function prependDomHtml(\DOMElement $element, string $html): ?\DOMNode
     {
         if (!$html) return null;
 
@@ -1357,12 +1357,12 @@ class Template
      *
      * @throws Exception
      */
-    public static function makeContentNode(string $markup, string $encoding = 'UTF-8'): \DOMElement
+    public static function makeContentNode(string $markup, string $encoding = 'UTF-8'): \DOMNode
     {
         $markup = self::cleanHtml($markup, $encoding);
         $id = '_c_o_n__';
         //$html = sprintf('<?xml version="1.0" encoding="%s" ? ><div xml:id="%s">%s</div>', $encoding, $id, $markup);
-        $html = sprintf('<div id="%s">%s</div>', $encoding, $id, $markup);
+        $html = sprintf('<div id="%s">%s</div>', $id, $markup);
         $doc = new \DOMDocument();
         libxml_use_internal_errors(true);
         //$ok = $doc->loadXML($html);
@@ -1377,7 +1377,6 @@ class Template
             $e = new Exception('Error Parsing DOM Template', 0, null, $str);
             throw $e;
         }
-
         return $doc->getElementById($id);
     }
 
@@ -1484,7 +1483,7 @@ class Template
             // Remove repeat template notes
             foreach ($this->repeat as $name => $repeat) {
                 $node = $repeat->getRepeatNode();
-                if (!$node || !isset($node->parentNode) || !$node->parentNode) {
+                if (!$node instanceof \DOMElement || !isset($node->parentNode) || !$node->parentNode) {
                     continue;
                 }
                 $node->parentNode->removeChild($node);
@@ -1494,7 +1493,7 @@ class Template
             // Remove nodes marked hidden
             foreach ($this->var as $var => $nodes) {
                 foreach ($nodes as $node) {
-                    if (!$node || !isset($node->parentNode) || !$node->parentNode) continue;
+                    if (!$node instanceof \DOMElement || !isset($node->parentNode) || !$node->parentNode) continue;
                     if ($node->hasAttribute(self::ATTR_HIDDEN)) {
                         $node->parentNode->removeChild($node);
                     }
@@ -1504,7 +1503,7 @@ class Template
             // Remove choice node marked hidden
             foreach ($this->choice as $choice => $nodes) {
                 foreach ($nodes as $node) {
-                    if (!$node || !isset($node->parentNode) || !$node->parentNode) continue;
+                    if (!$node instanceof \DOMElement || !isset($node->parentNode) || !$node->parentNode) continue;
                     if ($node->hasAttribute(self::ATTR_HIDDEN)) {
                         $node->parentNode->removeChild($node);
                     }
