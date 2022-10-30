@@ -68,7 +68,7 @@ class Builder
         return Template::load($section);
     }
 
-    public function hasTemplate($id)
+    public function hasTemplate($id): bool
     {
         if (!isset($this->sectionCache[$id])) $this->getTemplate($id);
         return isset($this->sectionCache[$id]);

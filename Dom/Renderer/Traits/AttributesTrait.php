@@ -29,7 +29,7 @@ trait AttributesTrait
             $this->_attrList = $this->_attrList + $name;
         } else {
             $name = strip_tags(trim($name));
-            $this->_attrList[$name] = $value ?: $name;
+            $this->_attrList[$name] = $value ?? $name;
         }
         return $this;
     }
@@ -47,7 +47,7 @@ trait AttributesTrait
      */
     public function getAttr(string $name, string $default = ''): string
     {
-        return $this->_attrList[$name] ?: $default;
+        return $this->_attrList[$name] ?? $default;
     }
 
     /**
