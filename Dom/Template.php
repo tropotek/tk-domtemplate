@@ -840,7 +840,6 @@ class Template
     {
         if ($this->isParsed()) return $this;
         $this->addTracer($attrs);
-        vd($attrs);
         $this->appendHeadElement('style', $attrs, "\n" . $styles . "\n", $node);
         return $this;
     }
