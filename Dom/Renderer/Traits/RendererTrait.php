@@ -29,10 +29,14 @@ trait RendererTrait
     /**
      * Get the template
      * This method will try to call the magic method __makeTemplate
-     * to create a template if non exits.
+     * to create a template within the object if non exits.
      */
     public function getTemplate(): ?Template
     {
+        $magic = '__makeTemplate';
+        if (!$this->hasTemplate() && method_exists($this, $magic)) {
+            $this->template = $this->$magic();
+        }
         return $this->template;
     }
 

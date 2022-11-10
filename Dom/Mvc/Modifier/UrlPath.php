@@ -46,7 +46,8 @@ class UrlPath extends FilterInterface
      */
     protected array $attrSrc = [
         'src', 'href', 'action', 'background',  // standard attributes
-        'data-href', 'data-src', 'data-url'     // Custom data attributes
+        'data-href', 'data-src', 'data-url',    // Custom data attributes
+        'hx-get', 'hx-post', 'hx-put', 'hx-delete', 'hx-head',
     ];
 
     /**

@@ -1396,11 +1396,11 @@ class Template
      *
      * @param string $property [var, choice, repeat]
      */
-    public function isWritable(string $property, string $key): bool
+    public function isWritable(string $property, string|\DOMElement $key): bool
     {
-        if ($this->isParsed())
-            return false;
-        if ($property && $key) {
+        if ($this->isParsed()) return false;
+
+        if ($property && is_string($key)) {
             if (!$this->keyExists($property, $key))
                 return false;
         }

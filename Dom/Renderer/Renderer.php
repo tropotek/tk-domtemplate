@@ -24,18 +24,4 @@ abstract class Renderer implements RendererInterface
     {
         $this->template = clone $this->template;
     }
-
-    /**
-     * Get the template
-     * This method will try to call the magic method __makeTemplate
-     * to create a template within the object if non exits.
-     */
-    public function getTemplate(): ?Template
-    {
-        $magic = '__makeTemplate';
-        if (!$this->hasTemplate() && method_exists($this, $magic)) {
-            $this->template = $this->$magic();
-        }
-        return $this->template;
-    }
 }

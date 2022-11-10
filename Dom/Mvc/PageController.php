@@ -26,10 +26,10 @@ abstract class PageController extends Renderer
 
     /**
      * Forwards the request to another controller.
+     * NOTE: If you are using Dom\Template to generate the response, keep in mind you will lose any template header, script, style tags
+     *       because this will return the response as a string and not the actual template object.
      *
      * @param callable|string|array $controller The controller name (a string like Bundle\BlogBundle\Controller\PostController::indexAction)
-     * @todo: we may need somewhere else for this method. But this is how we call a controller from another, request stacking.
-     *        This will be great if we create controllers for each separate dynamic element and use HTMX to bring it all together
      */
     protected function forward(callable|string|array $controller, array $path = null, array $query = null, array $request = null): Response
     {
