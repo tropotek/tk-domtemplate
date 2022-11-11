@@ -24,11 +24,12 @@ class Repeat extends Template
         $this->repeatNode = $node;
         $this->repeatName = $node->getAttribute('repeat');
         $this->parent = $parent;
-        $node->removeAttribute('repeat');
-        $node->setAttribute('var', $this->repeatName);
 
         $repeatDoc = new \DOMDocument();
         $tplNode = $repeatDoc->importNode($node, true);
+        $tplNode->removeAttribute('repeat');
+        $var = $tplNode->getAttribute(self::$ATTR_VAR);
+        $tplNode->setAttribute(self::$ATTR_VAR, $var . ' ' . $this->repeatName);
         $repeatDoc->appendChild($tplNode);
 
         parent::__construct($repeatDoc, $parent->getEncoding());

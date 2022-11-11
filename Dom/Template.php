@@ -1029,7 +1029,7 @@ class Template
      * @param bool $preserveRootAttr Copy existing attributes of destination element to new node
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
-    public function replaceHtml(string|\DOMElement $var, string $html, bool $preserveRootAttr = true): Template
+    public function replaceHtml(string|\DOMNode $var, string $html, bool $preserveRootAttr = true): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -1111,7 +1111,7 @@ class Template
      * @throws Exception
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
-    public static function replaceDomHtml(\DOMElement $element, string $html, string $encoding = 'UTF-8', bool $preserveRootAttr = true): ?\DOMNode
+    public static function replaceDomHtml(\DOMNode $element, string $html, string $encoding = 'UTF-8', bool $preserveRootAttr = true): ?\DOMNode
     {
         if (!$html) return null;
 
@@ -1138,7 +1138,7 @@ class Template
      *
      * @throws Exception
      */
-    public static function insertDomHtml(\DOMElement $element, string $html, string $encoding = 'UTF-8'): ?\DOMNode
+    public static function insertDomHtml(\DOMNode $element, string $html, string $encoding = 'UTF-8'): ?\DOMNode
     {
         if ($html == null) return null;
 
@@ -1164,7 +1164,7 @@ class Template
      *
      * @throws Exception
      */
-    public static function appendDomHtml(\DOMElement $element, string $html, string $encoding = 'UTF-8'): ?\DOMNode
+    public static function appendDomHtml(\DOMNode $element, string $html, string $encoding = 'UTF-8'): ?\DOMNode
     {
         if (!$html) return null;
 
@@ -1187,7 +1187,7 @@ class Template
      *
      * @throws Exception
      */
-    public static function prependDomHtml(\DOMElement $element, string $html): ?\DOMNode
+    public static function prependDomHtml(\DOMNode $element, string $html): ?\DOMNode
     {
         if (!$html) return null;
 
