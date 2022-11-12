@@ -753,7 +753,6 @@ class Template
      */
     public function getForm(string $id = ''): ?Form
     {
-        vd($this->form, $this->formElement);
         if (!$this->isParsed() && isset($this->form[$id])) {
             return new Form($this->form[$id], $this->formElement[$id], $this);
         }
