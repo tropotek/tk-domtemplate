@@ -967,6 +967,7 @@ class Template
             $preKey .= $k . $v;
         }
         $hash = md5($preKey);
+        
         $this->headers[$hash]['elementName'] = $elementName;
         $this->headers[$hash]['attributes'] = $attributes;
         $this->headers[$hash]['value'] = $value;
