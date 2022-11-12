@@ -102,7 +102,7 @@ class Repeat extends Template
     /**
      * get the parent template this repeat belongs to.
      */
-    public function getParent()
+    public function getParent(): ?Template
     {
         return $this->parent;
     }

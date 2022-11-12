@@ -389,6 +389,7 @@ class Template
                     $id = $node->getAttribute('id');
                 }
                 $this->formElement[$form][$id][] = $node;
+                if (!isset($this->form[$form]) && $form == '') $this->form[$form] = $this->document->documentElement;
             }
 
             if ($node->nodeName == 'head') {
@@ -752,6 +753,7 @@ class Template
      */
     public function getForm(string $id = ''): ?Form
     {
+        vd($this->form, $this->formElement);
         if (!$this->isParsed() && isset($this->form[$id])) {
             return new Form($this->form[$id], $this->formElement[$id], $this);
         }
