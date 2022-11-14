@@ -872,9 +872,6 @@ class Template
     public function appendJs(string $js, array $attrs = [], ?\DOMElement $node = null): Template
     {
         if ($this->isParsed()) return $this;
-        if (!isset($attrs['type']) && $this->isHtml5()) {
-            $attrs['type'] = 'text/javascript';
-        }
         $this->addTracer($attrs);
         $this->appendHeadElement('script', $attrs, $js, $node);
         return $this;
