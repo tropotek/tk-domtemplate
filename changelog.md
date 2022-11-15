@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 3.2.12 [2022-11-16]:
+-------------------------------
+  - Updated main template code, added renamed methods. removed unused code
+
+
 Ver 3.2.10 [2022-08-11]:
 -------------------------------
 
