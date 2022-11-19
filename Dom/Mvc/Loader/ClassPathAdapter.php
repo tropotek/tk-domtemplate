@@ -5,8 +5,10 @@ use Dom\Exception;
 use \Dom\Template;
 
 /**
- * This adapter will look for template files in the supplied
- * paths using the class name with underscores or slashes depending on the $useUnderscores param.
+ * This adapter will attempt to load a class path template if one exists, then by default
+ * it will load the HTML or file supplied of non exists.
+ *
+ * Paths are found using the class name with underscores or slashes depending on the $useUnderscores param.
  *
  * For example if the calling class is App\Controller\Home then the default path would be:
  *   - App\Controller\Home => {$basePath} . '/App/Controller/Home.xtpl'
@@ -30,11 +32,11 @@ class ClassPathAdapter extends AdapterInterface
 {
     /**
      * The default path would is:
-     *    \App\Controller\Index   =>  {path}/App/Controller/index.{extension}
+     *    \App\Controller\Index   =>  {basePath}/App/Controller/index.{extension}
      *
      * If $useUnderscores is true then the search path will be a single class filename:
      * EG:
-     *    \App\Controller\Index   =>  {path}/App_Controller_index.{extension}
+     *    \App\Controller\Index   =>  {basePath}/App_Controller_index.{extension}
      *
      */
     protected bool $useUnderscores = false;

@@ -15,7 +15,8 @@ class Page extends Renderer
     private string $templatePath = '';
 
     /**
-     * @var array|Renderer[][]
+     * Use Page::addRenderer(...) to add Renderer`s that will get appended to the selec
+     * @var array|Renderer[$var][]
      */
     private array $renderList = [];
 
@@ -25,7 +26,7 @@ class Page extends Renderer
         $this->templatePath = $templatePath;
     }
 
-    public static function create(string $templatePath)
+    public static function create(string $templatePath): static
     {
         $obj = new static($templatePath);
         return $obj;
@@ -35,6 +36,11 @@ class Page extends Renderer
     {
         $var = $var ?: 'content';
         $this->renderList[$var][] = $renderer;
+    }
+
+    protected function getRenderList(): array
+    {
+        return $this->renderList;
     }
 
     public function getTemplatePath(): string
@@ -56,14 +62,12 @@ class Page extends Renderer
     /**
      * Execute the rendering of a template.
      * This method must return a Template object
-     *
-     * @throws \DOMException
      */
     public function show(): ?Template
     {
         $template = $this->getTemplate();
 
-        foreach ($this->renderList as $var => $list) {
+        foreach ($this->getRenderList() as $var => $list) {
             foreach ($list as $renderer) {
                 $this->getTemplate()->appendTemplate($var, $renderer->show());
             }
@@ -72,10 +76,10 @@ class Page extends Renderer
         return $template;
     }
 
-    public function __makeTemplate()
+    public function __makeTemplate(): ?Template
     {
-        if (!is_file($this->getTemplatePath())) {
-            // Default template if error loading template file
+        $template = $this->loadTemplateFile($this->getTemplatePath());
+        if (!$template) {
             $html = <<<HTML
 <html>
 <head>
@@ -86,9 +90,9 @@ class Page extends Renderer
 </body>
 </html>
 HTML;
-            return $this->loadTemplate($html);
-        } else {
-            return $this->loadTemplateFile($this->getTemplatePath());
+            $template = $this->loadTemplate($html);
         }
+
+        return $template;
     }
 }
