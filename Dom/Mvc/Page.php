@@ -15,7 +15,7 @@ class Page extends Renderer
     private string $templatePath = '';
 
     /**
-     * Use Page::addRenderer(...) to add Renderer`s that will get appended to the selec
+     * Use Page::addRenderer(...) to add Renderer`s that will get appended to it's array key
      * @var array|Renderer[$var][]
      */
     private array $renderList = [];
