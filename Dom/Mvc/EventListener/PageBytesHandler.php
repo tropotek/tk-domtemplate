@@ -7,9 +7,6 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Dom\Mvc\Modifier\PageBytes;
 use Tk\Mvc\EventListener\StartupHandler;
 
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class PageBytesHandler implements EventSubscriberInterface
 {
 
@@ -18,9 +15,6 @@ class PageBytesHandler implements EventSubscriberInterface
     protected PageBytes $pageBytes;
 
 
-    /**
-     *
-     */
     function __construct(LoggerInterface $logger, PageBytes $pageBytes)
     {
         $this->logger = $logger;
@@ -41,9 +35,6 @@ class PageBytesHandler implements EventSubscriberInterface
         }
     }
 
-    /**
-     * @return string
-     */
     private function pageBytesToString(): string
     {
         $str = '';
@@ -62,7 +53,7 @@ class PageBytesHandler implements EventSubscriberInterface
         return $str;
     }
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             KernelEvents::TERMINATE => ['onTerminate', -100]
