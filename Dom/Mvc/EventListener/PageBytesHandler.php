@@ -3,6 +3,7 @@ namespace Dom\Mvc\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Dom\Mvc\Modifier\PageBytes;
 use Tk\Mvc\EventListener\StartupHandler;
@@ -21,10 +22,7 @@ class PageBytesHandler implements EventSubscriberInterface
         $this->pageBytes = $pageBytes;
     }
 
-    /**
-     * @param \Symfony\Component\HttpKernel\Event\TerminateEvent $event
-     */
-    public function onTerminate($event)
+    public function onTerminate(TerminateEvent $event)
     {
         if (!StartupHandler::$SCRIPT_CALLED) return;
 

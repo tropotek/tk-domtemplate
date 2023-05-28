@@ -7,11 +7,9 @@ use Dom\Renderer\RendererInterface;
 use Dom\Template;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\ViewEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 
-
-/**
- * @author Tropotek <http://www.tropotek.com/>
- */
 class ViewHandler implements EventSubscriberInterface
 {
 
@@ -27,11 +25,8 @@ class ViewHandler implements EventSubscriberInterface
      * Execute the Dom Modifier before the template is converted to a response
      * The dom modifier will execute any attached filters as a last post render iteration
      * over the dom tree
-     *
-     * @param \Symfony\Component\HttpKernel\Event\ViewEvent $event
-     * @throws \DOMException
      */
-    public function onDomModify($event)
+    public function onDomModify(ViewEvent $event)
     {
         $result = $event->getControllerResult();
 
@@ -57,14 +52,13 @@ class ViewHandler implements EventSubscriberInterface
      * NOTE: if you want to modify the template using its API
      * you must add the listeners before this one its priority is set to -100
      * make sure your handlers have a priority > -100 so this is run last
-     * 
+     *
      * Convert controller return types to a request
-     * Once this event is fired and a response is set it will stop propagation, 
+     * Once this event is fired and a response is set it will stop propagation,
      * so other events using this name must be run with a priority > -100
-     * 
-     * @param \Symfony\Component\HttpKernel\Event\ViewEvent $event
+     *
      */
-    public function onView($event)
+    public function onView(ViewEvent $event)
     {
         $result = $event->getControllerResult();
 
@@ -78,7 +72,7 @@ class ViewHandler implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            \Symfony\Component\HttpKernel\KernelEvents::VIEW => [
+            KernelEvents::VIEW => [
                 ['onDomModify', -80],
                 ['onView', -100]
             ]
