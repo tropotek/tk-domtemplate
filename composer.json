@@ -24,13 +24,10 @@
   "autoload": {
     "psr-0": {
       "Dom\\": ""
-    },
-    "exclude-from-classmap": [
-      "/tests/"
-    ]
+    }
   },
   "require": {
-    "php": "^8.2",
+    "php": "^8.1",
     "ext-dom": "*",
     "ext-tidy": "*",
     "scssphp/scssphp": "^1.11.0"
