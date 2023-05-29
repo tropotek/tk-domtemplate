@@ -1538,14 +1538,16 @@ class Template
                         $n->parentNode->insertBefore($node, $n);
                         $n->parentNode->insertBefore($nl, $n);
                     } else {
-                        if ($this->title) {
+                        if (strtolower($header['elementName']) == 'meta' && $this->title) {
+                            // insert meta tags above <title> tag where possible
+                            // Note this may reverse the order, not sure that matters for meta tags tho
                             $this->head->insertBefore($node, $this->title);
                             $this->head->insertBefore($nl, $this->title);
                             $this->head->insertBefore($t, $this->title);
                         } else {
-                            $this->head->insertBefore($node, $this->head->firstChild);
-                            $this->head->insertBefore($t, $this->head->firstChild);
-                            $this->head->insertBefore($nl, $this->head->firstChild);
+                            $this->head->append($node);
+                            $this->head->append($t);
+                            $this->head->append($nl);
                         }
                     }
                 }
