@@ -22,8 +22,8 @@
     }
   ],
   "autoload": {
-    "psr-0": {
-      "Dom\\": ""
+    "psr-4": {
+      "Dom\\": "Dom/"
     }
   },
   "require": {
