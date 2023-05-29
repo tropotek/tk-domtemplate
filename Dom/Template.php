@@ -804,6 +804,7 @@ class Template
         $this->headers[$hash]['attributes'] = $attributes;
         $this->headers[$hash]['value'] = $value;
         $this->headers[$hash]['node'] = $node;
+
         return $this;
     }
 
@@ -839,7 +840,7 @@ class Template
      */
     public function appendCss(string $styles, array $attrs = [], ?\DOMElement $node = null): Template
     {
-        if ($this->isParsed()) return $this;
+        if (!trim($styles) || $this->isParsed()) return $this;
         $this->addTracer($attrs);
         $this->appendHeadElement('style', $attrs, "\n" . $styles . "\n", $node);
         return $this;
@@ -871,7 +872,7 @@ class Template
      */
     public function appendJs(string $js, array $attrs = [], ?\DOMElement $node = null): Template
     {
-        if ($this->isParsed()) return $this;
+        if (!trim($js) || $this->isParsed()) return $this;
         $this->addTracer($attrs);
         $this->appendHeadElement('script', $attrs, $js, $node);
         return $this;
@@ -1531,13 +1532,21 @@ class Template
                         }
                     }
                     $nl = $this->document->createTextNode("\n");
+                    $t = $this->document->createTextNode("  ");
                     if ($header['node']) {
                         $n = $header['node'];
                         $n->parentNode->insertBefore($node, $n);
                         $n->parentNode->insertBefore($nl, $n);
                     } else {
-                        $this->head->appendChild($node);
-                        $this->head->appendChild($nl);
+                        if ($this->title) {
+                            $this->head->insertBefore($node, $this->title);
+                            $this->head->insertBefore($nl, $this->title);
+                            $this->head->insertBefore($t, $this->title);
+                        } else {
+                            $this->head->insertBefore($node, $this->head->firstChild);
+                            $this->head->insertBefore($t, $this->head->firstChild);
+                            $this->head->insertBefore($nl, $this->head->firstChild);
+                        }
                     }
                 }
             }
