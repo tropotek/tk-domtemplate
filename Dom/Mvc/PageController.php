@@ -19,6 +19,9 @@ abstract class PageController extends Renderer
         $page->addRenderer($this);
     }
 
+    /**
+     * @return Page|\App\Page
+     */
     public function getPage(): Page
     {
         return $this->page;
