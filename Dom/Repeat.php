@@ -42,9 +42,9 @@ class Repeat extends Template
      * to is original location in the parent template.
      * @throws \DOMException
      */
-    public function appendRepeat(string $var = '', Template $destRepeat = null): ?\DOMElement
+    public function appendRepeat(string|\DOMElement $var = '', Template $destRepeat = null): \DOMNode|false
     {
-        if ($this->getParent()->isParsed()) return null;
+        if ($this->getParent()->isParsed()) return false;
 
         $this->parent->headers = array_merge($this->parent->getHeaderList(), $this->getHeaderList());
         $this->parent->bodyTemplates = array_merge($this->parent->getBodyTemplateList(), $this->getBodyTemplateList());
@@ -58,26 +58,24 @@ class Repeat extends Template
         }
 
         $insertNode = $appendNode->ownerDocument->importNode($this->getDocument()->documentElement, true);
-        if ($appendNode->parentNode) {
-            if (!$var) {
-                $appendNode->parentNode->insertBefore($insertNode, $appendNode);
-                return $insertNode;
-            }
+        if ($appendNode->parentNode && !$var) {
+            $appendNode->parentNode->insertBefore($insertNode, $appendNode);
+        } else {
+            $appendNode->appendChild($insertNode);
         }
-        $appendNode->appendChild($insertNode);
 
         return $insertNode;
     }
 
     /**
-     * Append a repeating region to the document.
-     * Repeating regions are appended to the supplied var.
-     * If the var is null or '' then the repeating region is appended
+     * Prepend a repeating region to the document.
+     * Repeating regions are prepended to the supplied var.
+     * If the var is null or '' then the repeating region is prepended
      * to is original location in the parent template.
      */
-    public function prependRepeat(string $var = '', Template $destRepeat = null): ?\DOMElement
+    public function prependRepeat(string $var = '', Template $destRepeat = null): \DOMNode|false
     {
-        if ($this->getParent()->isParsed()) return null;
+        if ($this->getParent()->isParsed()) return false;
 
         $this->parent->headers = array_merge($this->parent->getHeaderList(), $this->getHeaderList());
         $this->parent->bodyTemplates = array_merge($this->parent->getBodyTemplateList(), $this->getBodyTemplateList());
@@ -88,7 +86,16 @@ class Repeat extends Template
                 $appendNode = $destRepeat->getVar($var);
             }
         }
-        return $appendNode->ownerDocument->importNode($this->getDocument()->documentElement, true);
+
+        $insertNode = $appendNode->ownerDocument->importNode($this->getDocument()->documentElement, true);
+
+        if ($appendNode->firstChild) {
+            $appendNode->insertBefore($insertNode, $appendNode->firstChild);
+        } else {
+            $appendNode->appendChild($insertNode);
+        }
+
+        return $insertNode;
     }
 
     /**
