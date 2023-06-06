@@ -58,7 +58,7 @@ class Repeat extends Template
         }
 
         $insertNode = $appendNode->ownerDocument->importNode($this->getDocument()->documentElement, true);
-        if ($appendNode->parentNode && !$var) {
+        if (!$var && $appendNode->parentNode) {
             $appendNode->parentNode->insertBefore($insertNode, $appendNode);
         } else {
             $appendNode->appendChild($insertNode);
