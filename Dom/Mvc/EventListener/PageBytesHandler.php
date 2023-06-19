@@ -28,7 +28,7 @@ class PageBytesHandler implements EventSubscriberInterface
 
         if ($this->pageBytes) {
             foreach (explode("\n", $this->pageBytesToString()) as $line) {
-                $this->logger->info($line);
+                $this->logger->debug($line);
             }
         }
     }
