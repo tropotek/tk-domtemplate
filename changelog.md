@@ -1,5 +1,18 @@
 #CHANGELOG#
 
+Ver 8.0.0 [2023-06-27]:
+-------------------------------
+  - Added new templates
+  - Added menu editor
+  - Added new Menu system
+  - Added breadcrumb object
+  - Added maintenance and form tabs
+  - Added account recover page
+  - Finished basic form functionality and fields
+  - update requirements to PHP 8.1
+  - Updated main template code, added renamed methods. removed unused code
+
+
 Ver 3.2.10 [2022-08-11]:
 -------------------------------
 
