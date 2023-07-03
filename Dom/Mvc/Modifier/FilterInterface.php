@@ -70,4 +70,22 @@ abstract class FilterInterface
         return $this->enabled;
     }
 
+    protected function addClass(string $classString, string $class): string
+    {
+        $arr = explode(' ', trim($classString));
+        $arr = array_flip($arr);
+        $arr[$class] = $class;
+        $arr = array_flip($arr);
+        return trim(implode(' ', $arr));
+    }
+
+    protected function removeClass(string $classString, string $class): string
+    {
+        $arr = explode(' ', trim($classString));
+        $arr = array_flip($arr);
+        unset($arr[$class]);
+        $arr = array_flip($arr);
+        return trim(implode(' ', $arr));
+    }
+
 }
