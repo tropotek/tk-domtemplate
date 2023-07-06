@@ -2,6 +2,7 @@
 namespace Dom\Mvc;
 
 use Dom\Mvc\Modifier\FilterInterface;
+use DOMComment;
 
 /**
  * This class is designed to take a DOMDocument, traverse it and pass each Node to
@@ -107,15 +108,13 @@ class Modifier
         foreach ($this->filters as $mod) {
             $mod->postTraverse($doc);
         }
+
         // Clear trash
-        if (count($this->nodeTrash)) {
-            foreach ($this->nodeTrash as $node) {
-                if ($node && $node->parentNode) {
-                    $node->parentNode->removeChild($node);
-                }
-            }
-            gc_collect_cycles();
+        foreach ($this->nodeTrash as $node) {
+            $node->parentNode?->removeChild($node);
         }
+        gc_collect_cycles();
+
         return $doc;
     }
 
@@ -124,7 +123,7 @@ class Modifier
      *
      * @param \DOMNode $node
      */
-    private function traverse(\DOMNode $node)
+    private function traverse(\DOMNode $node): void
     {
         if ($node->nodeType == \XML_ELEMENT_NODE) {
             /** @var $node \DOMElement */
@@ -142,7 +141,7 @@ class Modifier
             }
         }
         if ($node->nodeType == \XML_COMMENT_NODE) {
-            /** @var $node \DOMComment */
+            /** @var $node DOMComment */
             foreach ($this->filters as $mod) {
                 if (method_exists($mod, 'executeComment')) {
                     if (!$mod->isEnabled()) continue;
