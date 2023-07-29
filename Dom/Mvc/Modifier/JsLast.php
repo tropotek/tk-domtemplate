@@ -14,12 +14,12 @@ class JsLast extends FilterInterface
      * if < 0 the node is placed higher in the tree
      * if > 0 the node is placed lower in the tree
      */
-    public static string $ATTR_PRIORITY = 'data-jsl-priority';
+    public static string $ATTR_PRIORITY = 'data-priority';
 
     /**
      * Used to ensure the node is not moved/sorted.
      */
-    public static string $ATTR_STATIC = 'data-jsl-static';
+    public static string $ATTR_STATIC = 'data-inline';
 
     /**
      * Flag to ensure the filter is run once only
