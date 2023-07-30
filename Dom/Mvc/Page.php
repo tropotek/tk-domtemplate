@@ -4,6 +4,7 @@ namespace Dom\Mvc;
 
 use Dom\Renderer\Renderer;
 use Dom\Template;
+use Tk\Log;
 use Tk\Traits\SystemTrait;
 
 class Page extends Renderer
@@ -21,15 +22,14 @@ class Page extends Renderer
     private array $renderList = [];
 
 
-    public function __construct(string $templatePath)
+    public function __construct(string $templatePath = '')
     {
         $this->templatePath = $templatePath;
     }
 
-    public static function create(string $templatePath): static
+    public static function create(string $templatePath = ''): static
     {
-        $obj = new static($templatePath);
-        return $obj;
+        return new static($templatePath);
     }
 
     public function addRenderer(Renderer $renderer, string $var = 'content')
@@ -78,8 +78,12 @@ class Page extends Renderer
 
     public function __makeTemplate(): ?Template
     {
-        $template = $this->loadTemplateFile($this->getTemplatePath());
+        $template = '';
+        if (is_file($this->getTemplatePath())) {
+            $template = $this->loadTemplateFile($this->getTemplatePath());
+        }
         if (!$template) {
+            Log::debug('WARNING! Using default Template, please check template path: ' . $this->getTemplatePath());
             $html = <<<HTML
 <html>
 <head>

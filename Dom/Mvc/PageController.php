@@ -13,7 +13,7 @@ abstract class PageController extends Renderer
     protected Page $page;
 
 
-    public function __construct(Page $page)
+    public function __construct(?Page $page = null)
     {
         $this->setPage($page);
     }
