@@ -880,12 +880,10 @@ class Template
 
     /**
      * Add the calling trace to a notes attributes
-     * @todo: see if this works ok in a class env
      */
     private function addTracer(array &$attrs): void
     {
         $trace = debug_backtrace();
-
         $i = 2;
         if (self::$ENABLE_TRACER && !empty($trace[$i]) && empty($attrs[self::ATTR_DATA_TRACE])) {
             $attrs[self::ATTR_DATA_TRACE] = (!empty($trace[$i]['class']) ? $trace[$i]['class'] . '::' : '').(!empty($trace[$i]['function']) ? $trace[$i]['function'] . '()' : '');
@@ -1023,37 +1021,11 @@ class Template
     }
 
     /**
-     * Replace a template var element with the supplied HTML
+     * Insert HTML content into a var element removing any existing html content.
      *
-     * @param bool $preserveRootAttr Copy existing attributes of destination element to new node
-     * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
+     * @note After insertion the template will lose references to any contained Template element nodes.
      */
-    public function replaceHtml(string|\DOMNode $var, string $html, bool $preserveRootAttr = true): Template
-    {
-        if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
-        $nodes = $this->getVarList($var);
-        $this->empty($var);
-        foreach ($nodes as $i => $node) {
-            try {
-                $newNode = self::replaceDomHtml($node, $html, $this->encoding, $preserveRootAttr);
-                if ($newNode) {
-                    $this->var[$var][$i] = $newNode;
-                }
-            } catch (Exception $e) {
-                $this->logError($e->__toString());
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * Insert HTML formatted text into a var element.
-     *
-     * @note After insertion the template will lose
-     *   reference to any contained repeat element nodes. The fix
-     *   is to just do all operations on the repeat templates/elements before this call.
-     */
-    public function insertHtml(string|\DOMElement $var, string $html): Template
+    public function setHtml(string|\DOMNode $var, string $html): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -1068,7 +1040,16 @@ class Template
     }
 
     /**
-     * Append HTML into a var element
+     * Alias to Template::setHtml()
+     * @deprecated use Template::setHtml()
+     */
+    public function insertHtml(string|\DOMElement $var, string $html): Template
+    {
+        return $this->setHtml($var, $html);
+    }
+
+    /**
+     * Append HTML content into a var element
      */
     public function appendHtml(string|\DOMElement $var, string $html): Template
     {
@@ -1085,7 +1066,7 @@ class Template
     }
 
     /**
-     * Append HTML into a var element
+     * Append HTML content into a var element
      */
     public function prependHtml(string|\DOMElement $var, string $html): Template
     {
@@ -1101,35 +1082,29 @@ class Template
         return $this;
     }
 
-
     /**
-     * Replace HTML on a dom node
-     * This will replace the existing node not just its inner contents.
+     * Replace a template var element with the supplied HTML
      *
-     * @param bool $preserveRootAttr Copy existing attributes of destination element to new node
-     * @throws Exception
+     * @param bool $preserveAttrs Copy attributes of dest element to new root node (overwriting)
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
+     * @deprecated use Template::setHtml()
      */
-    public static function replaceDomHtml(\DOMNode $element, string $html, string $encoding = 'UTF-8', bool $preserveRootAttr = true): ?\DOMNode
+    public function replaceHtml(string|\DOMNode $var, string $html, bool $preserveAttrs = true): Template
     {
-        if (!$html) return null;
-
-        $html = self::cleanHtml($html, $encoding);
-        if (str_starts_with($html, '<?xml')) {
-            $html = substr($html, strpos($html, "\n", 5) + 1);
-        }
-        $elementDoc = $element->ownerDocument;
-
-        $contentNode = self::makeContentNode($html);
-        $contentNode = $contentNode->firstChild;
-        $contentNode = $elementDoc->importNode($contentNode, true);
-        if ($element->hasAttributes() && $preserveRootAttr && $contentNode->nodeType == \XML_ELEMENT_NODE) {
-            foreach ($element->attributes as $attr) {
-                $contentNode->setAttribute($attr->nodeName, $attr->nodeValue);
+        if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
+        $nodes = $this->getVarList($var);
+        $this->empty($var);
+        foreach ($nodes as $i => $node) {
+            try {
+                $newNode = self::replaceDomHtml($node, $html, $this->encoding, $preserveAttrs);
+                if ($newNode) {
+                    $this->var[$var][$i] = $newNode;
+                }
+            } catch (Exception $e) {
+                $this->logError($e->__toString());
             }
         }
-        $element->parentNode->replaceChild($contentNode, $element);
-        return $contentNode;
+        return $this;
     }
 
     /**
@@ -1204,33 +1179,33 @@ class Template
     }
 
     /**
-     * Replace a var element with a DOMDocument contents
+     * Replace HTML on a dom node
+     * This will replace the existing node not just its inner contents.
      *
-     * The DOMDocument's topmost node will be used to replace the destination node
-     * This will replace the existing node not just its inner contents
-     *
-     * @param bool $preserveRootAttr Copy existing attributes of destination element to new node
+     * @param bool $preserveAttrs Copy attributes of dest element to new root node (overwriting)
+     * @throws Exception
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
-    public function replaceDocHtml(string|\DOMElement $var, \DOMDocument $doc, bool $preserveRootAttr = true): Template
+    public static function replaceDomHtml(\DOMNode $element, string $html, string $encoding = 'UTF-8', bool $preserveAttrs = true): ?\DOMNode
     {
-        if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
-        if (!$doc->documentElement) return $this;
+        if (!$html) return null;
 
-        $nodes = $this->getVarList($var);
-        foreach ($nodes as $i => $node) {
-            $newNode = $this->document->importNode($doc->documentElement, true);
-            if ($node->hasAttributes() && $preserveRootAttr && $newNode->nodeType == \XML_ELEMENT_NODE) {
-                foreach ($node->attributes as $attr) {
-                    $newNode->setAttribute($attr->nodeName, $attr->nodeValue);
-                }
-            }
-            $node->parentNode->replaceChild($newNode, $node);
-            if (is_string($var)) {
-                $this->var[$var][$i] = $newNode;
+        $html = self::cleanHtml($html, $encoding);
+        if (str_starts_with($html, '<?xml')) {
+            $html = substr($html, strpos($html, "\n", 5) + 1);
+        }
+        $elementDoc = $element->ownerDocument;
+
+        $contentNode = self::makeContentNode($html);
+        $contentNode = $contentNode->firstChild;
+        $contentNode = $elementDoc->importNode($contentNode, true);
+        if ($element->hasAttributes() && $preserveAttrs && $contentNode->nodeType == \XML_ELEMENT_NODE) {
+            foreach ($element->attributes as $attr) {
+                $contentNode->setAttribute($attr->nodeName, $attr->nodeValue);
             }
         }
-        return $this;
+        $element->parentNode->replaceChild($contentNode, $element);
+        return $contentNode;
     }
 
     /**
@@ -1288,6 +1263,36 @@ class Template
     }
 
     /**
+     * Replace a var element with a DOMDocument contents
+     *
+     * The DOMDocument's topmost node will be used to replace the destination node
+     * This will replace the existing node not just its inner contents
+     *
+     * @param bool $preserveAttrs Copy attributes of dest element to new root node (overwriting)
+     * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
+     */
+    public function replaceDocHtml(string|\DOMElement $var, \DOMDocument $doc, bool $preserveAttrs = true): Template
+    {
+        if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
+        if (!$doc->documentElement) return $this;
+
+        $nodes = $this->getVarList($var);
+        foreach ($nodes as $i => $node) {
+            $newNode = $this->document->importNode($doc->documentElement, true);
+            if ($node->hasAttributes() && $preserveAttrs && $newNode->nodeType == \XML_ELEMENT_NODE) {
+                foreach ($node->attributes as $attr) {
+                    $newNode->setAttribute($attr->nodeName, $attr->nodeValue);
+                }
+            }
+            $node->parentNode->replaceChild($newNode, $node);
+            if (is_string($var)) {
+                $this->var[$var][$i] = $newNode;
+            }
+        }
+        return $this;
+    }
+
+    /**
      * Parse and Insert a template into a var element
      * The var tag will not be replaced only its contents
      *
@@ -1300,24 +1305,6 @@ class Template
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $this->mergeTemplate($template);
         return $this->insertDocHtml($var, $template->getDocument());
-    }
-
-    /**
-     * Replace a var node with the supplied Template
-     * The DOMDocument's topmost node will be used to replace the destination node
-     *
-     * This will also copy any headers in the supplied template.
-     * This will replace the existing node not just its inner contents
-     *
-     * @param bool $preserveRootAttr Copy existing attributes of destination element to new node
-     * @throws \DOMException
-     * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
-     */
-    public function replaceTemplate(string|\DOMElement $var, Template $template, bool $preserveRootAttr = true): Template
-    {
-        if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
-        $this->mergeTemplate($template);
-        return $this->replaceDocHtml($var, $template->getDocument(), $preserveRootAttr);
     }
 
     /**
@@ -1344,6 +1331,24 @@ class Template
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $this->mergeTemplate($template);
         return $this->prependDocHtml($var, $template->getDocument());
+    }
+
+    /**
+     * Replace a var node with the supplied Template
+     * The DOMDocument's topmost node will be used to replace the destination node
+     *
+     * This will also copy any headers in the supplied template.
+     * This will replace the existing node not just its inner contents
+     *
+     * @param bool $preserveAttrs Copy attributes of dest element to new root node (overwriting)
+     * @throws \DOMException
+     * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
+     */
+    public function replaceTemplate(string|\DOMElement $var, Template $template, bool $preserveAttrs = true): Template
+    {
+        if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
+        $this->mergeTemplate($template);
+        return $this->replaceDocHtml($var, $template->getDocument(), $preserveAttrs);
     }
 
 
@@ -1570,14 +1575,13 @@ class Template
     }
 
     /**
-     * Return the document as an XML/XHTML string
+     * Return the document as an HTML string
      */
     public function toString(bool $parse = true): string
     {
         $str = '';
         try {
             $doc = $this->getDocument($parse);
-            //$str = $doc->saveXML($doc->documentElement);
             $str = $doc->saveHTML($doc->documentElement);
 
             // Cleanup Document
@@ -1614,8 +1618,8 @@ class Template
     }
 
     /**
-     * Get the xml/html and return the cleaned string
-     * A good place to clean any nasty html entities and other non-valid XML/XHTML elements
+     * Get the html and return the cleaned string
+     * A good place to clean any nasty html entities and other non-valid HTML elements
      */
     static function cleanHtml(string $xml, string $encoding = 'UTF-8'): string
     {
