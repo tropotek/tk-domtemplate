@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 3.2.14 [2023-11-18]:
+-------------------------------
+  - Tagging and releasing branch `3.2` with version `3.2.12`.
+  - Updated main template code, added renamed methods. removed unused code
+
+
 Ver 3.2.12 [2022-11-16]:
 -------------------------------
   - Updated main template code, added renamed methods. removed unused code
