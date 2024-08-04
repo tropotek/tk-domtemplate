@@ -2,17 +2,11 @@
 namespace Dom;
 
 /**
- * Class Exception
- *
  * @author Tropotek <http://www.tropotek.com/>
  */
 class Exception extends \Exception {
 
-
-    /**
-     * @var string
-     */
-    protected $dump = '';
+    protected string $dump = '';
 
     /**
      * Construct the exception. Note: The message is NOT binary safe.
@@ -23,10 +17,9 @@ class Exception extends \Exception {
      * @param string $dump
      * @since 5.1.0
      */
-    public function __construct($message = "", $code = 0, $previous = null, $dump = '') {
+    public function __construct(string $message = '', int $code = 0, ?\Exception $previous = null, string $dump = '') {
         parent::__construct($message, $code);
         $this->dump = $dump;
-
     }
 
     /**
@@ -35,10 +28,10 @@ class Exception extends \Exception {
      * @see http://php.net/manual/en/exception.tostring.php
      * @return string the string representation of the exception.
      */
-    public function __toString()
+    public function __toString(): string
     {
         $str = parent::__toString();
-        if ($this->dump != null) {
+        if (!empty($this->dump)) {
             $str =  "DOM Errors:\n" . $this->dump . "\n\n" . $str;
         }
         return $str;

@@ -6,7 +6,6 @@ use Dom\Mvc\Modifier;
 /**
  * The interface for all Modifier filter objects
  *
- *
  * @author Tropotek <http://www.tropotek.com/>
  */
 abstract class FilterInterface
@@ -16,12 +15,10 @@ abstract class FilterInterface
 
     protected bool $enabled = true;
 
-
     /**
      * pre init the front controller
      */
     abstract function init(\DOMDocument $doc);
-
 
     /**
      * The code to perform any modification to the node goes here.
@@ -39,9 +36,6 @@ abstract class FilterInterface
     public function postTraverse(\DOMDocument $doc) { }
 
 
-    /**
-     * Set Dom Modifier
-     */
     public function setDomModifier(Modifier $dm): FilterInterface
     {
         $this->domModifier = $dm;
@@ -53,18 +47,12 @@ abstract class FilterInterface
         return $this->domModifier;
     }
 
-    /**
-     * Set the enabled state of the object
-     */
     public function setEnable(bool $b): FilterInterface
     {
         $this->enabled = $b;
         return $this;
     }
 
-    /**
-     * Get the enabled status.
-     */
     public function isEnabled(): bool
     {
         return $this->enabled;

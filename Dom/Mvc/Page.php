@@ -7,6 +7,9 @@ use Dom\Template;
 use Tk\Log;
 use Tk\Traits\SystemTrait;
 
+/**
+ * @deprecated use \Bs\PageDomInterface
+ */
 class Page extends Renderer
 {
     use SystemTrait;
@@ -32,10 +35,11 @@ class Page extends Renderer
         return new static($templatePath);
     }
 
-    public function addRenderer(Renderer $renderer, string $var = 'content')
+    public function addRenderer(string|Renderer $renderer, string $var = 'content'): self
     {
         $var = $var ?: 'content';
         $this->renderList[$var][] = $renderer;
+        return $this;
     }
 
     protected function getRenderList(): array
@@ -61,18 +65,19 @@ class Page extends Renderer
 
     /**
      * Execute the rendering of a template.
-     * This method must return a Template object
      */
     public function show(): ?Template
     {
         $template = $this->getTemplate();
-
         foreach ($this->getRenderList() as $var => $list) {
             foreach ($list as $renderer) {
-                $this->getTemplate()->appendTemplate($var, $renderer->show());
+                if (is_string($renderer)) {
+                    $this->getTemplate()->appendHtml($var, $renderer);
+                } else {
+                    $this->getTemplate()->appendTemplate($var, $renderer->show());
+                }
             }
         }
-
         return $template;
     }
 

@@ -9,9 +9,7 @@ use Dom\Template;
  */
 class LoadEvent extends TemplateEvent
 {
-
     private AdapterInterface $adapter;
-
 
     public function __construct(Template $template, AdapterInterface $adapter)
     {
@@ -19,9 +17,6 @@ class LoadEvent extends TemplateEvent
         $this->adapter = $adapter;
     }
 
-    /**
-     * @return AdapterInterface
-     */
     public function getAdapter(): AdapterInterface
     {
         return $this->adapter;

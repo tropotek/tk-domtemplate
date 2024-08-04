@@ -5,60 +5,42 @@ use Dom\Exception;
 
 /**
  * Class XmlObj
- *
- * @author Tropotek <http://www.tropotek.com/>
  */
 class XmlObj
 {
-    
+
     /**
      * Convert an XML string to a stdObj
      * We use this instead of simpleXML because it returns native strings.
-     *
-     * @param string $xml
-     * @return \stdClass
-     * @throws Exception
      */
-    static function xml2Obj($xml)
+    static function xml2Obj(string $xml): ?\stdClass
     {
         if ($xml[0] != '<') {
             $xml = file_get_contents($xml);
         }
         $dom = new \DOMDocument();
         $r = $dom->loadXML($xml);
-
-//        if (!$dom->loadXML($xml)) {
-//            $e = new Exception('Invalid XML cannot convert XML string to DOM.');
-//            throw $e;
-//        }
         if (!$r) {
             $str = '';
             foreach (libxml_get_errors() as $error) {
                 $str .= sprintf("\n[%s:%s] %s", $error->line, $error->column, trim($error->message));
             }
             libxml_clear_errors();
-            $e = new Exception('Invalid XML cannot convert To DOM Object.', 0, null, $str);
-            //$e->setDump($str);
-            throw $e;
+            throw new Exception('Invalid XML cannot convert To DOM Object.', 0, null, $str);
         }
 
-        $obj = self::dom2Obj($dom->documentElement);
-        return $obj;
+        return self::dom2Obj($dom->documentElement);
     }
-
 
     /**
      * Convert a dom node and its children to a stdClass object
-     *
-     * @param \DOMNode $node
-     * @return \stdClass
      */
-    public static function dom2Obj(\DOMNode $node)
+    public static function dom2Obj(\DOMNode $node): ?\stdClass
     {
         $node->normalize();
         if ($node->firstChild != null) {
             if ($node->childNodes->length == 1 && $node->firstChild->nodeType == \XML_TEXT_NODE) {
-                return trim($node->firstChild->nodeValue);
+                return (object)[$node->firstChild->nodeName] = trim($node->firstChild->nodeValue);
             }
         } else {
             return null;
@@ -83,6 +65,5 @@ class XmlObj
         }
         return $obj;
     }
-
 
 }

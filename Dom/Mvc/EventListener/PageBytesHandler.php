@@ -25,11 +25,8 @@ class PageBytesHandler implements EventSubscriberInterface
     public function onTerminate(TerminateEvent $event)
     {
         if (!StartupHandler::$SCRIPT_CALLED) return;
-
-        if ($this->pageBytes) {
-            foreach (explode("\n", $this->pageBytesToString()) as $line) {
-                $this->logger->debug($line);
-            }
+        foreach (explode("\n", $this->pageBytesToString()) as $line) {
+            $this->logger->debug($line);
         }
     }
 

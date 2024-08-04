@@ -29,7 +29,7 @@ namespace Dom;
  * This is a way that a front end devs can create a single HTML
  * page with all the templates required for system objects.
  *
- * Great for creating forms and tables with all their elements.
+ * Handy for creating forms and tables templates with all their elements in one file.
  *
  * @author Tropotek <http://www.tropotek.com/>
  */

@@ -1049,6 +1049,30 @@ class Template
     }
 
     /**
+     * Replace a template var element with the supplied HTML
+     *
+     * @param bool $preserveAttrs Copy attributes of dest element to new root node (overwriting)
+     * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
+     */
+    public function replaceHtml(string|\DOMNode $var, string $html, bool $preserveAttrs = true): Template
+    {
+        if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
+        $nodes = $this->getVarList($var);
+        $this->empty($var);
+        foreach ($nodes as $i => $node) {
+            try {
+                $newNode = self::replaceDomHtml($node, $html, $this->encoding, $preserveAttrs);
+                if ($newNode) {
+                    $this->var[$var][$i] = $newNode;
+                }
+            } catch (Exception $e) {
+                $this->logError($e->__toString());
+            }
+        }
+        return $this;
+    }
+
+    /**
      * Append HTML content into a var element
      */
     public function appendHtml(string|\DOMElement $var, string $html): Template
@@ -1075,31 +1099,6 @@ class Template
         foreach ($nodes as $node) {
             try {
                 self::prependDomHtml($node, $html);
-            } catch (Exception $e) {
-                $this->logError($e->__toString());
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * Replace a template var element with the supplied HTML
-     *
-     * @param bool $preserveAttrs Copy attributes of dest element to new root node (overwriting)
-     * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
-     * @deprecated use Template::setHtml()
-     */
-    public function replaceHtml(string|\DOMNode $var, string $html, bool $preserveAttrs = true): Template
-    {
-        if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
-        $nodes = $this->getVarList($var);
-        $this->empty($var);
-        foreach ($nodes as $i => $node) {
-            try {
-                $newNode = self::replaceDomHtml($node, $html, $this->encoding, $preserveAttrs);
-                if ($newNode) {
-                    $this->var[$var][$i] = $newNode;
-                }
             } catch (Exception $e) {
                 $this->logError($e->__toString());
             }

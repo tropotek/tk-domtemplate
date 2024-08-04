@@ -5,14 +5,11 @@ use \Dom\Mvc\Loader;
 use Dom\Template;
 
 /**
- *
  * @author Tropotek <http://www.tropotek.com/>
  */
 abstract class AdapterInterface
 {
-
     protected ?Loader $loader = null;
-
 
     /**
      * Load xml/xhtml string template

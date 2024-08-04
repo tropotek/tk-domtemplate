@@ -1,24 +1,36 @@
 <?php
 namespace Dom\Mvc\EventListener;
 
+use Bs\ControllerInterface;
 use Dom\Mvc\Modifier;
 use Dom\Renderer\DisplayInterface;
-use Dom\Renderer\RendererInterface;
 use Dom\Template;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 class ViewHandler implements EventSubscriberInterface
 {
 
-    protected Modifier $domModifier;
+    protected ?Modifier $domModifier;
+    protected ?ControllerInterface $controller = null;
 
 
-    public function __construct(Modifier $domModifier)
+    public function __construct(?Modifier $domModifier = null)
     {
         $this->domModifier = $domModifier;
+    }
+
+    /**
+     * @Event("Symfony\Component\HttpKernel\Event\ControllerEvent")
+     */
+    public function onController(ControllerEvent $event): void
+    {
+        if (!is_array($event->getController())) return;
+        if (!($event->getController()[0] instanceof ControllerInterface)) return;
+        $this->controller = $event->getController()[0];
     }
 
     /**
@@ -26,7 +38,7 @@ class ViewHandler implements EventSubscriberInterface
      * The dom modifier will execute any attached filters as a last post render iteration
      * over the dom tree
      */
-    public function onDomModify(ViewEvent $event)
+    public function onDomModify(ViewEvent $event): void
     {
         $result = $event->getControllerResult();
 
@@ -34,16 +46,12 @@ class ViewHandler implements EventSubscriberInterface
             $result = $result->show();
         }
 
-        if ($result instanceof RendererInterface) {
-            $result = $result->getTemplate();
-        }
-
         if ($result instanceof Template) {
             $result = $result->getDocument();
         }
 
         if ($result instanceof \DOMDocument) {
-            $this->domModifier->execute($result);
+            $this->domModifier?->execute($result);
         }
     }
 
@@ -58,20 +66,24 @@ class ViewHandler implements EventSubscriberInterface
      * so other events using this name must be run with a priority > -100
      *
      */
-    public function onView(ViewEvent $event)
+    public function onView(ViewEvent $event): void
     {
         $result = $event->getControllerResult();
+        if (is_null($result)) {
+            $result = $this->controller;
+        }
 
         if ($result instanceof Template) {
             $event->setResponse(new Response($result->toString()));
-        } else if ($result instanceof RendererInterface) {
-            $event->setResponse(new Response($result->getTemplate()->toString()));
+        } else if ($result instanceof DisplayInterface) {
+            $event->setResponse(new Response($result->show()->toString()));
         }
     }
 
     public static function getSubscribedEvents()
     {
         return [
+            KernelEvents::CONTROLLER => 'onController',
             KernelEvents::VIEW => [
                 ['onDomModify', -80],
                 ['onView', -100]

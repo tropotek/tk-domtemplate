@@ -55,20 +55,17 @@ class ClassPathAdapter extends AdapterInterface
 
     /**
      * Load xml/xhtml string template
-     *
-     * @throws Exception
      */
     public function load(string $xhtml = ''): ?Template
     {
-        $tpl =  $this->loadFile();
-        if (!$tpl) return Template::load($xhtml);
+        $tpl = $this->loadFile();
+        if (is_null($tpl)) $tpl = Template::load($xhtml);
+        return $tpl;
     }
 
     /**
      * Load xml/xhtml file template
      * If no path value is passed then a path is created by using the calling class
-     *
-     * @throws Exception
      */
     public function loadFile(string $path = ''): ?Template
     {

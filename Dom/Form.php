@@ -39,7 +39,6 @@ class Form
         $this->form = $form;
         $this->elements = $elements;
         $this->parent = $parent;
-
     }
 
     /**

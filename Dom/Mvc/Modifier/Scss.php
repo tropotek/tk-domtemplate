@@ -93,8 +93,6 @@ class Scss extends FilterInterface
 
     /**
      * pre init the Filter
-     *
-     * @throws \Exception
      */
     public function postTraverse(\DOMDocument $doc)
     {
@@ -147,7 +145,6 @@ class Scss extends FilterInterface
 
     }
 
-
     /**
      * Surround a string by quotation marks. Single quote by default
      */
@@ -188,4 +185,5 @@ class Scss extends FilterInterface
     {
         return (class_exists('\Tk\Config') && \Tk\Config::instance()->isDebug());
     }
+
 }
