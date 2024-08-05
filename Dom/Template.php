@@ -240,7 +240,6 @@ class Template
             $isHtml5 = true;
             $html = substr($html, 16);
         }
-        //$ok = $doc->loadXML($xml);
         $ok = $doc->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         if (!$ok) {
             $str = '';
@@ -284,7 +283,6 @@ class Template
     public function __wakeup()
     {
         $doc = new \DOMDocument();
-        //$doc->loadXML($this->serialHtml);
         $doc->loadHTML($this->serialHtml, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         $this->init($doc, $this->encoding);
     }
@@ -1363,11 +1361,9 @@ class Template
     {
         $markup = self::cleanHtml($markup, $encoding);
         $id = '_c_o_n__';
-        //$html = sprintf('<?xml version="1.0" encoding="%s" ? ><div xml:id="%s">%s</div>', $encoding, $id, $markup);
-        $html = sprintf('<div id="%s">%s</div>', $id, $markup);
+        $html = sprintf('<?xml encoding="'.$encoding.'"?><div id="%s">%s</div>', $id, $markup);
         $doc = new \DOMDocument();
         libxml_use_internal_errors(true);
-        //$ok = $doc->loadXML($html);
         $ok = $doc->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         if (!$ok) {
             $str = '';
@@ -1376,8 +1372,8 @@ class Template
             }
             libxml_clear_errors();
             $str .= "\n\n" . $markup . "\n";
-            $e = new Exception('Error Parsing DOM Template', 0, null, $str);
-            throw $e;
+
+            throw new Exception('Error Parsing DOM Template', 0, null, $str);
         }
         return $doc->getElementById($id);
     }

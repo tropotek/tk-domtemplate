@@ -122,8 +122,12 @@ abstract class Element
     /**
      * Set the attribute name and value
      */
-    public function setAttribute(string $name, string $value): Element
+    public function setAttribute(string $name, ?string $value): Element
     {
+        if(is_null($value)) {
+            $this->element->removeAttribute($name);
+            return $this;
+        }
         $this->element->setAttribute($name, $value);
         return $this;
     }
