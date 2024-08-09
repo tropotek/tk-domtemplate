@@ -30,6 +30,11 @@ class JsLast extends FilterInterface
 
     private array $body = [];
 
+    /**
+     * track src urls to remove duplicates
+     */
+    private array $src = [];
+
 
     /**
      * pre init the front controller
@@ -74,12 +79,17 @@ class JsLast extends FilterInterface
                 return ($aPri < $bPri) ? -1 : 1;
             });
 
+            /** @var \DOMElement $child */
             foreach ($nodeList as $child) {
                 $newNode = $child->cloneNode(true);
                 if (!trim($child->previousSibling->textContent)) {  // Remove newline nodes
                     $child->previousSibling->parentNode->removeChild($child->previousSibling);
                 }
                 $this->domModifier->removeNode($child);
+
+                // ignore duplicate src paths
+                if (in_array($child->getAttribute('src'), $this->src)) continue;
+                $this->src[] = $child->getAttribute('src');
 
                 $nl = $newNode->ownerDocument->createTextNode("\n");
                 $this->domModifier->getBody()->appendChild($nl);

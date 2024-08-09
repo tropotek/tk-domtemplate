@@ -1138,11 +1138,11 @@ class Template
     public static function appendDomHtml(\DOMNode $element, string $html, string $encoding = 'UTF-8'): ?\DOMNode
     {
         if (!$html) return null;
-
         $html = self::cleanHtml($html, $encoding);
         if (str_starts_with($html, '<?xml')) {
             $html = substr($html, strpos($html, "\n", 5) + 1);
         }
+
         $elementDoc = $element->ownerDocument;
 
         $contentNode = self::makeContentNode($html);
@@ -1360,10 +1360,12 @@ class Template
     public static function makeContentNode(string $markup, string $encoding = 'UTF-8'): \DOMNode
     {
         $markup = self::cleanHtml($markup, $encoding);
+
         $id = '_c_o_n__';
         $html = sprintf('<?xml encoding="'.$encoding.'"?><div id="%s">%s</div>', $id, $markup);
         $doc = new \DOMDocument();
         libxml_use_internal_errors(true);
+
         $ok = $doc->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         if (!$ok) {
             $str = '';
