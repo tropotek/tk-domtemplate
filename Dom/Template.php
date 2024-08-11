@@ -870,7 +870,7 @@ class Template
      */
     public function appendJs(string $js, array $attrs = [], ?\DOMElement $node = null): Template
     {
-        if (!trim($js) || $this->isParsed()) return $this;
+        if (empty(trim($js)) || $this->isParsed()) return $this;
         $this->addTracer($attrs);
         $this->appendHeadElement('script', $attrs, $js, $node);
         return $this;
