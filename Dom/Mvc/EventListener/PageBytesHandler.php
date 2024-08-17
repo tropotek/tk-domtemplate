@@ -6,19 +6,16 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Dom\Mvc\Modifier\PageBytes;
+use Tk\Log;
 use Tk\Mvc\EventListener\StartupHandler;
 
 class PageBytesHandler implements EventSubscriberInterface
 {
-
-    private LoggerInterface $logger;
-
     protected PageBytes $pageBytes;
 
 
-    function __construct(LoggerInterface $logger, PageBytes $pageBytes)
+    function __construct(PageBytes $pageBytes)
     {
-        $this->logger = $logger;
         $this->pageBytes = $pageBytes;
     }
 
@@ -26,7 +23,7 @@ class PageBytesHandler implements EventSubscriberInterface
     {
         if (!StartupHandler::$SCRIPT_CALLED) return;
         foreach (explode("\n", $this->pageBytesToString()) as $line) {
-            $this->logger->debug($line);
+            Log::debug($line);
         }
     }
 
