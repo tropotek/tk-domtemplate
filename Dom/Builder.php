@@ -29,20 +29,18 @@ namespace Dom;
  * This is a way that a front end devs can create a single HTML
  * page with all the templates required for system objects.
  *
- * Handy for creating forms and tables templates with all their elements in one file.
+ * To see it in action look at the \Tk\Table and \Tk\Form libs.
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
 class Builder
 {
 
-    private string $path = '';
+    private   string $path         = '';
+    private   array  $sectionCache = [];
+    protected bool   $removeId     = true;
 
     private \DOMDocument $document;
-
-    private array $sectionCache = [];
-
-    protected bool $removeId = true;
 
 
     public function __construct(string $path)
@@ -97,7 +95,7 @@ class Builder
     }
 
     /**
-     * If true then the original section id tag is remove
+     * If true then the original section id tag is removed
      * (default: true)
      */
     public function isRemoveId(): bool

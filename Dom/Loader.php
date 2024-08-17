@@ -1,16 +1,10 @@
 <?php
-namespace Dom\Mvc;
+namespace Dom;
 
-use Dom\Mvc\Event\LoadEvent;
-use Dom\Mvc\Loader\AdapterInterface;
-use Dom\Template;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Dom\Loader\AdapterInterface;
 
 /**
- * Class Template Loader
- *
  * Use this class to facilitate automatic searching loading of template files
- *
  * You can add loader adapters to find templates
  *
  * NOTE: Adapters are run in a LIFO (Last In First Out) queue.
@@ -25,13 +19,13 @@ class Loader
      */
     protected array $adapterList = [];
 
-    protected ?EventDispatcherInterface $dispatcher = null;
+//    protected ?EventDispatcherInterface $dispatcher = null;
 
 
-    public function __construct(?EventDispatcherInterface $dispatcher = null)
-    {
-        $this->dispatcher = $dispatcher;
-    }
+//    public function __construct(?EventDispatcherInterface $dispatcher = null)
+//    {
+//        $this->dispatcher = $dispatcher;
+//    }
 
     /**
      * Load xml/xhtml string template
@@ -41,7 +35,8 @@ class Loader
         foreach($this->adapterList as $adapter) {
             $tpl = $adapter->load($xhtml);
             if ($tpl instanceof Template) {
-                return $this->triggerLoadEvent($tpl, $adapter);
+                return $tpl;
+//                return $this->triggerLoadEvent($tpl, $adapter);
             }
         }
         return null;
@@ -55,17 +50,21 @@ class Loader
         foreach($this->adapterList as $adapter) {
             $tpl = $adapter->loadFile($path);
             if ($tpl instanceof Template) {
-                return $this->triggerLoadEvent($tpl, $adapter);
+                return $tpl;
+//                return $this->triggerLoadEvent($tpl, $adapter);
             }
         }
         return null;
     }
 
+    /**
+     * @deprecated
+     */
     protected function triggerLoadEvent(Template $template, AdapterInterface $adapter): Template
     {
-        if ($this->dispatcher) {
-            $this->dispatcher->dispatch(new LoadEvent($template, $adapter));
-        }
+//        if ($this->dispatcher) {
+//            $this->dispatcher->dispatch(new LoadEvent($template, $adapter));
+//        }
         return $template;
     }
 

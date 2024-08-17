@@ -1,13 +1,11 @@
 <?php
-namespace Dom\Mvc\Loader;
+namespace Dom\Loader;
 
 use Dom\Exception;
-use Dom\Mvc\Loader\AdapterInterface;
-use \Dom\Template;
+use Dom\Template;
 
 /**
  * Default adapter for the loader object.
- *
  * This should be run last after all other adapters have been tried
  *
  * @author Tropotek <http://www.tropotek.com/>

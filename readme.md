@@ -40,6 +40,44 @@ Or add the following to your composer.json file:
 }
 ```
 
+__SCSS Auto compalation support__
+
+To enable SCSS auto compalation you will need to add the package "scssphp/scssphp" (https://packagist.org/packages/scssphp/scssphp)
+```
+composer require scssphp/scssphp
+```
+
+Then use the `\Dom\Modifyer\Scss` DOM modifier:
+```php
+// Load a template with some valid SCSS inline:
+//     <style type="text/scss"> .. </style>
+// or with a standard css include:
+//     <link href="/assets/scss/styles.scss" />
+$template = new \Dom\Template::loadFile('index.html');
+
+// use template as needed ...
+
+// final step befor rendering to the output stream is to execute andy DOM modifiers
+$dm = new \Tk\Dom\Modifier\Modifier();
+$dm->add(new \Tk\Dom\Modifier\Filter\Scss(
+    $basePath,    // site base path from the vendor dir 
+    $baseUrl,     // base url from the vbendor path
+    $cachePath,   // path to cache the compiled css files
+    // add any SCSS properties you may want to access in the source files during parsing
+    $constants = [
+        'backColor' => '#EFEFEF',
+        'borderWidth' => '1px',
+    ]
+));
+// modifier to move all JS to the bottom of the page
+$dm->add(new \Tk\Dom\Modifier\Filter\JsLast();
+$dm->execute($template->getDocument());
+
+echo $template->toString();
+```
+
+
+
 ## Introduction
 
 __NOTE: This engine uses the PHP DOM module that requires that all documents
@@ -301,22 +339,5 @@ $template = \Dom\Loader::loadFile($tplFile);
 ```
 
 
-
-## AutoRenderer (deprecated)
-
-__WHY?__ As I am not a fan of making the DOMTemplate Lib use any type of internal scripting logic, 
-which will add a new layer of complexity for the designer, I have terminated this as a supported part 
-of the DOMTemplate lib. 
-
-<small>_It is left here as a reference only, use it as a base to get yourself started if you want to build 
-on it for your own requirements._</small>
-
----
-
-The auto renderer was built to facilitate automatic rendering of data similar to that
-of other templating languages.
-
-Data is passed to the auto renderer and template attributes are used to display the selected data stored in 
-the AutoRenderer.
  
 [See the Example](docs/examples/autoRenderer.php)

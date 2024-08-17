@@ -1,5 +1,5 @@
 <?php
-namespace Dom\Mvc\Modifier;
+namespace Dom\Modifier;
 
 
 /**

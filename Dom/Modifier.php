@@ -1,7 +1,7 @@
 <?php
-namespace Dom\Mvc;
+namespace Dom;
 
-use Dom\Mvc\Modifier\FilterInterface;
+use Dom\Modifier\FilterInterface;
 use DOMComment;
 
 /**
@@ -29,23 +29,14 @@ use DOMComment;
  */
 class Modifier
 {
-    /**
-     * @var array|FilterInterface[]
-     */
-    protected array $filters = [];
 
-    /**
-     * @var array|\DOMNode[]
-     */
+    protected array $filters   = [];
     protected array $nodeTrash = [];
+    protected bool  $inHead    = false;
+    protected bool  $inBody    = false;
 
     protected ?\DOMElement $head = null;
-
     protected ?\DOMElement $body = null;
-
-    protected bool $inHead = false;
-
-    protected bool $inBody = false;
 
 
     /**

@@ -1,5 +1,5 @@
 <?php
-namespace Dom\Mvc\Modifier;
+namespace Dom\Modifier;
 
 
 /**
@@ -7,7 +7,7 @@ namespace Dom\Mvc\Modifier;
  *
  * This filter assumes that the paths are used as follows:
  *
- * Template Relative: <img src="./img/image.png" />     {TODO: I think this can be removed}
+ * Template Relative: <img src="./img/image.png" />
  *   The path prefix './' will be treated as a special case and be
  *   converted to the root of the current page template folder so an example
  *   in this case if the template path was in '/html/default' the converted path
@@ -213,7 +213,6 @@ class UrlPath extends FilterInterface
             throw new \Tk\Exception('Invalid url path: ' . $path);
         }
 
-        // TODO: could cause security issues. see how we go without it.
         //$path = str_replace(array('//','\\\\'), array('/','\\'), $path);
         $array = explode( '/', $path);
         $parents = array();

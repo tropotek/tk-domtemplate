@@ -6,6 +6,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * @author Tropotek <http://www.tropotek.com/>
+ * @deprecated
  */
 class TemplateEvent extends Event
 {

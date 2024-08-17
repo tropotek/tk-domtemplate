@@ -1,6 +1,5 @@
 <?php
-namespace Dom\Mvc\Modifier;
-
+namespace Dom\Modifier;
 
 use Dom\Exception;
 use ScssPhp\ScssPhp\OutputStyle;
@@ -46,7 +45,7 @@ class Scss extends FilterInterface
 
 
     /**
-     * @param array $constants Any parameters you want accessible via the less file via @{paramName}
+     * @param array $constants Any parameters you want accessible via the scss parser via @{paramName}
      */
     public function __construct($basePath, $baseUrl, string $cachePath, array $constants = [])
     {

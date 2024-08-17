@@ -1,5 +1,5 @@
 <?php
-namespace Dom\Renderer\Util;
+namespace Dom\Renderer;
 
 use Dom\Renderer\Renderer;
 use Dom\Template;
@@ -8,25 +8,17 @@ use Dom\Exception;
 /**
  * For classes that render dom templates.
  *
- * This is a good base for all renderer objects that implement the \Dom_Template
- * it can guide you to create templates that can be inserted into other template
- * objects.
+ * This is an example of parsing a DOM template in similar was that other
+ * template libs work, byt sending params that you want rendered to the parse method.
+ * In this case sending params to the $renderer->toString([]) method.
  *
- * If the current template is null then
- * the magic method __makeTemplate() will be called to create an internal template.
- * This is a good way to create a default template. But be aware that this will
- * be a new template and will have to be inserted into its parent using the \Dom_Template::insertTemplate()
- * method.
- *
- *
- *
- * @note development on this object as it does not belong with this
+ * @note development on this object has ceased as it does not belong with this
  * library. It introduces the need for logic into the template which is what we are trying to avoid.
- * It is left here as a reference so if you wish to build on the base Template system
- * this shows how you could create an automated template renderer by sending array of params
- * and build your own template logic renderer
+ * It is left here as a reference to show how you could create an automated template renderer
+ * by sending array of params. It reduces the flexibility of the Dom Templates and is no longer supported.
  *
  * @author Tropotek <http://www.tropotek.com/>
+ * @deprecated
  */
 class AutoRenderer extends Renderer
 {

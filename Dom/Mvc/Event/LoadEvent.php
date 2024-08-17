@@ -1,11 +1,12 @@
 <?php
 namespace Dom\Mvc\Event;
 
-use Dom\Mvc\Loader\AdapterInterface;
+use Dom\Loader\AdapterInterface;
 use Dom\Template;
 
 /**
  * @author Tropotek <http://www.tropotek.com/>
+ * @deprecated
  */
 class LoadEvent extends TemplateEvent
 {

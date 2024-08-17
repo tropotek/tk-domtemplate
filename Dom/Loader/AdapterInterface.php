@@ -1,7 +1,7 @@
 <?php
-namespace Dom\Mvc\Loader;
+namespace Dom\Loader;
 
-use \Dom\Mvc\Loader;
+use Dom\Loader;
 use Dom\Template;
 
 /**

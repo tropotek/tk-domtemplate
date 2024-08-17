@@ -1,8 +1,7 @@
 <?php
-namespace Dom\Mvc\Loader;
+namespace Dom\Loader;
 
-use Dom\Exception;
-use \Dom\Template;
+use Dom\Template;
 
 /**
  * This adapter will attempt to load a class path template if one exists, then by default
@@ -21,7 +20,7 @@ use \Dom\Template;
  *     $path = $this->getConfig()->getBasePath() . '/html/templates';
  *     $loader->addAdapter(new Loader\DefaultAdapter());
  *     $loader->addAdapter(new Loader\ClassPathAdapter($path));
- *     ..
+ *     ...
  *     $template = $this->getFactory()->getTemplateLoader()->loadFile();
  *     return $template->toString();
  * </code>

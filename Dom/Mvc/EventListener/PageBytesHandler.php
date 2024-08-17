@@ -2,13 +2,15 @@
 namespace Dom\Mvc\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Dom\Mvc\Modifier\PageBytes;
+use Dom\Modifier\PageBytes;
 use Tk\Log;
 use Tk\Mvc\EventListener\StartupHandler;
 
+/**
+ * @deprecated
+ */
 class PageBytesHandler implements EventSubscriberInterface
 {
     protected PageBytes $pageBytes;

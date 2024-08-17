@@ -1,5 +1,5 @@
 <?php
-namespace Dom\Mvc\Modifier;
+namespace Dom\Modifier;
 
 /**
  * Append all scripts to the bottom of the body tag.

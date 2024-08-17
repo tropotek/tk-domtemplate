@@ -102,7 +102,7 @@ class Template
 
     /**
      * The original template document
-     * before template initialisation
+     * before template initialization
      */
     private ?\DOMDocument $orgDocument = null;
 

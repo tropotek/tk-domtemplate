@@ -12,11 +12,10 @@ namespace Dom;
  */
 class Repeat extends Template
 {
+
+    protected string       $repeatName = '';
     protected ?\DOMElement $repeatNode = null;
-
-    protected string $repeatName = '';
-
-    protected ?Template $parent = null;
+    protected ?Template    $parent     = null;
 
 
     public function __construct(\DOMElement $node, Template $parent)

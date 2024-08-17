@@ -2,7 +2,7 @@
 namespace Dom\Mvc\EventListener;
 
 use Bs\ControllerInterface;
-use Dom\Mvc\Modifier;
+use Dom\Modifier;
 use Dom\Renderer\DisplayInterface;
 use Dom\Template;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -11,6 +11,9 @@ use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
+/**
+ * @deprecated
+ */
 class ViewHandler implements EventSubscriberInterface
 {
 

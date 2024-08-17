@@ -1,7 +1,7 @@
 <?php
-namespace Dom\Mvc\Modifier;
+namespace Dom\Modifier;
 
-use Dom\Mvc\Modifier;
+use Dom\Modifier;
 
 /**
  * The interface for all Modifier filter objects
