@@ -797,6 +797,7 @@ class Template
             if (in_array($k, $ignore)) continue;
             $preKey .= $k . $v;
         }
+
         $hash = md5($preKey);
         $this->headers[$hash]['elementName'] = $elementName;
         $this->headers[$hash]['attributes'] = $attributes;

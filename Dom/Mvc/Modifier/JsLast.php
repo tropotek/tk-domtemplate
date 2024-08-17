@@ -88,8 +88,10 @@ class JsLast extends FilterInterface
                 $this->domModifier->removeNode($child);
 
                 // ignore duplicate src paths
-                if (in_array($child->getAttribute('src'), $this->src)) continue;
-                $this->src[] = $child->getAttribute('src');
+                if (!empty($child->getAttribute('src'))) {
+                    if (in_array($child->getAttribute('src'), $this->src)) continue;
+                    $this->src[] = $child->getAttribute('src');
+                }
 
                 $nl = $newNode->ownerDocument->createTextNode("\n");
                 $this->domModifier->getBody()->appendChild($nl);
