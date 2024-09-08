@@ -1,5 +1,16 @@
 #CHANGELOG#
 
+Ver 8.0.10 [2024-09-08]:
+-------------------------------
+  - fixed select dialogs
+  - Update dom template ready to MVC code
+  - remove monolog calls
+  - Update libs and site to use new DbModel, Form and Table objects
+  - Added Bs\Table with filter form
+  - added actions and orderby to new Tt table
+  - add new table objects
+
+
 Ver 8.0.8 [2023-09-28]:
 -------------------------------
   - Some template updates
