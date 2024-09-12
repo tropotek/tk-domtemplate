@@ -232,6 +232,10 @@ class UrlPath extends FilterInterface
         return implode( '/', $parents);
     }
 
+
+    /**
+     * @todo: make this a sent parameter or const property
+     */
     public function isDebug(): bool
     {
         return (class_exists('\Tk\Config') && \Tk\Config::instance()->isDebug());

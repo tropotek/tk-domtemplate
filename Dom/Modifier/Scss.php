@@ -180,6 +180,9 @@ class Scss extends FilterInterface
         return $this;
     }
 
+    /**
+     * @todo: make this a sent parameter or const property
+     */
     public function isDebug(): bool
     {
         return (class_exists('\Tk\Config') && \Tk\Config::instance()->isDebug());
