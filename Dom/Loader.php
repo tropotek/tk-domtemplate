@@ -10,6 +10,10 @@ use Dom\Loader\AdapterInterface;
  * NOTE: Adapters are run in a LIFO (Last In First Out) queue.
  *
  * @author Tropotek <http://www.tropotek.com/>
+ *
+ *
+ * @deprecated
+ * @todo: remove: this should be handled on a per project basis and not in this lib
  */
 class Loader
 {
