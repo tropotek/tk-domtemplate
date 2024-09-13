@@ -13,7 +13,7 @@ class XmlObj
      * Convert an XML string to a stdObj
      * We use this instead of simpleXML because it returns native strings.
      */
-    static function xml2Obj(string $xml): ?\stdClass
+    public static function xml2Obj(string $xml): ?\stdClass
     {
         if ($xml[0] != '<') {
             $xml = file_get_contents($xml);
