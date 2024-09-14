@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.12 [2024-09-14]:
+-------------------------------
+  - Move Factory update System and registry
+
+
 Ver 8.0.10 [2024-09-08]:
 -------------------------------
   - fixed select dialogs
