@@ -122,7 +122,7 @@ class Scss extends FilterInterface
                 }
                 $css .= $cCss->getCss();
             } else {
-                \Tk\Log::warning('Invalid file: ' . $path);
+                \Tk\Log::notice('Invalid file: ' . $path);
             }
         }
 
