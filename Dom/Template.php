@@ -1365,6 +1365,7 @@ class Template
         $id = '_c_o_n__';
         $html = sprintf('<?xml encoding="'.$encoding.'"?><div id="%s">%s</div>', $id, $markup);
         $doc = new \DOMDocument();
+        $doc->substituteEntities = false;
         libxml_use_internal_errors(true);
 
         $ok = $doc->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
