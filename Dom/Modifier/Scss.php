@@ -185,7 +185,7 @@ class Scss extends FilterInterface
      */
     public function isDebug(): bool
     {
-        return (class_exists('\Tk\Config') && \Tk\Config::instance()->isDebug());
+        return (class_exists('\Tk\Config') && \Tk\Config::isDebug());
     }
 
 }
