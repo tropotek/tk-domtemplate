@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.18 [2024-09-25]:
+-------------------------------
+  - cleanup config methods
+
+
 Ver 8.0.16 [2024-09-19]:
 -------------------------------
   - secret replace id with hash
