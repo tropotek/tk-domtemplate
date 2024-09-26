@@ -24,4 +24,11 @@ abstract class Renderer implements RendererInterface
     {
         $this->template = clone $this->template;
     }
+
+    // Example magic method
+    // public function __makeTemplate(): ?Template
+    // {
+    //     $html = "...";
+    //     return Template::load($html);
+    // }
 }

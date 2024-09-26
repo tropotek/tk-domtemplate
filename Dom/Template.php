@@ -1513,7 +1513,12 @@ class Template
             }
 
             // Insert headers
-            if ($this->head) {
+            $headNode = $this->head;
+            // append to parent node if no headers exist
+            if (!($headNode instanceof \DOMElement)) {
+                $headNode = $this->document->documentElement;
+            }
+            if ($headNode instanceof \DOMElement) {
                 $meta = [];
                 $other = [];
                 foreach ($this->headers as $i => $header) {
@@ -1545,13 +1550,13 @@ class Template
                         if (strtolower($header['elementName']) == 'meta' && $this->title) {
                             // insert meta tags above <title> tag where possible
                             // Note this may reverse the order, not sure that matters for meta tags tho
-                            $this->head->insertBefore($node, $this->title);
-                            $this->head->insertBefore($nl, $this->title);
-                            $this->head->insertBefore($t, $this->title);
+                            $headNode->insertBefore($node, $this->title);
+                            $headNode->insertBefore($nl, $this->title);
+                            $headNode->insertBefore($t, $this->title);
                         } else {
-                            $this->head->append($node);
-                            $this->head->append($t);
-                            $this->head->append($nl);
+                            $headNode->append($node);
+                            $headNode->append($t);
+                            $headNode->append($nl);
                         }
                     }
                 }
