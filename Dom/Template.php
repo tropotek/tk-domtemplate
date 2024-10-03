@@ -1516,9 +1516,13 @@ class Template
             // Insert headers
             $headNode = $this->head;
             // append to parent node if no headers exist
-            if (!($headNode instanceof \DOMElement)) {
-                $headNode = $this->document->documentElement;
-            }
+            // TODO: Do not do this, the head element must exist to avoid duplicates.
+            //       I need to do more research into how to handle the case of rendering
+            //       JS and CSS if no head element exists... see appendBodyTemplate() method,
+            //       and if we can refactor that case as well, maybe a flag is needed in the Template instead???
+//            if (!($headNode instanceof \DOMElement)) {
+//                $headNode = $this->document->documentElement;
+//            }
             if ($headNode instanceof \DOMElement) {
                 $meta = [];
                 $other = [];
