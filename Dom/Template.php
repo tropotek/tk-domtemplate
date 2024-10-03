@@ -792,7 +792,7 @@ class Template
     {
         if ($this->isParsed()) return $this;
         $preKey = $elementName . $value;
-        $ignore = array('content', 'type', self::ATTR_DATA_TRACE);
+        $ignore = ['content', 'type', self::ATTR_DATA_TRACE];
         foreach ($attributes as $k => $v) {
             if (in_array($k, $ignore)) continue;
             $preKey .= $k . $v;
@@ -891,7 +891,8 @@ class Template
 
     /**
      * Append a template to the <body> tag, the supplied template
-     * will be merged into other templates until a <body> tag exists
+     * will be merged into other templates until a <body> tag
+     * exists within the document
      */
     public function appendBodyTemplate(Template $template): Template
     {
@@ -913,7 +914,7 @@ class Template
     }
 
     /**
-     * Merge existing header array with this template header array
+     * Merge supplied body template with this documents body template list.
      *
      * @param array|Template[] $arr
      */
