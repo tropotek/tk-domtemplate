@@ -28,7 +28,7 @@ class Select extends Element
      *
      * If no value is supplied the text parameter is used as the value.
      *
-     * @note Ensure no comment nodes are in the select's node tree.
+     * @note Ensure no comment nodes are in the selects node tree.
      */
     public function appendOption(string $text, ?string $value = null, string $optGroup = ''): \DOMElement
     {
@@ -95,19 +95,19 @@ class Select extends Element
     /**
      * Set the selected value of the form element
      */
-    public function setValue($value): Select
+    public function setValue(string|array $value): static
     {
         if (is_array($value)) {
             if ($this->isMultiple()) {
                 foreach ($value as $v) {
                     $option = $this->findOption($this->element, $v);
-                    if ($option) {
+                    if ($option instanceof \DOMElement) {
                         $option->setAttribute('selected', 'selected');
                     }
                 }
             } else {
                 $option = $this->findOption($this->element, $value[0]);
-                if ($option) {
+                if ($option instanceof \DOMElement) {
                     $option->setAttribute('selected', 'selected');
                 }
             }
@@ -116,7 +116,7 @@ class Select extends Element
                 $this->clearSelected();
             }
             $option = $this->findOption($this->element, $value);
-            if ($option) {
+            if ($option instanceof \DOMElement) {
                 $option->setAttribute('selected', 'selected');
             }
         }
@@ -126,10 +126,8 @@ class Select extends Element
     /**
      * Return the selected value,
      * Will return an array if multiple select is enabled.
-     *
-     * @return string|array
      */
-    public function getValue()
+    public function getValue(): string|array
     {
         $selected = $this->findSelected($this->element);
         if (count($selected) > 0) {
@@ -139,13 +137,13 @@ class Select extends Element
                 return $selected[0]->textContent;
             }
         }
-        return null;
+        return '';
     }
 
     /**
      * Clear this 'select' element of all its 'option' elements.
      */
-    public function removeOptions(): Select
+    public function removeOptions(): self
     {
         while ($this->element != null && $this->element->hasChildNodes()) {
             $this->element->removeChild($this->element->childNodes->item(0));
@@ -156,7 +154,7 @@ class Select extends Element
     /**
      * Clear all selected elements
      */
-    public function clearSelected(): Select
+    public function clearSelected(): self
     {
         $this->clearSelectedFunction($this->element);
         return $this;
@@ -167,7 +165,7 @@ class Select extends Element
      */
     private function clearSelectedFunction(\DOMNode $node): void
     {
-        if ($node->nodeType == \XML_ELEMENT_NODE) {
+        if ($node instanceof \DOMElement) {
             if ($node->nodeName == 'option' && $node->hasAttribute('selected')) {
                 $node->removeAttribute('selected');
             }
@@ -183,7 +181,7 @@ class Select extends Element
     public function findOptGroup(\DOMNode $node, string $name): ?\DOMNode
     {
         $foundNode = null;
-        if ($node->nodeType == \XML_ELEMENT_NODE) {
+        if ($node instanceof \DOMElement) {
             if ($node->nodeName == 'optgroup' && $node->getAttribute('label') == $name) {
                 return $node;
             }
@@ -219,14 +217,11 @@ class Select extends Element
 
     /**
      * Find the selected values to this select box
-     *
-     * @param \DOMNode $node
-     * @return \DOMNode|\DOMNode[]
      */
-    public function findSelected(\DOMNode $node)
+    public function findSelected(\DOMNode $node): \DOMNode|array
     {
         $foundNodes = array();
-        if ($node->nodeType == XML_ELEMENT_NODE) {
+        if ($node instanceof \DOMElement) {
             if ($node->nodeName == 'option' && $node->hasAttribute('selected')) {
                 return $node;
             }
