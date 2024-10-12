@@ -40,7 +40,8 @@ class XmlObj
         $node->normalize();
         if ($node->firstChild != null) {
             if ($node->childNodes->length == 1 && $node->firstChild->nodeType == \XML_TEXT_NODE) {
-                return (object)[$node->firstChild->nodeName] = trim($node->firstChild->nodeValue);
+                //return (object)[$node->firstChild->nodeName] = trim($node->firstChild->nodeValue);
+                return (object)[$node->firstChild->nodeName => trim($node->firstChild->nodeValue)];
             }
         } else {
             return null;

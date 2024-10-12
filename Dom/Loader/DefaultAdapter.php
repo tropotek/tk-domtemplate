@@ -15,8 +15,6 @@ class DefaultAdapter extends AdapterInterface
 
     /**
      * Load xml/xhtml string template
-     *
-     * @throws Exception
      */
     public function load(string $xhtml = ''): ?Template
     {
@@ -25,10 +23,8 @@ class DefaultAdapter extends AdapterInterface
 
     /**
      * Load xml/xhtml file template
-     *
-     * @throws Exception
      */
-    public function loadFile($path = ''): ?Template
+    public function loadFile(string $path = ''): ?Template
     {
        return Template::loadFile($path);
     }

@@ -11,22 +11,16 @@ namespace Dom\Modifier;
  * Note: No image sizes are calculated.
  * Note: Do not use in production environments.
  */
-class PageBytes extends FilterInterface
+class PageBytes extends ModifierInterface
 {
-
-    private int $cssTotal = 0;
-
-    private int $jsTotal = 0;
-
-    private int $htmlTotal = 0;
-
-    private array $checkedHash = [];
-
-    protected string $baseUrl = '';
-
+    protected string $baseUrl     = '';
     protected string $baseUrlPath = '';
+    protected string $basePath    = '';
 
-    protected string $basePath = '';
+    private int   $cssTotal    = 0;
+    private int   $jsTotal     = 0;
+    private int   $htmlTotal   = 0;
+    private array $checkedHash = [];
 
 
     public function __construct(string $basePath)
@@ -54,12 +48,12 @@ class PageBytes extends FilterInterface
     /**
      * pre init the Filter
      */
-    public function init(\DOMDocument $doc) { }
+    public function init(\DOMDocument $doc): void { }
 
     /**
      * Call this method to traverse a document
      */
-    public function executeNode(\DOMElement $node)
+    public function executeNode(\DOMElement $node): void
     {
         try {
             $str = '';
@@ -74,20 +68,18 @@ class PageBytes extends FilterInterface
                 }
                 $hash = md5($str);
                 if ($str && !in_array($hash, $this->checkedHash)) {
-                    $this->jsTotal += \Tk\FileUtil::string2Bytes(strlen($str));
+                    $this->jsTotal += \Tk\FileUtil::string2Bytes(strval(strlen($str)));
                 }
                 $this->checkedHash[] = $hash;
-                $str = null;
                 return;
             }
             if ($node->nodeName == 'style') {
                 $str = $node->nodeValue;
                 $hash = md5($str);
                 if ($str && !in_array($hash, $this->checkedHash)) {
-                    $this->cssTotal += \Tk\FileUtil::string2Bytes(strlen($str));
+                    $this->cssTotal += \Tk\FileUtil::string2Bytes(strval(strlen($str)));
                 }
                 $this->checkedHash[] = $hash;
-                $str = null;
                 return;
             }
             if ( $node->nodeName == 'link' && $node->hasAttribute('href') && preg_match('/\.(css)$/', $node->getAttribute('href'))) {
@@ -97,24 +89,22 @@ class PageBytes extends FilterInterface
                 }
                 $hash = md5($str);
                 if ($str && !in_array($hash, $this->checkedHash)) {
-                    $this->cssTotal += \Tk\FileUtil::string2Bytes(strlen($str));
+                    $this->cssTotal += \Tk\FileUtil::string2Bytes(strval(strlen($str)));
                 }
                 $this->checkedHash[] = $hash;
-                $str = null;
                 return;
             }
-            $str = null;
         } catch (\Exception $e) {}
     }
 
     /**
      * called after DOM tree is traversed
      */
-    public function postTraverse(\DOMDocument $doc)
+    public function postTraverse(\DOMDocument $doc): void
     {
         $str = $doc->saveXML();
         if ($str) {
-            $this->htmlTotal = \Tk\FileUtil::string2Bytes(strlen($str));
+            $this->htmlTotal = \Tk\FileUtil::string2Bytes(strval(strlen($str)));
         }
     }
 
@@ -152,6 +142,5 @@ class PageBytes extends FilterInterface
     {
         return $this->toString();
     }
-
 
 }

@@ -20,10 +20,8 @@ class Textarea extends Element
 
     /**
      * Set the value of this form element
-     *
-     * @param string $value
      */
-    public function setValue($value): Textarea
+    public function setValue(string|array $value): Textarea
     {
         $dom = $this->element->ownerDocument;
         $textNode = $dom->createTextNode($value);
@@ -33,11 +31,9 @@ class Textarea extends Element
 
     /**
      * Get the current text in the textarea
-     *
-     * @return string
      */
-    public function getValue()
+    public function getValue(): string
     {
-        return $this->element->nodeValue;
+        return strval($this->element->nodeValue);
     }
 }

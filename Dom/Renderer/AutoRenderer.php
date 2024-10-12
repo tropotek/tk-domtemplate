@@ -47,7 +47,7 @@ class AutoRenderer extends Renderer
     /**
      * Add an item to the renderer data list
      */
-    public function set(string $name, string $val)
+    public function set(string $name, string $val): void
     {
         $this->data->$name = $val;
     }

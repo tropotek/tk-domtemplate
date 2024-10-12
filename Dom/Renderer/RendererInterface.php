@@ -10,5 +10,5 @@ interface RendererInterface extends DisplayInterface
 {
     public function getTemplate(): ?Template;
 
-    public function setTemplate(Template $template);
+    public function setTemplate(Template $template): void;
 }

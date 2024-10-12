@@ -24,7 +24,7 @@ class Form
     protected ?\DOMElement $form;
 
     /**
-     * @var array|\DOMElement[]
+     * @var array<string,array<int,\DOMElement>>
      */
     protected array $elements;
 
@@ -32,7 +32,7 @@ class Form
 
 
     /**
-     * @param array|\DOMElement[] $elements
+     * @param array<string,array<int,\DOMElement>> $elements
      */
     public function __construct(\DOMElement $form, array $elements, Template $parent)
     {
@@ -195,7 +195,7 @@ class Form
     /**
      * Append a hidden element to a form.
      */
-    public function appendHiddenElement(string $name, string $value): \DOMElement
+    public function appendHiddenElement(string $name, string $value): ?\DOMElement
     {
         if ($this->form) {
             $nl = $this->form->ownerDocument->createTextNode("\n");
@@ -206,8 +206,9 @@ class Form
             $this->form->appendChild($node);
             $this->form->appendChild($nl);
             $this->elements[$name][] = $node;
+            return $node;
         }
-        return $node;
+        return null;
     }
 
     /**
@@ -218,12 +219,13 @@ class Form
     public function getHiddenElements(): array
     {
         $arr = [];
-        /* @var \DOMElement $element */
-        foreach ($this->elements as $element) {
-            $type = $element->nodeName;
-            $inputType = $element->getAttribute('type');
-            if ($type == 'input' && $inputType == 'hidden') {
-                $arr[] = new Input($element, $this);
+        foreach ($this->elements as $elList) {
+            foreach ($elList as $element) {
+                $type = $element->nodeName;
+                $inputType = $element->getAttribute('type');
+                if ($type == 'input' && $inputType == 'hidden') {
+                    $arr[] = new Input($element, $this);
+                }
             }
         }
         return $arr;

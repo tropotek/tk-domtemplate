@@ -1,7 +1,7 @@
 <?php
 namespace Dom;
 
-use Dom\Modifier\FilterInterface;
+use Dom\Modifier\ModifierInterface;
 use DOMComment;
 
 /**
@@ -30,7 +30,10 @@ use DOMComment;
 class Modifier
 {
 
-    protected array $filters   = [];
+    /**
+     * @var array<int,ModifierInterface>
+     */
+    protected array $modifiers   = [];
     protected array $nodeTrash = [];
     protected bool  $inHead    = false;
     protected bool  $inBody    = false;
@@ -42,16 +45,16 @@ class Modifier
     /**
      * add a Dome modifier filter object to the queue
      */
-    public function addFilter($name, FilterInterface $mod): FilterInterface
+    public function addFilter(string $name, ModifierInterface $mod): ModifierInterface
     {
         $mod->setDomModifier($this);
-        $this->filters[$name] = $mod;
+        $this->modifiers[$name] = $mod;
         return $mod;
     }
 
-    public function getFilter($name): ?FilterInterface
+    public function getFilter(string $name): ?ModifierInterface
     {
-        return $this->filters[$name] ?? null;
+        return $this->modifiers[$name] ?? null;
     }
 
     public function getHead(): ?\DOMElement
@@ -92,11 +95,11 @@ class Modifier
     public function execute(\DOMDocument $doc): \DOMDocument
     {
         $doc->normalizeDocument();
-        foreach ($this->filters as $mod) {
+        foreach ($this->modifiers as $mod) {
             $mod->init($doc);
         }
         $this->traverse($doc->documentElement);
-        foreach ($this->filters as $mod) {
+        foreach ($this->modifiers as $mod) {
             $mod->postTraverse($doc);
         }
 
@@ -111,13 +114,10 @@ class Modifier
 
     /**
      * Traverse a document converting element attributes.
-     *
-     * @param \DOMNode $node
      */
     private function traverse(\DOMNode $node): void
     {
-        if ($node->nodeType == \XML_ELEMENT_NODE) {
-            /** @var $node \DOMElement */
+        if ($node instanceof \DOMElement) {
             if ($node->nodeName == 'head') {
                 $this->head = $node;
                 $this->inHead = true;
@@ -126,16 +126,15 @@ class Modifier
                 $this->body = $node;
                 $this->inBody = true;
             }
-            foreach ($this->filters as $mod) {
+            foreach ($this->modifiers as $mod) {
                 if (!$mod->isEnabled()) continue;
                 $mod->executeNode($node);
             }
         }
-        if ($node->nodeType == \XML_COMMENT_NODE) {
-            /** @var $node DOMComment */
-            foreach ($this->filters as $mod) {
+        if ($node instanceof DOMComment) {
+            foreach ($this->modifiers as $mod) {
+                if (!$mod->isEnabled()) continue;
                 if (method_exists($mod, 'executeComment')) {
-                    if (!$mod->isEnabled()) continue;
                     $mod->executeComment($node);
                 }
             }
@@ -155,7 +154,6 @@ class Modifier
                 $this->inBody = false;
             }
         }
-
     }
 
 }

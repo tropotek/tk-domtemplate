@@ -50,7 +50,7 @@ class Builder
         $this->path = $path;
     }
 
-    public function getTemplate($id): ?Template
+    public function getTemplate(string $id): ?Template
     {
         if (!$this->getSection($id)) {
             $el = $this->getDocument()->getElementById($id);
@@ -66,13 +66,13 @@ class Builder
         return Template::load($section);
     }
 
-    public function hasTemplate($id): bool
+    public function hasTemplate(string $id): bool
     {
         if (!isset($this->sectionCache[$id])) $this->getTemplate($id);
         return isset($this->sectionCache[$id]);
     }
 
-    protected function getSection($id): string
+    protected function getSection(string $id): string
     {
         return $this->sectionCache[$id] ?? '';
     }

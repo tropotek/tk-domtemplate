@@ -4,11 +4,11 @@ namespace Dom\Modifier;
 use Dom\Modifier;
 
 /**
- * The interface for all Modifier filter objects
+ * The interface for all Modifier objects
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
-abstract class FilterInterface
+abstract class ModifierInterface
 {
 
     protected ?Modifier $domModifier = null;
@@ -18,25 +18,25 @@ abstract class FilterInterface
     /**
      * pre init the front controller
      */
-    abstract function init(\DOMDocument $doc);
+    abstract function init(\DOMDocument $doc): void;
 
     /**
      * The code to perform any modification to the node goes here.
      */
-    abstract function executeNode(\DOMElement $node);
+    abstract function executeNode(\DOMElement $node): void;
 
     /**
      * Execute code on the current Comment Node
      */
-    public function executeComment(\DOMComment $node) { }
+    public function executeComment(\DOMComment $node): void { }
 
     /**
      * called after DOM tree is traversed
      */
-    public function postTraverse(\DOMDocument $doc) { }
+    public function postTraverse(\DOMDocument $doc): void { }
 
 
-    public function setDomModifier(Modifier $dm): FilterInterface
+    public function setDomModifier(Modifier $dm): ModifierInterface
     {
         $this->domModifier = $dm;
         return $this;
@@ -47,7 +47,7 @@ abstract class FilterInterface
         return $this->domModifier;
     }
 
-    public function setEnable(bool $b): FilterInterface
+    public function setEnable(bool $b): ModifierInterface
     {
         $this->enabled = $b;
         return $this;

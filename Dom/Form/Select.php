@@ -140,9 +140,6 @@ class Select extends Element
         return '';
     }
 
-    /**
-     * Clear this 'select' element of all its 'option' elements.
-     */
     public function removeOptions(): self
     {
         while ($this->element != null && $this->element->hasChildNodes()) {
@@ -151,18 +148,12 @@ class Select extends Element
         return $this;
     }
 
-    /**
-     * Clear all selected elements
-     */
     public function clearSelected(): self
     {
         $this->clearSelectedFunction($this->element);
         return $this;
     }
 
-    /**
-     * Find the option group node with the name
-     */
     private function clearSelectedFunction(\DOMNode $node): void
     {
         if ($node instanceof \DOMElement) {
@@ -175,9 +166,6 @@ class Select extends Element
         }
     }
 
-    /**
-     * Find the option group node with the name
-     */
     public function findOptGroup(\DOMNode $node, string $name): ?\DOMNode
     {
         $foundNode = null;
@@ -195,13 +183,10 @@ class Select extends Element
         return $foundNode;
     }
 
-    /**
-     * Find an option node
-     */
     public function findOption(\DOMNode $node, string $value): ?\DOMNode
     {
         $foundNode = null;
-        if ($node->nodeType == \XML_ELEMENT_NODE) {
+        if ($node instanceof \DOMElement) {
             if ($node->nodeName == 'option' && $node->getAttribute('value') == $value) {
                 return $node;
             }
@@ -235,9 +220,6 @@ class Select extends Element
         return $foundNodes;
     }
 
-    /**
-     * Check if the opt group exists
-     */
     public function optGroupExists(string $name): bool
     {
         return $this->findOptGroup($this->element, $name) != null;
@@ -245,8 +227,6 @@ class Select extends Element
 
     /**
      * Set the select list to handle multiple selections
-     * <b>NOTE:</b> When multiple is disabled and multiple elements are selected
-     *  it behaviour is unknown and browser specific.
      */
     public function enableMultiple(bool $b): Select
     {
@@ -259,8 +239,6 @@ class Select extends Element
     }
 
     /**
-     * Return if this is a multiple select or not.
-     *
      * Returns true if multiple selects are allowed
      */
     public function isMultiple(): bool

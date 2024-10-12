@@ -24,22 +24,25 @@ namespace Dom\Modifier;
  *   <img src="image.png" />  TO  <img src="/project/image.png" />
  *   <img src="/img/image.png" />  TO  <img src="/project/img/image.png" />
  *
- * The filter attempts to convert some javascript event attribute paths but it is expected
+ * The modifier attempts to convert some javascript event attribute paths but it is expected
  * that the designer uses javascript to config paths using the project code.
+ *
  *  TODO:
- *       We need to refactor this and only replace full paths:
+ *       Refactor this to only replace full paths:
  *       <img src="/img/image.png" />  TO  <img src="/project/img/image.png" />
  *       All relative and template URLS can be removed...
  *
  * @author Tropotek <https://www.tropotek.com/>
  */
-class UrlPath extends FilterInterface
+class UrlPath extends ModifierInterface
 {
 
     /**
      * Att his to element nodes that you want to ignore replacing URL's
      */
     public static string $ATTR_IGNORE_REL = 'data-ignore-rel';
+
+    public static bool $IS_DEBUG = false;
 
     /**
      * element attributes to search for path URL`s
@@ -66,7 +69,6 @@ class UrlPath extends FilterInterface
     protected string $baseUrl = '';
 
 
-
     /**
      * __construct
      */
@@ -79,12 +81,12 @@ class UrlPath extends FilterInterface
     /**
      * pre init the filter
      */
-    public function init(\DOMDocument $doc) { }
+    public function init(\DOMDocument $doc): void { }
 
     /**
      * Execute code on the current Node
      */
-    public function executeNode(\DOMElement $node)
+    public function executeNode(\DOMElement $node): void
     {
         /** @var \DOMAttr $attr */
         foreach ($node->attributes as $attr) {
@@ -104,12 +106,12 @@ class UrlPath extends FilterInterface
 
                 // And start of URL  matched existing dev path, then ignore.
                 // Temp fix to stop conversion of WYSIWYG links in debug mode.
-                if ($this->isDebug() && !empty(rtrim($this->baseUrl, '/')) && substr($attr->value, 0, strlen($this->baseUrl)) === $this->baseUrl) {
+                if (self::$IS_DEBUG && !empty(rtrim($this->baseUrl, '/')) && str_starts_with($attr->value, $this->baseUrl)) {
                     continue;
                 }
 
                 if (
-                    preg_match('/^#/', $attr->value) ||     // ignore fragment urls
+                    str_starts_with($attr->value, '#') ||     // ignore fragment urls
                     preg_match('/(\S+):(\S+)/', $attr->value) || preg_match('/^\/\//', $attr->value)   // ignore full and application URI`s
                 ) {
                     continue;
@@ -125,7 +127,6 @@ class UrlPath extends FilterInterface
                     }, $attr->nodeValue);
                     $attr->nodeValue = $newValue;
                 }
-                // TODO: possibly do the same to inline style tag URL's
             }
         }
     }
@@ -133,7 +134,7 @@ class UrlPath extends FilterInterface
     /**
      * Execute code on the current Comment Node
      */
-    public function executeComment(\DOMComment $node)
+    public function executeComment(\DOMComment $node): void
     {
         $node->data = $this->replaceStr($node->data);
     }
@@ -144,8 +145,9 @@ class UrlPath extends FilterInterface
      */
     public function addUrlAttr(string $attr): UrlPath
     {
-        if (!in_array($attr, $this->attrSrc))
+        if (!in_array($attr, $this->attrSrc)) {
             $this->attrSrc[] = $attr;
+        }
         return $this;
     }
 
@@ -177,7 +179,7 @@ class UrlPath extends FilterInterface
 
         if (!$url) $url = '/';
         $processedUrl = \Tk\Uri::create($url)->toString();
-        if ($url && preg_match('/^\.?(\/|\/)(.+)/', $url, $regs)) {
+        if (preg_match('/^\.?(\/|\/)(.+)/', $url, $regs)) {
             $url = '/' . $regs[2];
             $processedUrl = \Tk\Uri::create($replace . $url)->toString();
         }
@@ -190,8 +192,7 @@ class UrlPath extends FilterInterface
      */
     protected function replaceStr(string $str): string
     {
-        $str = str_replace('{siteUrl}', $this->baseUrl, $str);
-        return $str;
+        return str_replace('{siteUrl}', $this->baseUrl, $str);
     }
 
 
@@ -203,41 +204,30 @@ class UrlPath extends FilterInterface
      *     To: /Work/relative/path/from/template.html
      *
      * Note: This function can give access to unwanted paths if not used carefully.
-     *
-     * @throws \Tk\Exception
      */
-    private function cleanRelative(string $path): string
-    {
-        if (preg_match('/^\/\//', $path)) {
-            // Should not be `http://` at the start
-            throw new \Tk\Exception('Invalid url path: ' . $path);
-        }
-
-        //$path = str_replace(array('//','\\\\'), array('/','\\'), $path);
-        $array = explode( '/', $path);
-        $parents = array();
-        foreach( $array as $dir) {
-            switch( $dir) {
-                case '.':
-                    // Don't need to do anything here
-                    break;
-                case '..':
-                    array_pop( $parents);
-                    break;
-                default:
-                    $parents[] = $dir;
-                    break;
-            }
-        }
-        return implode( '/', $parents);
-    }
-
-
-    /**
-     * @todo: make this a sent parameter or const property
-     */
-    public function isDebug(): bool
-    {
-        return (class_exists('\Tk\Config') && \Tk\Config::isDebug());
-    }
+//    private function cleanRelative(string $path): string
+//    {
+//        if (preg_match('/^\/\//', $path)) {
+//            // Should not be `http://` at the start
+//            throw new \Tk\Exception('Invalid url path: ' . $path);
+//        }
+//
+//        //$path = str_replace(array('//','\\\\'), array('/','\\'), $path);
+//        $array = explode( '/', $path);
+//        $parents = array();
+//        foreach( $array as $dir) {
+//            switch( $dir) {
+//                case '.':
+//                    // Don't need to do anything here
+//                    break;
+//                case '..':
+//                    array_pop( $parents);
+//                    break;
+//                default:
+//                    $parents[] = $dir;
+//                    break;
+//            }
+//        }
+//        return implode( '/', $parents);
+//    }
 }

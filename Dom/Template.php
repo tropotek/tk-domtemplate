@@ -1,6 +1,9 @@
 <?php
 namespace Dom;
 
+use DOMDocument;
+use DOMElement;
+use DOMNode;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -81,7 +84,7 @@ class Template
 
     /**
      * This is the original string document sent to the template
-     * before template initialisation
+     * before template initialization
      */
     private string $html = '';
 
@@ -91,82 +94,77 @@ class Template
     private ?string $serialHtml = null;
 
     /**
-     * Cache of the string document of the template after is has been parsed
+     * Cache of the string document of the template after it has been parsed
      */
     private ?string $parsedXml = null;
 
     /**
      * The template document
      */
-    protected ?\DOMDocument $document = null;
+    protected ?DOMDocument $document = null;
 
     /**
-     * The original template document
-     * before template initialization
+     * The original template document before template initialization
      */
-    private ?\DOMDocument $orgDocument = null;
+    private ?DOMDocument $orgDocument = null;
 
     /**
-     * An array of var attr \DOMElement objects
-     * @var array|\DOMElement[]
+     * @var array<string,array<int,DOMElement>>
      */
     protected array $var = [];
 
     /**
-     * This array stores all elements that are to be removed when parsed
-     * @var array|\DOMElement[]
+     * @var array<string,array<int,DOMElement>>
      */
     protected array $choice = [];
 
     /**
-     * An array of repeat attr \DOMElement objects
-     * @var array|\DOMElement[]
+     * @var array<string,Repeat>
      */
     protected array $repeat = [];
 
     /**
-     * An array of form DOMElement objects
-     * @var array|\DOMElement[]
+     * @var array<string,DOMElement>
      */
     protected array $form = [];
 
     /**
-     * An array of formElement DOMElement objects
-     * @var array|\DOMElement[][]
+     * @var array<string,array<string,array<int,DOMElement>>>
      */
     protected array $formElement = [];
 
     /**
      * Track all id attribute nodes
-     * @var array|\DOMElement[]
+     * @var array<string,DOMElement>
      */
     protected array $idList = [];
 
     /**
      * An internal list of nodes to delete after init()
-     * @var array|\DOMNode[]
+     * @var array<string,DOMNode>
      */
     private array $delete = [];
 
     /**
      * Comment tags to be removed
+     * @var array<string,DOMNode>
      */
     protected array $comments = [];
 
     /**
      * The head tag of a html page
      */
-    protected ?\DOMElement $head = null;
+    protected ?DOMElement $head = null;
 
     /**
      * The body tag of a html page
      */
-    protected ?\DOMElement $body = null;
+    protected ?DOMElement $body = null;
 
     /**
      * The head tag of a html page
      */
-    protected ?\DOMElement $title = null;
+    protected ?DOMElement $title = null;
 
     /**
      * Headers to be created and appended to the <head> tag
@@ -184,7 +182,7 @@ class Template
     /**
      * Templates to be appended to the <body> tag
      * on rendering of the template
-     * @var array|Template[]
+     * @var array<string,Template>
      */
     protected array $bodyTemplates = [];
 
@@ -214,7 +212,7 @@ class Template
     protected $onPostParse = null;
 
 
-    public function __construct(\DOMDocument $doc, string $xml = '', string $encoding = 'UTF-8')
+    public function __construct(DOMDocument $doc, string $xml = '', string $encoding = 'UTF-8')
     {
         $this->html = $xml;
         $this->init($doc, $encoding);
@@ -231,7 +229,7 @@ class Template
             throw new Exception('Please supply a valid XHTML/XML string to create the DOMDocument.');
         }
 
-        $doc = new \DOMDocument();
+        $doc = new DOMDocument();
         libxml_use_internal_errors(true);
 
         $html = self::cleanHtml($html, $encoding);
@@ -282,7 +280,7 @@ class Template
 
     public function __wakeup()
     {
-        $doc = new \DOMDocument();
+        $doc = new DOMDocument();
         $doc->loadHTML($this->serialHtml, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         $this->init($doc, $this->encoding);
     }
@@ -297,7 +295,7 @@ class Template
      * Mainly used for the Repeat objects
      * but could be useful for your own methods.
      */
-    public function init(\DOMDocument $doc, string $encoding = 'UTF-8'): Template
+    public function init(DOMDocument $doc, string $encoding = 'UTF-8'): Template
     {
         $this->document = $doc;
         $this->encoding = $encoding;
@@ -329,13 +327,12 @@ class Template
     }
 
     /**
-     * A private recursive method to initialise the template.
+     * A private recursive method to initialize the template.
      */
-    private function prepareDoc(\DOMNode $node, string $form = ''): void
+    private function prepareDoc(DOMNode $node, string $form = ''): void
     {
         if ($this->isParsed()) return;
-        if ($node->nodeType == \XML_ELEMENT_NODE) {
-            /** @var $node \DOMElement */
+        if ($node instanceof DOMElement) {
             // Store all repeat regions
             if ($node->hasAttribute(self::$ATTR_REPEAT)) {
                 $repeatName = $node->getAttribute(self::$ATTR_REPEAT);
@@ -347,8 +344,8 @@ class Template
             // Store all var nodes
             if ($node->hasAttribute(self::$ATTR_VAR)) {
                 $varStr = $node->getAttribute(self::$ATTR_VAR);
-                $arrAtts = explode(' ', $varStr);
-                foreach ($arrAtts as $var) {
+                $arrAttrs = explode(' ', $varStr);
+                foreach ($arrAttrs as $var) {
                     $this->var[$var][] = $node;
                     $node->removeAttribute(self::$ATTR_VAR);
                 }
@@ -356,8 +353,8 @@ class Template
 
             // Store all choice nodes
             if ($node->hasAttribute(self::$ATTR_CHOICE)) {
-                $arrAtts = explode(' ', $node->getAttribute(self::$ATTR_CHOICE));
-                foreach ($arrAtts as $choice) {
+                $arrAttrs = explode(' ', $node->getAttribute(self::$ATTR_CHOICE));
+                foreach ($arrAttrs as $choice) {
                     $this->choice[$choice][] = $node;
                     $this->var[$choice][] = $node;
                     $node->setAttribute(self::ATTR_HIDDEN, 'true');
@@ -457,7 +454,7 @@ class Template
     /**
      * Return a copy of the original \DOMDocument before the template ini
      */
-    public function getOriginalDocument(): \DOMDocument
+    public function getOriginalDocument(): DOMDocument
     {
         return $this->orgDocument;
     }
@@ -483,7 +480,7 @@ class Template
     /**
      * Return the title node if it exists.
      */
-    public function getTitleElement(): ?\DOMElement
+    public function getTitleElement(): ?DOMElement
     {
         return $this->title;
     }
@@ -491,7 +488,7 @@ class Template
     /**
      * Return the head node if it exists.
      */
-    public function getHeadElement(): ?\DOMElement
+    public function getHeadElement(): ?DOMElement
     {
         return $this->head;
     }
@@ -517,7 +514,7 @@ class Template
      * ID attributes should be unique for XHTML documents, multiple names
      * are ignored and only the first node found is returned.
      */
-    public function getElementById(string $id): ?\DOMElement
+    public function getElementById(string $id): ?DOMElement
     {
         return $this->idList[$id] ?? null;
     }
@@ -526,7 +523,7 @@ class Template
      * Return the root document node.
      * IE: DomDocument->documentElement
      */
-    public function getRootElement(): \DOMElement
+    public function getRootElement(): DOMElement
     {
         return $this->document->documentElement;
     }
@@ -542,7 +539,7 @@ class Template
     /**
      * Return the body node.
      */
-    public function getBodyElement(): ?\DOMElement
+    public function getBodyElement(): ?DOMElement
     {
         return $this->body;
     }
@@ -560,10 +557,10 @@ class Template
     /**
      * Internal method to enable var to be a DOMElement or array of DOMElements...
      */
-    public function getVarList(null|string|\DOMElement $var = null): array
+    public function getVarList(null|string|DOMElement $var = null): array
     {
         if ($var === null) return $this->var;
-        if ($var instanceof \DOMElement) return [$var];
+        if ($var instanceof DOMElement) return [$var];
         if ($this->keyExists(self::$ATTR_VAR, $var)) {
             return $this->var[$var];
         }
@@ -575,7 +572,7 @@ class Template
      * Only use this if there is only one element
      * with that var name. If more exists the first found is returned
      */
-    public function getVar(string|\DOMElement $var): ?\DOMElement
+    public function getVar(string|DOMElement $var): ?DOMElement
     {
         $nodes = $this->getVarList($var);
         return $nodes[0] ?? null;
@@ -584,7 +581,7 @@ class Template
     /**
      * Check if this document has a var node
      */
-    public function hasVar(string|\DOMElement $var): bool
+    public function hasVar(string|DOMElement $var): bool
     {
         return (count($this->getVarList($var)) > 0);
     }
@@ -592,7 +589,7 @@ class Template
     /**
      * It is recommended to use hide($var) unless you specifically want to remove the node from the tree.
      */
-    public function removeVar(string|\DOMElement $var): Template
+    public function removeVar(string|DOMElement $var): Template
     {
         foreach($this->getVarList($var) as $node) {
             $node->parentNode->removeChild($node);
@@ -602,8 +599,6 @@ class Template
 
     /**
      * Get the choice node list
-     *
-     * @return array|\DOMElement[]
      */
     public function getChoiceList(): array
     {
@@ -613,7 +608,7 @@ class Template
     /**
      * Show/Hide a choice or a var node
      */
-    public function setVisible(string|\DOMElement $choice, bool $b = true): Template
+    public function setVisible(string|DOMElement $choice, bool $b = true): Template
     {
         $nodes = $this->getVarList($choice);
         if ($b) {
@@ -635,17 +630,14 @@ class Template
      */
     public function getRepeat(string $repeat): ?Repeat
     {
-        if ($this->keyExists(self::$ATTR_REPEAT, $repeat)) {
-            $obj = $this->repeat[$repeat];
-            return clone $obj;
+        if (($this->repeat[$repeat] ?? null) instanceof Repeat) {
+            return clone $this->repeat[$repeat];
         }
         return null;
     }
 
     /**
      * Get the repeat node list
-     *
-     * @return array|\DOMElement[]
      */
     public function getRepeatList(): array
     {
@@ -669,22 +661,21 @@ class Template
      *
      * @param string $attr [var, choice, repeat]
      */
-    public static function findNodeByAttr(\DOMElement $node, string $value, string $attr): ?\DOMElement
+    public static function findNodeByAttr(DOMElement $node, string $value, string $attr): ?DOMElement
     {
-        if ($node->nodeType == \XML_ELEMENT_NODE) {
-            if ($node->getAttribute($attr) == $value) {
-                return $node;
-            }
-            // iterate through the children
-            foreach ($node->childNodes as $child) {
-                $found = self::findNodeByAttr($child, $value, $attr);
-                if ($found) return $found;
-            }
+        if ($node->getAttribute($attr) == $value) {
+            return $node;
+        }
+        // iterate through the children
+        foreach ($node->childNodes as $child) {
+            if (!($child instanceof DOMElement)) continue;
+            $found = self::findNodeByAttr($child, $value, $attr);
+            if ($found) return $found;
         }
         return null;
     }
 
-    public function addCss(string|\DOMElement $var, array|string $class): Template
+    public function addCss(string|DOMElement $var, array|string $class): Template
     {
         $list = $class;
         if (!is_array($class)) {
@@ -701,7 +692,7 @@ class Template
         return $this;
     }
 
-    public function removeCss(string|\DOMElement $var, string $class): Template
+    public function removeCss(string|DOMElement $var, string $class): Template
     {
         $str = $this->getAttr($var, 'class');
         $str = preg_replace('/(' . $class . ')\s?/', '', trim($str));
@@ -709,7 +700,7 @@ class Template
         return $this;
     }
 
-    public function setAttr(string|\DOMElement $var, array|string $attr, ?string $value = null): Template
+    public function setAttr(string|DOMElement $var, array|string $attr, ?string $value = null): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         if (!is_array($attr)) $attr = [$attr => $value];
@@ -725,7 +716,7 @@ class Template
         return $this;
     }
 
-    public function getAttr(string|\DOMElement $var, string $attr): string
+    public function getAttr(string|DOMElement $var, string $attr): string
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return '';
         $nodes = $this->getVarList($var);
@@ -735,7 +726,7 @@ class Template
         return '';
     }
 
-    public function removeAttr(string|\DOMElement $var, string $attr): Template
+    public function removeAttr(string|DOMElement $var, string $attr): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -786,9 +777,9 @@ class Template
      * any parent templates that this template is appended/inserted/prepended etc to.
      *
      * @param array $attributes An associative array of (attr, value) pairs.
-     * @param \DOMElement|null $node (optional) If sent this head element will append after the supplied node
+     * @param DOMElement|null $node (optional) If sent this head element will append after the supplied node
      */
-    public function appendHeadElement(string $elementName, array $attributes, string $value = '', ?\DOMElement $node = null): Template
+    public function appendHeadElement(string $elementName, array $attributes, string $value = '', ?DOMElement $node = null): Template
     {
         if ($this->isParsed()) return $this;
         $preKey = $elementName . $value;
@@ -810,9 +801,9 @@ class Template
     /**
      * Use this to add meta tags
      *
-     * @param \DOMElement|null $node (optional) If sent this head element will append after the supplied node
+     * @param DOMElement|null $node (optional) If sent this head element will append after the supplied node
      */
-    public function appendMetaTag(string $name, string $content, ?\DOMElement $node = null): Template
+    public function appendMetaTag(string $name, string $content, ?DOMElement $node = null): Template
     {
         return $this->appendHeadElement('meta', array('name' => $name, 'content' => $content), '', $node);
     }
@@ -820,9 +811,9 @@ class Template
     /**
      * Append a stylesheet file to the template header
      *
-     * @param \DOMElement|null $node (optional) If sent this head element will append after the supplied node
+     * @param DOMElement|null $node (optional) If sent this head element will append after the supplied node
      */
-    public function appendCssUrl(string $styleUrl, array $attrs = [], ?\DOMElement $node = null): Template
+    public function appendCssUrl(string $styleUrl, array $attrs = [], ?DOMElement $node = null): Template
     {
         if ($this->isParsed()) return $this;
         $attrs['rel'] = 'stylesheet';
@@ -835,9 +826,9 @@ class Template
     /**
      * Append some styles to the template header in a <style> element
      *
-     * @param \DOMElement|null $node (optional) If sent this head element will append after the supplied node
+     * @param DOMElement|null $node (optional) If sent this head element will append after the supplied node
      */
-    public function appendCss(string $styles, array $attrs = [], ?\DOMElement $node = null): Template
+    public function appendCss(string $styles, array $attrs = [], ?DOMElement $node = null): Template
     {
         if (!trim($styles) || $this->isParsed()) return $this;
         $this->addTracer($attrs);
@@ -848,9 +839,9 @@ class Template
     /**
      * Append a Javascript file to the template header
      *
-     * @param \DOMElement|null $node (optional) If sent this head element will append after the supplied node
+     * @param DOMElement|null $node (optional) If sent this head element will append after the supplied node
      */
-    public function appendJsUrl(string $urlString, array $attrs = [], ?\DOMElement $node = null): Template
+    public function appendJsUrl(string $urlString, array $attrs = [], ?DOMElement $node = null): Template
     {
         if ($this->isParsed()) return $this;
         if (!isset($attrs['type']) && !$this->isHtml5()) {
@@ -867,9 +858,9 @@ class Template
     /**
      * Append some Javascript to the template header in a <script> element
      *
-     * @param \DOMElement|null $node (optional) If supplied, this element will append after the supplied node
+     * @param DOMElement|null $node (optional) If supplied, this element will append after the supplied node
      */
-    public function appendJs(string $js, array $attrs = [], ?\DOMElement $node = null): Template
+    public function appendJs(string $js, array $attrs = [], ?DOMElement $node = null): Template
     {
         if (empty(trim($js)) || $this->isParsed()) return $this;
         $this->addTracer($attrs);
@@ -938,7 +929,7 @@ class Template
     /**
      * Remove all child nodes from a var
      */
-    public function empty(string|\DOMElement $var): Template
+    public function empty(string|DOMElement $var): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -952,7 +943,7 @@ class Template
     /**
      * Get the text inside a var node.
      */
-    public function getText(string|\DOMElement $var): string
+    public function getText(string|DOMElement $var): string
     {
         $nodes = $this->getVarList($var);
         if (count($nodes)) {
@@ -964,7 +955,7 @@ class Template
     /**
      * Replace the text of a var element
      */
-    public function setText(string|\DOMElement $var, string $value): Template
+    public function setText(string|DOMElement $var, string $value): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -979,7 +970,7 @@ class Template
     /**
      * Append text to a var element
      */
-    public function appendText(string|\DOMElement $var, string $value): Template
+    public function appendText(string|DOMElement $var, string $value): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -993,7 +984,7 @@ class Template
     /**
      * Prepend text to a var element
      */
-    public function prependText(string|\DOMElement $var, string $value): Template
+    public function prependText(string|DOMElement $var, string $value): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -1008,12 +999,12 @@ class Template
     /**
      * Return the html including the node contents
      */
-    public function getHtml(string|\DOMElement $var): string
+    public function getHtml(string|DOMElement $var): string
     {
         $html = '';
         $nodes = $this->getVarList($var);
         if (count($nodes)) {
-            $doc = new \DOMDocument();
+            $doc = new DOMDocument();
             $doc->appendChild($doc->importNode($nodes[0], true));
             $html = trim($doc->saveHTML());
         }
@@ -1025,7 +1016,7 @@ class Template
      *
      * @note After insertion the template will lose references to any contained Template element nodes.
      */
-    public function setHtml(string|\DOMNode $var, string $html): Template
+    public function setHtml(string|DOMNode $var, string $html): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -1043,7 +1034,7 @@ class Template
      * Alias to Template::setHtml()
      * @deprecated use Template::setHtml()
      */
-    public function insertHtml(string|\DOMElement $var, string $html): Template
+    public function insertHtml(string|DOMElement $var, string $html): Template
     {
         return $this->setHtml($var, $html);
     }
@@ -1054,7 +1045,7 @@ class Template
      * @param bool $preserveAttrs Copy attributes of dest element to new root node (overwriting)
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
-    public function replaceHtml(string|\DOMNode $var, string $html, bool $preserveAttrs = true): Template
+    public function replaceHtml(string|DOMNode $var, string $html, bool $preserveAttrs = true): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -1062,7 +1053,7 @@ class Template
         foreach ($nodes as $i => $node) {
             try {
                 $newNode = self::replaceDomHtml($node, $html, $this->encoding, $preserveAttrs);
-                if ($newNode) {
+                if (is_string($var) && $newNode instanceof DOMElement) {
                     $this->var[$var][$i] = $newNode;
                 }
             } catch (Exception $e) {
@@ -1075,7 +1066,7 @@ class Template
     /**
      * Append HTML content into a var element
      */
-    public function appendHtml(string|\DOMElement $var, string $html): Template
+    public function appendHtml(string|DOMElement $var, string $html): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -1092,7 +1083,7 @@ class Template
     /**
      * Append HTML content into a var element
      */
-    public function prependHtml(string|\DOMElement $var, string $html): Template
+    public function prependHtml(string|DOMElement $var, string $html): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -1111,7 +1102,7 @@ class Template
      *
      * @throws Exception
      */
-    public static function insertDomHtml(\DOMNode $element, string $html, string $encoding = 'UTF-8'): ?\DOMNode
+    public static function insertDomHtml(DOMNode $element, string $html, string $encoding = 'UTF-8'): ?DOMNode
     {
         if ($html == null) return null;
 
@@ -1137,7 +1128,7 @@ class Template
      *
      * @throws Exception
      */
-    public static function appendDomHtml(\DOMNode $element, string $html, string $encoding = 'UTF-8'): ?\DOMNode
+    public static function appendDomHtml(DOMNode $element, string $html, string $encoding = 'UTF-8'): ?DOMNode
     {
         if (!$html) return null;
         $html = self::cleanHtml($html, $encoding);
@@ -1160,7 +1151,7 @@ class Template
      *
      * @throws Exception
      */
-    public static function prependDomHtml(\DOMNode $element, string $html): ?\DOMNode
+    public static function prependDomHtml(DOMNode $element, string $html): ?DOMNode
     {
         if (!$html) return null;
 
@@ -1185,7 +1176,7 @@ class Template
      * @throws Exception
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
-    public static function replaceDomHtml(\DOMNode $element, string $html, string $encoding = 'UTF-8', bool $preserveAttrs = true): ?\DOMNode
+    public static function replaceDomHtml(DOMNode $element, string $html, string $encoding = 'UTF-8', bool $preserveAttrs = true): ?DOMNode
     {
         if (!$html) return null;
 
@@ -1198,7 +1189,7 @@ class Template
         $contentNode = self::makeContentNode($html);
         $contentNode = $contentNode->firstChild;
         $contentNode = $elementDoc->importNode($contentNode, true);
-        if ($element->hasAttributes() && $preserveAttrs && $contentNode->nodeType == \XML_ELEMENT_NODE) {
+        if ($contentNode instanceof DOMElement && $element->hasAttributes() && $preserveAttrs) {
             foreach ($element->attributes as $attr) {
                 $contentNode->setAttribute($attr->nodeName, $attr->nodeValue);
             }
@@ -1211,7 +1202,7 @@ class Template
      * Insert a DOMDocument into a var element
      * The var tag will not be replaced only its contents
      */
-    public function insertDocHtml(string|\DOMElement $var, \DOMDocument $doc): Template
+    public function insertDocHtml(string|DOMElement $var, DOMDocument $doc): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -1228,7 +1219,7 @@ class Template
     /**
      * Append a var element with a DOMDocument contents
      */
-    public function appendDocHtml(string|\DOMElement $var, \DOMDocument $doc): Template
+    public function appendDocHtml(string|DOMElement $var, DOMDocument $doc): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         if (!$doc->documentElement) return $this;
@@ -1244,7 +1235,7 @@ class Template
     /**
      * Prepend documents to the var node
      */
-    public function prependDocHtml(string|\DOMElement $var, \DOMDocument $doc): Template
+    public function prependDocHtml(string|DOMElement $var, DOMDocument $doc): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         if (!$doc->documentElement) return $this;
@@ -1270,7 +1261,7 @@ class Template
      * @param bool $preserveAttrs Copy attributes of dest element to new root node (overwriting)
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
-    public function replaceDocHtml(string|\DOMElement $var, \DOMDocument $doc, bool $preserveAttrs = true): Template
+    public function replaceDocHtml(string|DOMElement $var, DOMDocument $doc, bool $preserveAttrs = true): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         if (!$doc->documentElement) return $this;
@@ -1278,14 +1269,16 @@ class Template
         $nodes = $this->getVarList($var);
         foreach ($nodes as $i => $node) {
             $newNode = $this->document->importNode($doc->documentElement, true);
-            if ($node->hasAttributes() && $preserveAttrs && $newNode->nodeType == \XML_ELEMENT_NODE) {
-                foreach ($node->attributes as $attr) {
-                    $newNode->setAttribute($attr->nodeName, $attr->nodeValue);
+            if ($newNode instanceof DOMElement) {
+                if ($node->hasAttributes() && $preserveAttrs) {
+                    foreach ($node->attributes as $attr) {
+                        $newNode->setAttribute($attr->nodeName, $attr->nodeValue);
+                    }
                 }
-            }
-            $node->parentNode->replaceChild($newNode, $node);
-            if (is_string($var)) {
-                $this->var[$var][$i] = $newNode;
+                $node->parentNode->replaceChild($newNode, $node);
+                if (is_string($var)) {
+                    $this->var[$var][$i] = $newNode;
+                }
             }
         }
         return $this;
@@ -1299,7 +1292,7 @@ class Template
      *
      * @throws \DOMException
      */
-    public function insertTemplate(string|\DOMElement $var, Template $template): Template
+    public function insertTemplate(string|DOMElement $var, Template $template): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $this->mergeTemplate($template);
@@ -1312,7 +1305,7 @@ class Template
      *
      * @throws \DOMException
      */
-    public function appendTemplate(string|\DOMElement $var, Template $template): Template
+    public function appendTemplate(string|DOMElement $var, Template $template): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $this->mergeTemplate($template);
@@ -1325,7 +1318,7 @@ class Template
      *
      * @throws \DOMException
      */
-    public function prependTemplate(string|\DOMElement $var, Template $template): Template
+    public function prependTemplate(string|DOMElement $var, Template $template): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $this->mergeTemplate($template);
@@ -1343,7 +1336,7 @@ class Template
      * @throws \DOMException
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
-    public function replaceTemplate(string|\DOMElement $var, Template $template, bool $preserveAttrs = true): Template
+    public function replaceTemplate(string|DOMElement $var, Template $template, bool $preserveAttrs = true): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $this->mergeTemplate($template);
@@ -1359,13 +1352,13 @@ class Template
      *
      * @throws Exception
      */
-    public static function makeContentNode(string $markup, string $encoding = 'UTF-8'): \DOMNode
+    public static function makeContentNode(string $markup, string $encoding = 'UTF-8'): DOMNode
     {
         $markup = self::cleanHtml($markup, $encoding);
 
         $id = '_c_o_n__';
         $html = sprintf('<?xml encoding="'.$encoding.'"?><div id="%s">%s</div>', $id, $markup);
-        $doc = new \DOMDocument();
+        $doc = new DOMDocument();
         $doc->substituteEntities = false;
         libxml_use_internal_errors(true);
 
@@ -1386,7 +1379,7 @@ class Template
     /**
      * Removes all children from a node.
      */
-    protected function removeChildren(\DOMNode $node): Template
+    protected function removeChildren(DOMNode $node): Template
     {
         while ($node->hasChildNodes()) {
             $node->removeChild($node->childNodes->item(0));
@@ -1400,7 +1393,7 @@ class Template
      *
      * @param string $property [var, choice, repeat]
      */
-    public function isWritable(string $property, string|\DOMElement $key): bool
+    public function isWritable(string $property, string|DOMElement $key): bool
     {
         if ($this->isParsed()) return false;
 
@@ -1450,7 +1443,7 @@ class Template
      * as no changes can be made to the template unless you use DOMDocument functions directly
      * @throws \DOMException
      */
-    public function getDocument(bool $parse = true): ?\DOMDocument
+    public function getDocument(bool $parse = true): ?DOMDocument
     {
         if (!$parse) return $this->document;
 
@@ -1486,7 +1479,7 @@ class Template
             // Remove repeat template notes
             foreach ($this->repeat as $name => $repeat) {
                 $node = $repeat->getRepeatNode();
-                if (!$node instanceof \DOMElement || !isset($node->parentNode) || !$node->parentNode) {
+                if (!$node instanceof DOMElement || !isset($node->parentNode) || !$node->parentNode) {
                     continue;
                 }
                 $node->parentNode->removeChild($node);
@@ -1496,7 +1489,7 @@ class Template
             // Remove nodes marked hidden
             foreach ($this->var as $var => $nodes) {
                 foreach ($nodes as $node) {
-                    if (!$node instanceof \DOMElement || !isset($node->parentNode) || !$node->parentNode) continue;
+                    if (!$node instanceof DOMElement || !isset($node->parentNode) || !$node->parentNode) continue;
                     if ($node->hasAttribute(self::ATTR_HIDDEN)) {
                         $node->parentNode->removeChild($node);
                     }
@@ -1506,7 +1499,7 @@ class Template
             // Remove choice node marked hidden
             foreach ($this->choice as $choice => $nodes) {
                 foreach ($nodes as $node) {
-                    if (!$node instanceof \DOMElement || !isset($node->parentNode) || !$node->parentNode) continue;
+                    if (!$node instanceof DOMElement || !isset($node->parentNode) || !$node->parentNode) continue;
                     if ($node->hasAttribute(self::ATTR_HIDDEN)) {
                         $node->parentNode->removeChild($node);
                     }
@@ -1523,7 +1516,7 @@ class Template
 //            if (!($headNode instanceof \DOMElement)) {
 //                $headNode = $this->document->documentElement;
 //            }
-            if ($headNode instanceof \DOMElement) {
+            if ($headNode instanceof DOMElement) {
                 $meta = [];
                 $other = [];
                 foreach ($this->headers as $i => $header) {

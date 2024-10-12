@@ -7,7 +7,7 @@ namespace Dom\Modifier;
  * for mobile devices to load faster.
  *
  */
-class JsLast extends FilterInterface
+class JsLast extends ModifierInterface
 {
     /**
      * Used to set an order priority to a node
@@ -24,27 +24,24 @@ class JsLast extends FilterInterface
     /**
      * Flag to ensure the filter is run once only
      */
-    private bool $notRun = true;
-
-    private array $head = [];
-
-    private array $body = [];
-
+    private bool  $notRun = true;
+    private array $head   = [];
+    private array $body   = [];
     /**
      * track src urls to remove duplicates
      */
-    private array $src = [];
+    private array $src    = [];
 
 
     /**
      * pre init the front controller
      */
-    public function init(\DOMDocument $doc) { }
+    public function init(\DOMDocument $doc): void { }
 
     /**
      * Call this method to travers a document
      */
-    public function executeNode(\DOMElement $node)
+    public function executeNode(\DOMElement $node): void
     {
         if ($node->nodeName == 'script' && !$node->hasAttribute(self::$ATTR_STATIC)) {
             if ($this->domModifier->inHead()) {
@@ -58,7 +55,7 @@ class JsLast extends FilterInterface
     /**
      * called after DOM tree is traversed
      */
-    public function postTraverse(\DOMDocument $doc)
+    public function postTraverse(\DOMDocument $doc): void
     {
         if ($this->domModifier->getBody() && $this->notRun) {
             $nodeList = array_merge($this->body, $this->head);

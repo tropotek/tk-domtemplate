@@ -27,7 +27,7 @@ abstract class AdapterInterface
         return $this->loader;
     }
 
-    public function setLoader(Loader $loader)
+    public function setLoader(Loader $loader): void
     {
         $this->loader = $loader;
     }

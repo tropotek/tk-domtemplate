@@ -20,10 +20,9 @@ trait RendererTrait
     /**
      * Set a new template for this renderer.
      */
-    public function setTemplate(Template $template): static
+    public function setTemplate(Template $template): void
     {
         $this->template = $template;
-        return $this;
     }
 
     /**

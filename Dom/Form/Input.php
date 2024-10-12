@@ -38,10 +38,7 @@ class Input extends Element
         return $this->element->hasAttribute('checked');
     }
 
-    /**
-     * Set the value of this form element.
-     */
-    public function setValue($value): Input
+    public function setValue(string|array $value): Input
     {
         if ($this->getType() == 'checkbox' || $this->getType() == 'radio') {
             $this->form->setCheckedByValue($this->getName(), $value);
@@ -51,10 +48,7 @@ class Input extends Element
         return $this;
     }
 
-    /**
-     * Return the value of this form element
-     */
-    public function getValue()
+    public function getValue(): array|string
     {
         return $this->element->getAttribute('value');
     }
