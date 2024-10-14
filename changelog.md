@@ -1,5 +1,13 @@
 #CHANGELOG#
 
+Ver 8.0.20 [2024-10-14]:
+-------------------------------
+  - phpstan lvl6 updates
+  - phpstan lvl6 compliance
+  - Fix template head tag issue
+  - Added microsoft and google SSO OAuth
+
+
 Ver 8.0.18 [2024-09-25]:
 -------------------------------
   - cleanup config methods
