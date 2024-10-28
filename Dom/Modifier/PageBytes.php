@@ -66,7 +66,7 @@ class PageBytes extends ModifierInterface
                 } else if (!$node->hasAttribute('src')) {
                     $str = $node->nodeValue;
                 }
-                $hash = md5($str);
+                $hash = md5(strval($str));
                 if ($str && !in_array($hash, $this->checkedHash)) {
                     $this->jsTotal += \Tk\FileUtil::string2Bytes(strval(strlen($str)));
                 }
@@ -87,7 +87,7 @@ class PageBytes extends ModifierInterface
                 if (is_file($path)) {
                     $str = @file_get_contents($path);
                 }
-                $hash = md5($str);
+                $hash = md5(strval($str));
                 if ($str && !in_array($hash, $this->checkedHash)) {
                     $this->cssTotal += \Tk\FileUtil::string2Bytes(strval(strlen($str)));
                 }

@@ -60,7 +60,7 @@ class Builder
             }
             $section = $this->getDocument()->saveHTML($el);
 
-            $this->setSection($id, $section);
+            $this->setSection($id, strval($section));
         }
         $section = $this->getSection($id);
         return Template::load($section);

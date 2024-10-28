@@ -98,7 +98,7 @@ class Scss extends ModifierInterface
                 if (!$cCss) {
                     \Tk\Log::notice('SCSS Compiling File: ' . $path);
                     $scss->setImportPaths(array($this->baseUrl, dirname($path)));
-                    $src = file_get_contents($path);
+                    $src = strval(file_get_contents($path));
                     $cCss = $scss->compileString($src);
                     $this->cache->store($cacheKey, $cCss, $this->cacheTimeout);
                 }

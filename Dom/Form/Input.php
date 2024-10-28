@@ -40,6 +40,8 @@ class Input extends Element
 
     public function setValue(string|array $value): Input
     {
+        if (is_array($value)) $value = strval($value[0]);
+
         if ($this->getType() == 'checkbox' || $this->getType() == 'radio') {
             $this->form->setCheckedByValue($this->getName(), $value);
         } else {

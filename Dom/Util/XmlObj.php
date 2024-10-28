@@ -17,6 +17,9 @@ class XmlObj
     {
         if ($xml[0] != '<') {
             $xml = file_get_contents($xml);
+            if ($xml === false) {
+                throw new \Exception("cannot load file $xml");
+            }
         }
         $dom = new \DOMDocument();
         $r = $dom->loadXML($xml);

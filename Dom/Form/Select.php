@@ -130,7 +130,7 @@ class Select extends Element
     public function getValue(): string|array
     {
         $selected = $this->findSelected($this->element);
-        if (count($selected) > 0) {
+        if (is_array($selected) && count($selected) > 0) {
             if ($this->isMultiple()) {
                 return array_map(fn($r) => $r->textContent, $selected);
             } else {

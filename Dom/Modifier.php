@@ -31,9 +31,9 @@ class Modifier
 {
 
     /**
-     * @var array<int,ModifierInterface>
+     * @var array<string,ModifierInterface>
      */
-    protected array $modifiers   = [];
+    protected array $modifiers = [];
     protected array $nodeTrash = [];
     protected bool  $inHead    = false;
     protected bool  $inBody    = false;

@@ -141,13 +141,13 @@ class Template
 
     /**
      * An internal list of nodes to delete after init()
-     * @var array<string,DOMNode>
+     * @var array<int,DOMNode>
      */
     private array $delete = [];
 
     /**
      * Comment tags to be removed
-     * @var array<string,DOMNode>
+     * @var array<int,DOMNode>
      */
     protected array $comments = [];
 
@@ -182,7 +182,7 @@ class Template
     /**
      * Templates to be appended to the <body> tag
      * on rendering of the template
-     * @var array<string,Template>
+     * @var array<int,Template>
      */
     protected array $bodyTemplates = [];
 
@@ -262,10 +262,10 @@ class Template
      */
     public static function loadFile(string $filename, string $encoding = 'UTF-8'): Template
     {
-        if (!is_file($filename)) {
+        $html = file_get_contents($filename);
+        if ($html === false) {
             throw new Exception('Cannot locate file: ' . $filename);
         }
-        $html = file_get_contents($filename);
         $obj = self::load($html, $encoding);
         $obj->document->documentURI = $filename;
         return $obj;
@@ -273,8 +273,7 @@ class Template
 
     public function __sleep(): array
     {
-        //$this->serialHtml = $this->document->saveXML();
-        $this->serialHtml = $this->document->saveHTML();
+        $this->serialHtml = strval($this->document->saveHTML());
         return array('html', 'serialHtml', 'encoding', 'headers', 'parsed');
     }
 
@@ -313,8 +312,7 @@ class Template
         $this->html5 = false;
         $this->orgDocument = clone $doc;
         if (!$this->html) {
-            //$this->html = $this->document->saveXML();
-            $this->html = $this->document->saveHTML();
+            $this->html = strval($this->document->saveHTML());
         }
 
         $this->prepareDoc($this->document->documentElement);
@@ -369,9 +367,9 @@ class Template
 
             // Store all Form nodes
             if ($node->nodeName == 'form') {
-                $form = $node->getAttribute('id') ?? $node->getAttribute('name');
-                if ($form == null) {
-                    $form = count($this->formElement);
+                $form = strval($node->getAttribute('id') ?? $node->getAttribute('name'));
+                if (!$form) {
+                    $form = 'form-' . strval(count($this->formElement));
                 }
                 $this->formElement[$form] = [];
                 $this->form[$form] = $node;
@@ -610,6 +608,9 @@ class Template
      */
     public function setVisible(string|DOMElement $choice, bool $b = true): Template
     {
+        if ($choice instanceof DOMElement) {
+            $choice = $choice->getAttribute(self::$ATTR_CHOICE);
+        }
         $nodes = $this->getVarList($choice);
         if ($b) {
             foreach ($nodes as $node) $node->removeAttribute(self::ATTR_HIDDEN);
@@ -677,18 +678,20 @@ class Template
 
     public function addCss(string|DOMElement $var, array|string $class): Template
     {
-        $list = $class;
-        if (!is_array($class)) {
+        if (is_string($class)) {
             $class = trim($class);
             $list = explode(' ', $class);
+        } else {
+            $list = $class;
         }
         $list2 = explode(' ', $this->getAttr($var, 'class'));
         $list = array_merge($list2, $list);
         $list = array_unique($list);
 
         $classStr = trim(implode(' ', $list));
-        if ($classStr)
+        if ($classStr) {
             $this->setAttr($var, 'class', $classStr);
+        }
         return $this;
     }
 
@@ -1006,19 +1009,19 @@ class Template
         if (count($nodes)) {
             $doc = new DOMDocument();
             $doc->appendChild($doc->importNode($nodes[0], true));
-            $html = trim($doc->saveHTML());
+            $html = trim(strval($doc->saveHTML()));
         }
         return $html;
     }
 
     /**
-     * Insert HTML content into a var element removing any existing html content.
+     * Insert HTML content  into a var element removing any existing html content.
      *
      * @note After insertion the template will lose references to any contained Template element nodes.
      */
-    public function setHtml(string|DOMNode $var, string $html): Template
+    public function setHtml(string|DOMElement $var, string $html): Template
     {
-        if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
+        if (is_string($var) && !$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
         foreach ($nodes as $node) {
             try {
@@ -1045,7 +1048,7 @@ class Template
      * @param bool $preserveAttrs Copy attributes of dest element to new root node (overwriting)
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
-    public function replaceHtml(string|DOMNode $var, string $html, bool $preserveAttrs = true): Template
+    public function replaceHtml(string|DOMElement $var, string $html, bool $preserveAttrs = true): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
@@ -1584,7 +1587,7 @@ class Template
         $str = '';
         try {
             $doc = $this->getDocument($parse);
-            $str = $doc->saveHTML($doc->documentElement);
+            $str = strval($doc->saveHTML($doc->documentElement));
 
             // Cleanup Document
             if (substr($str, 0, 5) == '<' . '?xml') {    // Remove xml declaration

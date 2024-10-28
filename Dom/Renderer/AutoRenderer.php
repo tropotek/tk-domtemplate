@@ -179,15 +179,15 @@ class AutoRenderer extends Renderer
                 }
                 $varVal = $varVal->$varPeice;
             } else {
-                $arrayName = substr($varPeice, 0, strpos($varPeice, '['));
+                $arrayName = substr($varPeice, 0, intval(strpos($varPeice, '[')));
                 if ($arrayName && (!isset($varVal->$arrayName) || !is_array($varVal->$arrayName))) {
                     $varVal = null;
                     break;
                 }
                 if (!$arrayName && $varVal) {
-                    $varVal = $this->accessArray($varVal, substr($varPeice, strpos($varPeice, '[')));
+                    $varVal = $this->accessArray($varVal, substr($varPeice, intval(strpos($varPeice, '['))));
                 } else {
-                    $varVal = $this->accessArray($varVal->$arrayName, substr($varPeice, strpos($varPeice, '[')));
+                    $varVal = $this->accessArray($varVal->$arrayName, substr($varPeice, intval(strpos($varPeice, '['))));
                 }
             }
         }
@@ -219,8 +219,10 @@ class AutoRenderer extends Renderer
         if (is_object($val)) {
             if (method_exists($val, 'toString')) {
                 return $val->toString();
-            } else {
+            } else if (method_exists($val, '__toString')) {
                 return $val->__toString();
+            } else {
+                return '';
             }
         }
         if (is_array($val)) {

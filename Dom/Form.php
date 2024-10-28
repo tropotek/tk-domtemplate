@@ -54,8 +54,7 @@ class Form
 
     /**
      * Set/unset the checkboxes and radio boxes.
-     * <b>NOTE:</b> This is called by Input<br\>
-     *   $value is not required for checkboxes
+     * NOTE: This is called by Input, $value is not required for checkboxes
      */
     public function setCheckedByValue(string $name, string $value = ''): Form
     {
