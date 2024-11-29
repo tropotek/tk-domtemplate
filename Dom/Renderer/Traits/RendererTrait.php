@@ -4,9 +4,7 @@ namespace Dom\Renderer\Traits;
 use Dom\Template;
 
 /**
- * Class RendererTrait
- *
- * In rare cases use this to add the get/set template to your renderer object
+ * Add the get/set template methods to your renderer object
  * Do not forget to implement the DisplayInterface if you need the show() method
  *
  * @author Tropotek <http://www.tropotek.com/>
