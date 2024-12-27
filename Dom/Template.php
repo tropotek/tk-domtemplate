@@ -9,9 +9,6 @@ use Psr\Log\LoggerInterface;
 /**
  * A PHP DOM Template Library
  *
- * NOTE: ATTR_ constants are considered reserved tag attributes and should
- *       not be used in any templates supplied to the Template for parsing
- *
  * @author Michael Mifsud
  * @author Darryl Ross
  * @see http://www.domtemplate.com/
@@ -21,8 +18,8 @@ use Psr\Log\LoggerInterface;
 class Template
 {
     /**
-     * ATTR_ constants are considered reserved tag attributes and should
-     * not be used in any templates supplied to the Template for parsing.
+     * ATTR_ values are reserved attributes used internally by the \Dom\Template and should
+     * not be used in any HTML supplied to the Template for parsing.
      */
     const ATTR_HIDDEN = '__tdt--hide';
 
@@ -37,7 +34,7 @@ class Template
      * add this attribute to the header tag to force the template to ignore it.
      * Header nodes include <script>, <style>, <link> and <meta> (self::$HEADER_NODES)
      */
-    const ATTR_HEAD_IGNORE = 'data-headParse';
+    //const ATTR_HEAD_IGNORE = 'data-headParse';
 
 
     /**
@@ -54,7 +51,7 @@ class Template
     public static string $ATTR_CHOICE = 'choice';
     public static string $ATTR_REPEAT = 'repeat';
 
-    public static array $HEADER_NODES = ['script', 'style', 'link', 'meta'];
+    //public static array $HEADER_NODES = ['script', 'style', 'link', 'meta'];
     public static array $FORM_ELEMENT_NODES = ['input', 'textarea', 'select', 'button'];
 
     /**
@@ -395,21 +392,21 @@ class Template
                 $this->title = $node;
                 return;
             }
-            if (!$this->head) {
-                // move all header nodes for compilation
-                if (in_array($node->nodeName, self::$HEADER_NODES)) {
-                    if ($node->hasAttribute(self::ATTR_HEAD_IGNORE)) return;
-                    $attrs = [];
-                    foreach ($node->attributes as $k => $v) {
-                        if (in_array($k, [self::$ATTR_VAR, self::$ATTR_CHOICE, self::$ATTR_REPEAT]))
-                            continue;
-                        $attrs[$k] = $v->nodeValue;
-                    }
-                    $this->appendHeadElement($node->nodeName, $attrs, $node->textContent);
-                    $this->delete[] = $node;
-                    return;
-                }
-            }
+//            if (!$this->head) {
+//                // move all header nodes for compilation
+//                if (in_array($node->nodeName, self::$HEADER_NODES)) {
+//                    if ($node->hasAttribute(self::ATTR_HEAD_IGNORE)) return;
+//                    $attrs = [];
+//                    foreach ($node->attributes as $k => $v) {
+//                        if (in_array($k, [self::$ATTR_VAR, self::$ATTR_CHOICE, self::$ATTR_REPEAT]))
+//                            continue;
+//                        $attrs[$k] = $v->nodeValue;
+//                    }
+//                    $this->appendHeadElement($node->nodeName, $attrs, $node->textContent);
+//                    $this->delete[] = $node;
+//                    return;
+//                }
+//            }
 
             // iterate through the dom elements
             $children = $node->childNodes;
@@ -861,7 +858,7 @@ class Template
     /**
      * Append some Javascript to the template header in a <script> element
      *
-     * @param DOMElement|null $node (optional) If supplied, this element will append after the supplied node
+     * @param DOMElement|null $node (optional) append the JS affter the supplied node
      */
     public function appendJs(string $js, array $attrs = [], ?DOMElement $node = null): Template
     {
@@ -1512,6 +1509,8 @@ class Template
             // Insert headers
             $headNode = $this->head;
             // append to parent node if no headers exist
+            // TODO: Refactor all headers, as this does not insert header into the `$header['node']` if it exits
+            //       ....
             // TODO: Do not do this, the head element must exist to avoid duplicates.
             //       I need to do more research into how to handle the case of rendering
             //       JS and CSS if no head element exists... see appendBodyTemplate() method,
@@ -1543,8 +1542,8 @@ class Template
                     }
                     $nl = $this->document->createTextNode("\n");
                     $t = $this->document->createTextNode("  ");
-                    if ($header['node']) {
-                        $n = $header['node'];
+                    $n = $header['node'] ?? false;
+                    if ($n instanceof DOMElement) {
                         $n->parentNode->insertBefore($node, $n);
                         $n->parentNode->insertBefore($nl, $n);
                     } else {
