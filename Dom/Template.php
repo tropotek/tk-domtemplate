@@ -1042,7 +1042,7 @@ class Template
     /**
      * Replace a template var element with the supplied HTML
      *
-     * @param bool $preserveAttrs Copy attributes of dest element to new root node (overwriting)
+     * @param bool $preserveAttrs Copy attributes of dest element to new element (overwriting any existing attrs)
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
     public function replaceHtml(string|DOMElement $var, string $html, bool $preserveAttrs = true): Template
@@ -1172,7 +1172,7 @@ class Template
      * Replace HTML on a dom node
      * This will replace the existing node not just its inner contents.
      *
-     * @param bool $preserveAttrs Copy attributes of dest element to new root node (overwriting)
+     * @param bool $preserveAttrs Copy attributes of dest element to new element (overwriting any existing attrs)
      * @throws Exception
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
@@ -1258,7 +1258,7 @@ class Template
      * The DOMDocument's topmost node will be used to replace the destination node
      * This will replace the existing node not just its inner contents
      *
-     * @param bool $preserveAttrs Copy attributes of dest element to new root node (overwriting)
+     * @param bool $preserveAttrs Copy attributes of dest element to new element (overwriting any existing attrs)
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
     public function replaceDocHtml(string|DOMElement $var, DOMDocument $doc, bool $preserveAttrs = true): Template
@@ -1332,7 +1332,7 @@ class Template
      * This will also copy any headers in the supplied template.
      * This will replace the existing node not just its inner contents
      *
-     * @param bool $preserveAttrs Copy attributes of dest element to new root node (overwriting)
+     * @param bool $preserveAttrs Copy attributes of dest element to new element (overwriting any existing attrs)
      * @throws \DOMException
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
