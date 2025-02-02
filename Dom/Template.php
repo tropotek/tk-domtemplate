@@ -5,6 +5,7 @@ use DOMDocument;
 use DOMElement;
 use DOMNode;
 use Psr\Log\LoggerInterface;
+use Tk\Uri;
 
 /**
  * A PHP DOM Template Library
@@ -736,7 +737,6 @@ class Template
         return $this;
     }
 
-
     /**
      * Return a form object from the document.
      */
@@ -858,7 +858,7 @@ class Template
     /**
      * Append some Javascript to the template header in a <script> element
      *
-     * @param DOMElement|null $node (optional) append the JS affter the supplied node
+     * @param DOMElement|null $node (optional) append the JS after the supplied node
      */
     public function appendJs(string $js, array $attrs = [], ?DOMElement $node = null): Template
     {
@@ -1343,7 +1343,6 @@ class Template
         return $this->replaceDocHtml($var, $template->getDocument(), $preserveAttrs);
     }
 
-
     /**
      * Prepare XML/HTML markup string ready for insertion into a node.
      *
@@ -1515,6 +1514,8 @@ class Template
             //       I need to do more research into how to handle the case of rendering
             //       JS and CSS if no head element exists... see appendBodyTemplate() method,
             //       and if we can refactor that case as well, maybe a flag is needed in the Template instead???
+            //       For now add all sub-template javascript into the template with the <script></script> tag
+
 //            if (!($headNode instanceof \DOMElement)) {
 //                $headNode = $this->document->documentElement;
 //            }
