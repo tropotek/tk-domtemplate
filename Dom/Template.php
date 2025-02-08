@@ -4,8 +4,8 @@ namespace Dom;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
+use Psr\Log\LogLevel;
 use Psr\Log\LoggerInterface;
-use Tk\Uri;
 
 /**
  * A PHP DOM Template Library
@@ -22,13 +22,13 @@ class Template
      * ATTR_ values are reserved attributes used internally by the \Dom\Template and should
      * not be used in any HTML supplied to the Template for parsing.
      */
-    const ATTR_HIDDEN = '__tdt--hide';
+    const string ATTR_HIDDEN = '__tdt--hide';
 
     /**
      * This attribute will be added to script and style elements
      * to show the code location that the data was inserted from.
      */
-    const ATTR_DATA_TRACE = 'data-trace';
+    const string ATTR_DATA_TRACE = 'data-trace';
 
     /**
      * All header nodes are deleted on parse
@@ -73,28 +73,28 @@ class Template
     /**
      * Set to true if this template uses HTML5
      */
-    private bool $html5 = false;
+    protected bool $html5 = false;
 
     /**
      * The character encoding use with this Template
      */
-    private string $encoding = 'UTF-8';
+    protected string $encoding = 'UTF-8';
 
     /**
      * This is the original string document sent to the template
      * before template initialization
      */
-    private string $html = '';
+    protected string $html = '';
 
     /**
      * Cache the string state of this template when being serialized
      */
-    private ?string $serialHtml = null;
+    protected ?string $serialHtml = null;
 
     /**
      * Cache of the string document of the template after it has been parsed
      */
-    private ?string $parsedXml = null;
+    protected ?string $parsedXml = null;
 
     /**
      * The template document
@@ -104,7 +104,7 @@ class Template
     /**
      * The original template document before template initialization
      */
-    private ?DOMDocument $orgDocument = null;
+    protected ?DOMDocument $orgDocument = null;
 
     /**
      * @var array<string,array<int,DOMElement>>
@@ -141,7 +141,7 @@ class Template
      * An internal list of nodes to delete after init()
      * @var array<int,DOMNode>
      */
-    private array $delete = [];
+    protected array $delete = [];
 
     /**
      * Comment tags to be removed
@@ -192,7 +192,7 @@ class Template
     /**
      * Blocking var to avoid a callback recursive loop
      */
-    private bool $parsing = false;
+    protected bool $parsing = false;
 
     /**
      * Set to true if this template has been parsed
@@ -255,8 +255,6 @@ class Template
 
     /**
      * Make a template from a file
-     *
-     * @throws Exception
      */
     public static function loadFile(string $filename, string $encoding = 'UTF-8'): Template
     {
@@ -323,9 +321,9 @@ class Template
     }
 
     /**
-     * A private recursive method to initialize the template.
+     * A recursive method to initialize the template.
      */
-    private function prepareDoc(DOMNode $node, string $form = ''): void
+    protected function prepareDoc(DOMNode $node, string $form = ''): void
     {
         if ($this->isParsed()) return;
         if ($node instanceof DOMElement) {
@@ -755,7 +753,7 @@ class Template
     {
         if (!$this->isParsed()) {
             if ($this->title == null) {
-                $this->getLogger()->notice(__CLASS__.'::setTitleText() This document has no title node.');
+                $this->log(__CLASS__.'::setTitleText() This document has no title node.');
                 return $this;
             }
             $this->removeChildren($this->title);
@@ -871,7 +869,7 @@ class Template
     /**
      * Add the calling trace to a notes attributes
      */
-    private function addTracer(array &$attrs): void
+    protected function addTracer(array &$attrs): void
     {
         $trace = debug_backtrace();
         $i = 2;
@@ -1024,7 +1022,7 @@ class Template
             try {
                 self::insertDomHtml($node, $html, $this->encoding);
             } catch (\Exception $e) {
-                $this->logError($e->__toString());
+                $this->log($e->__toString(), LogLevel::ERROR);
             }
         }
         return $this;
@@ -1057,7 +1055,7 @@ class Template
                     $this->var[$var][$i] = $newNode;
                 }
             } catch (Exception $e) {
-                $this->logError($e->__toString());
+                $this->log($e->__toString(), LogLevel::ERROR);
             }
         }
         return $this;
@@ -1074,7 +1072,7 @@ class Template
             try {
                 self::appendDomHtml($node, $html, $this->encoding);
             } catch (Exception $e) {
-                $this->logError($e->__toString());
+                $this->log($e->__toString(), LogLevel::ERROR);
             }
         }
         return $this;
@@ -1091,7 +1089,7 @@ class Template
             try {
                 self::prependDomHtml($node, $html);
             } catch (Exception $e) {
-                $this->logError($e->__toString());
+                $this->log($e->__toString(), LogLevel::ERROR);
             }
         }
         return $this;
@@ -1099,8 +1097,6 @@ class Template
 
     /**
      * Insert HTML formatted text into a dom element.
-     *
-     * @throws Exception
      */
     public static function insertDomHtml(DOMNode $element, string $html, string $encoding = 'UTF-8'): ?DOMNode
     {
@@ -1125,8 +1121,6 @@ class Template
 
     /**
      * Append HTML text into a dom node.
-     *
-     * @throws Exception
      */
     public static function appendDomHtml(DOMNode $element, string $html, string $encoding = 'UTF-8'): ?DOMNode
     {
@@ -1148,8 +1142,6 @@ class Template
 
     /**
      * Append HTML text into a dom node.
-     *
-     * @throws Exception
      */
     public static function prependDomHtml(DOMNode $element, string $html): ?DOMNode
     {
@@ -1173,7 +1165,6 @@ class Template
      * This will replace the existing node not just its inner contents.
      *
      * @param bool $preserveAttrs Copy attributes of dest element to new element (overwriting any existing attrs)
-     * @throws Exception
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
     public static function replaceDomHtml(DOMNode $element, string $html, string $encoding = 'UTF-8', bool $preserveAttrs = true): ?DOMNode
@@ -1289,8 +1280,6 @@ class Template
      * The var tag will not be replaced only its contents
      *
      * This will also grab any headers in the supplied template.
-     *
-     * @throws \DOMException
      */
     public function insertTemplate(string|DOMElement $var, Template $template): Template
     {
@@ -1302,8 +1291,6 @@ class Template
     /**
      * Append a template to a var element, it will parse the template before appending it
      * This will also copy any headers in the $template.
-     *
-     * @throws \DOMException
      */
     public function appendTemplate(string|DOMElement $var, Template $template): Template
     {
@@ -1315,8 +1302,6 @@ class Template
     /**
      * Prepend a template to a var element, it will parse the template before appending it
      * This will also copy any headers in the $template.
-     *
-     * @throws \DOMException
      */
     public function prependTemplate(string|DOMElement $var, Template $template): Template
     {
@@ -1333,7 +1318,6 @@ class Template
      * This will replace the existing node not just its inner contents
      *
      * @param bool $preserveAttrs Copy attributes of dest element to new element (overwriting any existing attrs)
-     * @throws \DOMException
      * @note Make sure you have a root node surrounding the content eg: `<p>content ...</p>`
      */
     public function replaceTemplate(string|DOMElement $var, Template $template, bool $preserveAttrs = true): Template
@@ -1348,8 +1332,6 @@ class Template
      *
      * Some methods require that there be a start and end tax before a node can be inserted.
      * This method fixes that issue.
-     *
-     * @throws Exception
      */
     public static function makeContentNode(string $markup, string $encoding = 'UTF-8'): DOMNode
     {
@@ -1440,7 +1422,6 @@ class Template
      *
      * After using this call ($parse = true) you can no longer use the template render functions
      * as no changes can be made to the template unless you use DOMDocument functions directly
-     * @throws \DOMException
      */
     public function getDocument(bool $parse = true): ?DOMDocument
     {
@@ -1609,7 +1590,7 @@ class Template
             }
 
         } catch (\Exception $e) {
-            $this->logError($e->__toString());
+            $this->log($e->__toString(), LogLevel::ERROR);
         }
         return $str;
     }
@@ -1650,7 +1631,7 @@ class Template
      * Since PHP's ord() function is not compatible with UTF-8
      * Here is a workaround.
      */
-    static private function ord(string $ch): int
+    static protected function ord(string $ch): int
     {
         $k = mb_convert_encoding($ch, 'UCS-2LE', 'UTF-8');
         $k1 = ord(substr($k, 0, 1));
@@ -1658,17 +1639,14 @@ class Template
         return $k2 * 256 + $k1;
     }
 
-    protected function logError(string $msg): void
-    {
-        $this->errors[] = $msg;
-        $this->getLogger()->error($msg);
-    }
-
-    protected function getLogger(): LoggerInterface
+    protected function log(string $msg, string $level = LogLevel::DEBUG): LoggerInterface
     {
         if (!self::$LOGGER) {
             self::$LOGGER = new \Psr\Log\NullLogger();
         }
+
+        self::$LOGGER->log($level, $msg);
+
         return self::$LOGGER;
     }
 
