@@ -1020,6 +1020,7 @@ class Template
         $nodes = $this->getVarList($var);
         foreach ($nodes as $node) {
             try {
+                $this->removeChildren($node);
                 self::insertDomHtml($node, $html, $this->encoding);
             } catch (\Exception $e) {
                 $this->log($e->__toString(), LogLevel::ERROR);
