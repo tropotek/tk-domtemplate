@@ -4,6 +4,7 @@ namespace Dom;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
+use DOMNodeList;
 use Psr\Log\LogLevel;
 use Psr\Log\LoggerInterface;
 
@@ -774,6 +775,11 @@ class Template
      * If this template does not have a <head> tag the elements will be added to
      * any parent templates that this template is appended/inserted/prepended etc to.
      *
+     * Things to note:
+     *   - node is not created until parse
+     *   - if template parsed without a head tag node will not be added
+     *   - Node creation will iterate up the parent when using the insert Template methods
+     *
      * @param array $attributes An associative array of (attr, value) pairs.
      * @param DOMElement|null $node (optional) If sent this head element will append after the supplied node
      */
@@ -798,6 +804,10 @@ class Template
 
     /**
      * Use this to add meta tags
+     * Things to note:
+     *   - node is not created until parse
+     *   - if template parsed without a head tag node will not be added
+     *   - Node creation will iterate up the parent when using the insert Template methods
      *
      * @param DOMElement|null $node (optional) If sent this head element will append after the supplied node
      */
@@ -807,7 +817,10 @@ class Template
     }
 
     /**
-     * Append a stylesheet file to the template header
+     * Append a CSS file to the template head element
+     * Things to note:
+     *   - node is not created until parse
+     *   - if template parsed without a head tag node will not be added
      *
      * @param DOMElement|null $node (optional) If sent this head element will append after the supplied node
      */
@@ -816,26 +829,71 @@ class Template
         if ($this->isParsed()) return $this;
         $attrs['rel'] = 'stylesheet';
         $attrs['href'] = $styleUrl;
-        $this->addTracer($attrs);
+        $trace = $this->getTracer();
+        if ($trace) $attrs[self::ATTR_DATA_TRACE] =  $trace;
         $this->appendHeadElement('link', $attrs, '', $node);
         return $this;
     }
 
     /**
-     * Append some styles to the template header in a <style> element
+     * Append CSS to the template parentElement or document body if exists
+     */
+    public function appendCss(string $styles, array $attrs = []): Template
+    {
+        $styles = trim($styles);
+        if (!$styles || $this->isParsed()) return $this;
+
+        // append js to body tag
+        $parentNode = $this->getBodyElement();
+        if (is_null($parentNode)) {
+            // append to parent template tag
+            $parentNode = $this->document->documentElement;
+        }
+        if (is_null($parentNode)) {
+            throw new Exception("cannot locate template parent to append CSS");
+        }
+
+        //$nl = $this->document->createTextNode("\n");
+        $node = $this->document->createElement('style');
+        $ct = $this->document->createCDATASection("\n" . $styles . "\n");
+        $node->appendChild($ct);
+        foreach ($attrs as $k => $v) {
+            $node->setAttribute($k, $v);
+        }
+        $parentNode->appendChild($node);
+        //$parentNode->insertBefore($nl, $node);
+
+        $trace = $this->getTracer();
+        if ($trace) {
+            $node->setAttribute(self::ATTR_DATA_TRACE, $trace);
+        }
+        return $this;
+    }
+
+    /**
+     * Append CSS to the template head element
+     * Things to note:
+     *   - node is not created until parse
+     *   - if template parsed without a head tag node will not be added
+     *   - Node creation will iterate up the parent when using the insert Template methods
      *
      * @param DOMElement|null $node (optional) If sent this head element will append after the supplied node
      */
-    public function appendCss(string $styles, array $attrs = [], ?DOMElement $node = null): Template
+    public function appendHeadCss(string $styles, array $attrs = [], ?DOMElement $node = null): Template
     {
         if (!trim($styles) || $this->isParsed()) return $this;
-        $this->addTracer($attrs);
+        $trace = $this->getTracer();
+        if ($trace) $attrs[self::ATTR_DATA_TRACE] =  $trace;
         $this->appendHeadElement('style', $attrs, "\n" . $styles . "\n", $node);
         return $this;
     }
 
     /**
-     * Append a Javascript file to the template header
+     * Append a Javascript file to the template head element
+     * Things to note:
+     *   - node is not created until parse
+     *   - if template parsed without a head tag node will not be added
+     *   - Node creation will iterate up the parent when using the insert Template methods
      *
      * @param DOMElement|null $node (optional) If sent this head element will append after the supplied node
      */
@@ -848,34 +906,80 @@ class Template
         if (!isset($attrs['src'])) {
             $attrs['src'] = $urlString;
         }
-        $this->addTracer($attrs);
+
+        $trace = $this->getTracer();
+        if ($trace) $attrs[self::ATTR_DATA_TRACE] =  $trace;
+
         $this->appendHeadElement('script', $attrs, '', $node);
         return $this;
     }
 
     /**
-     * Append some Javascript to the template header in a <script> element
+     * Append Javascript to the template parentElement or document body if exists
+     */
+    public function appendJs(string $js, array $attrs = []): Template
+    {
+        $js =  trim($js);
+        if (empty($js) || $this->isParsed()) return $this;
+
+        // append js to body tag
+        $parentNode = $this->getBodyElement();
+        if (is_null($parentNode)) {
+            // append to parent template tag
+            $parentNode = $this->document->documentElement;
+        }
+        if (is_null($parentNode)) {
+            throw new Exception("cannot locate template parent to append JavaScript");
+        }
+
+        //$nl = $this->document->createTextNode("\n");
+        $node = $this->document->createElement('script');
+        $ct = $this->document->createCDATASection("\n" . $js . "\n");
+        $node->appendChild($ct);
+        foreach ($attrs as $k => $v) {
+            $node->setAttribute($k, $v);
+        }
+        $parentNode->appendChild($node);
+        //$parentNode->insertBefore($nl, $node);
+
+        $trace = $this->getTracer();
+        if ($trace) {
+            $node->setAttribute(self::ATTR_DATA_TRACE, $trace);
+        }
+        return $this;
+    }
+
+    /**
+     * Append Javascript to the template head element
+     * Things to note:
+     *   - node is not created until parse
+     *   - if template parsed without a head tag node will not be added
+     *   - Node creation will iterate up the parent when using the insert Template methods
      *
      * @param DOMElement|null $node (optional) append the JS after the supplied node
      */
-    public function appendJs(string $js, array $attrs = [], ?DOMElement $node = null): Template
+    public function appendHeadJs(string $js, array $attrs = [], ?DOMElement $node = null): Template
     {
         if (empty(trim($js)) || $this->isParsed()) return $this;
-        $this->addTracer($attrs);
+        $trace = $this->getTracer();
+        if ($trace) $attrs[self::ATTR_DATA_TRACE] =  $trace;
         $this->appendHeadElement('script', $attrs, $js, $node);
         return $this;
     }
 
     /**
-     * Add the calling trace to a notes attributes
+     * return a string representing the calling code location for debugging
      */
-    protected function addTracer(array &$attrs): void
+    protected function getTracer(int $ignore = 2): string
     {
         $trace = debug_backtrace();
-        $i = 2;
-        if (self::$ENABLE_TRACER && !empty($trace[$i]) && empty($attrs[self::ATTR_DATA_TRACE])) {
-            $attrs[self::ATTR_DATA_TRACE] = (!empty($trace[$i]['class']) ? $trace[$i]['class'] . '::' : '').(!empty($trace[$i]['function']) ? $trace[$i]['function'] . '()' : '');
+        if (self::$ENABLE_TRACER && !empty($trace[$ignore])) {
+            return
+                (!empty($trace[$ignore]['line']) ? '[' . $trace[$ignore]['line'] . '] ' : '') .
+                (!empty($trace[$ignore]['class']) ? $trace[$ignore]['class'] . '::' : '') .
+                (!empty($trace[$ignore]['function']) ? $trace[$ignore]['function'] . '()' : '');
         }
+        return '';
     }
 
     /**
@@ -1489,18 +1593,6 @@ class Template
 
             // Insert headers
             $headNode = $this->head;
-            // append to parent node if no headers exist
-            // TODO: Refactor all headers, as this does not insert header into the `$header['node']` if it exits
-            //       ....
-            // TODO: Do not do this, the head element must exist to avoid duplicates.
-            //       I need to do more research into how to handle the case of rendering
-            //       JS and CSS if no head element exists... see appendBodyTemplate() method,
-            //       and if we can refactor that case as well, maybe a flag is needed in the Template instead???
-            //       For now add all sub-template javascript into the template with the <script></script> tag
-
-//            if (!($headNode instanceof \DOMElement)) {
-//                $headNode = $this->document->documentElement;
-//            }
             if ($headNode instanceof DOMElement) {
                 $meta = [];
                 $other = [];
