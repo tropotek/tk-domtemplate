@@ -31,6 +31,7 @@ trait RendererTrait
     public function getTemplate(): ?Template
     {
         $magic = '__makeTemplate';
+        /** @phpstan-ignore-next-line  */
         if (!$this->hasTemplate() && method_exists($this, $magic)) {
             $this->template = $this->$magic();
         }

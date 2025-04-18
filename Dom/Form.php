@@ -63,7 +63,7 @@ class Form
         }
         $elements = $this->elements[$name];
         foreach ($elements as $element) {
-            if ($value !== null && ($element->getAttribute('value') == $value)) {
+            if ($element->getAttribute('value') == $value) {
                 $element->setAttribute('checked', 'checked');
             } else if ($element->getAttribute('type') == 'radio') {
                 $element->removeAttribute('checked');

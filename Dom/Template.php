@@ -700,10 +700,10 @@ class Template
         return $this;
     }
 
-    public function setAttr(string|DOMElement $var, array|string $attr, ?string $value = null): Template
+    public function setAttr(string|DOMElement $var, array|string $attr, null|string|int|float $value = null): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
-        if (!is_array($attr)) $attr = [$attr => $value];
+        if (!is_array($attr)) $attr = [$attr => (string)$value];
         $nodes = $this->getVarList($var);
         foreach ($nodes as $node) {
             if (!$node) continue;
@@ -1057,13 +1057,13 @@ class Template
     /**
      * Replace the text of a var element
      */
-    public function setText(string|DOMElement $var, string $value): Template
+    public function setText(string|DOMElement $var, string|int|float $value): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
         foreach ($nodes as $node) {
             $this->removeChildren($node);
-            $newNode = $this->document->createTextNode($value);
+            $newNode = $this->document->createTextNode((string)$value);
             $node->appendChild($newNode);
         }
         return $this;
@@ -1072,12 +1072,12 @@ class Template
     /**
      * Append text to a var element
      */
-    public function appendText(string|DOMElement $var, string $value): Template
+    public function appendText(string|DOMElement $var, string|int|float $value): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
         foreach ($nodes as $node) {
-            $newNode = $this->document->createTextNode($value);
+            $newNode = $this->document->createTextNode((string)$value);
             $node->appendChild($newNode);
         }
         return $this;
@@ -1086,12 +1086,12 @@ class Template
     /**
      * Prepend text to a var element
      */
-    public function prependText(string|DOMElement $var, string $value): Template
+    public function prependText(string|DOMElement $var, string|int|float $value): Template
     {
         if (!$this->isWritable(self::$ATTR_VAR, $var)) return $this;
         $nodes = $this->getVarList($var);
         foreach ($nodes as $node) {
-            $newNode = $this->document->createTextNode($value);
+            $newNode = $this->document->createTextNode((string)$value);
             $node->insertBefore($newNode, $node->firstChild);
         }
         return $this;
@@ -1532,7 +1532,7 @@ class Template
     {
         if (!$parse || $this->isParsed()) return $this->document;
 
-        if (!$this->isParsed() && !$this->parsing) {
+        if (!$this->parsing) {
             $this->parsing = true;
 
             // Call Pre Parse Event
@@ -1702,7 +1702,7 @@ class Template
      */
     static function cleanHtml(string $xml, string $encoding = 'UTF-8'): string
     {
-        static $mapping = null;
+        static $mapping = [];
         if (!$mapping) {
             $list1 = get_html_translation_table(HTML_ENTITIES, ENT_NOQUOTES);
             $list2 = get_html_translation_table(HTML_SPECIALCHARS, ENT_NOQUOTES);
@@ -1715,7 +1715,8 @@ class Template
             $extras = array('&times;' => '&#215;');
             $mapping = array_merge($mapping, $extras);
         }
-        $xml = str_replace(array_keys($mapping), $mapping, $xml);
+        /** @phpstan-ignore-next-line  */
+        $xml = str_replace(array_keys($mapping), array_values($mapping), $xml);
         $xml = preg_replace ('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', ' ', $xml);       // Strip out unsupported characters from XML
         return $xml;
     }

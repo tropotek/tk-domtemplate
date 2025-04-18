@@ -43,7 +43,7 @@ class Repeat extends Template
      * to is original location in the parent template.
      * @throws \DOMException
      */
-    public function appendRepeat(string|\DOMElement $var = '', Template $destRepeat = null): \DOMNode|false
+    public function appendRepeat(string|\DOMElement $var = '', ?Template $destRepeat = null): \DOMNode|false
     {
         if ($this->getParent()->isParsed()) return false;
 
@@ -74,7 +74,7 @@ class Repeat extends Template
      * If the var is null or '' then the repeating region is prepended
      * to is original location in the parent template.
      */
-    public function prependRepeat(string $var = '', Template $destRepeat = null): \DOMNode|false
+    public function prependRepeat(string $var = '', ?Template $destRepeat = null): \DOMNode|false
     {
         if ($this->getParent()->isParsed()) return false;
 

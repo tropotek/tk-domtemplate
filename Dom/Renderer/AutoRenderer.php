@@ -25,7 +25,7 @@ class AutoRenderer extends Renderer
     private \stdClass $data;
 
 
-    public function __construct(Template $template = null, array|\stdClass $data = null)
+    public function __construct(?Template $template = null, null|array|\stdClass $data = null)
     {
         if ($template) {
             $this->template = $template;

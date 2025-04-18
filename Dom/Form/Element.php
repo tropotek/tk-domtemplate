@@ -22,7 +22,7 @@ abstract class Element
     protected ?Form $form = null;
 
 
-    public function __construct(\DOMElement $element, Form $form = null)
+    public function __construct(\DOMElement $element, ?Form $form = null)
     {
         $this->element = $element;
         $this->form = $form;
