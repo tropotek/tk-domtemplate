@@ -1,5 +1,13 @@
 #CHANGELOG#
 
+Ver 8.0.24 [2025-04-20]:
+-------------------------------
+  - Add search and create new to nav
+  - fix template logging
+  - Implement htmx table UI
+  - Add checkSelect field and persistand form fields
+
+
 Ver 8.0.22 [2024-11-03]:
 -------------------------------
   - phpstan lvl7
