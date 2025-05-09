@@ -1,7 +1,7 @@
 {
   "name": "ttek/tk-domtemplate",
   "type": "library",
-  "description": "A PHP DOM Template library using XML/HTML files for templates",
+  "description": "Tk8 Lib: PHP DOM Template library with inline SCSS file compiler",
   "keywords": [
     "Dom",
     "tropotek",
