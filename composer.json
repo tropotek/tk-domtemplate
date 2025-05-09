@@ -30,7 +30,7 @@
     "php": "^8.1",
     "ext-dom": "*",
     "ext-tidy": "*",
-    "scssphp/scssphp": "^1.11.0"
+    "scssphp/scssphp": "^1.11.0-@stable"
   },
   "extra": {
     "branch-alias": {
