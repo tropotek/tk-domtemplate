@@ -40,16 +40,13 @@ class Scss extends ModifierInterface
     /**
      * @param array $constants Any parameters you want accessible via the scss parser via @{paramName}
      */
-    public function __construct(string $basePath, string $baseUrl, string $cachePath, array $constants = [])
+    public function __construct(string $basePath, string $baseUrl, array $constants = [])
     {
-        $this->basePath  = $basePath;
-        $this->baseUrl   = $baseUrl;
-        $this->constants = $constants;
-        $this->cache     = new Cache(new Filesystem($cachePath));
-
-        if (!is_writable($cachePath)) {
-            $this->cacheEnabled = false;
-        }
+        $this->basePath     = $basePath;
+        $this->baseUrl      = $baseUrl;
+        $this->constants    = $constants;
+        $this->cache        = Cache::instance();
+        $this->cacheEnabled = false;
     }
 
     public function init(\DOMDocument $doc): void
@@ -65,7 +62,6 @@ class Scss extends ModifierInterface
             $url = \Tk\Uri::create($node->getAttribute('href'));
             $path = $this->basePath . $url->getRelativePath();
             $this->source[$path] = '';
-            //$this->sourcePaths[] = $path;   // For adding to data-paths attributes
             $this->sourcePaths[] = $url->getRelativePath();
             $this->domModifier->removeNode($node);
             $this->insNode = $node;
@@ -92,7 +88,7 @@ class Scss extends ModifierInterface
             if (preg_match('/\.scss/', $path) && is_file($path)) {
                 $cCss = '';
                 $cacheKey = 'scss_' . hash('md5', $path);
-                if ($this->cacheEnabled) {
+                if ($this->isCacheEnabled()) {
                     $cCss = $this->cache->fetch($cacheKey);
                 }
                 if (!$cCss) {
@@ -149,6 +145,11 @@ class Scss extends ModifierInterface
     {
         $this->cacheEnabled = $cacheEnabled;
         return $this;
+    }
+
+    public function isCacheEnabled(): bool
+    {
+        return $this->cacheEnabled;
     }
 
     public function getCacheTimeout(): int
