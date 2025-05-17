@@ -1,5 +1,11 @@
 #CHANGELOG#
 
+Ver 8.0.26 [2025-05-18]:
+-------------------------------
+  - Update to use static methods for Registry and Config
+  - base lib cleanup, Config/Registry/Cache
+
+
 Ver 8.0.24 [2025-04-20]:
 -------------------------------
   - Add search and create new to nav
