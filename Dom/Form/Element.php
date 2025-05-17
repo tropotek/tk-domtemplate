@@ -66,10 +66,7 @@ abstract class Element
      */
     public function getTemplate(): ?Template
     {
-        if ($this->form) {
-            return $this->form->getTemplate();
-        }
-        return null;
+        return $this->form?->getTemplate();
     }
 
     /**

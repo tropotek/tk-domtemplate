@@ -39,7 +39,7 @@ ob_start();
 $path = dirname(__FILE__, 3);
 include_once $path . '/Dom/Exception.php';
 include_once $path . '/Dom/Template.php';
-include_once $path . '/Dom/Renderer/TemplateInterface.php';
+//include_once $path . '/Dom/Renderer/TemplateInterface.php';
 include_once $path . '/Dom/Renderer/AutoRenderer.php';
 
 // Create a template from the html in the buffer

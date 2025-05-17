@@ -1,10 +1,6 @@
 <?php
 namespace Dom\Form;
 
-use Dom\Form;
-use Dom\Template;
-
-
 /**
  * A class that handles a forms textarea element.
  *

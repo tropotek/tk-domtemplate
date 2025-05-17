@@ -1,7 +1,6 @@
 <?php
 namespace Dom\Renderer;
 
-use Dom\Renderer\Renderer;
 use Dom\Template;
 use Dom\Exception;
 
@@ -169,7 +168,7 @@ class AutoRenderer extends Renderer
     {
         $arr = explode('.', $rawParam);
         if ($varVal === null) {
-            $varVal = (object)$this->data;
+            $varVal = $this->data;
         }
         foreach ($arr as $varPeice) {
             if (!str_contains($varPeice, '[')) {

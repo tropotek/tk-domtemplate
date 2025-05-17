@@ -150,9 +150,7 @@ class Form
      */
     public function setAction(string $value): Form
     {
-        if ($this->form) {
-            $this->form->setAttribute('action', $value);
-        }
+        $this->form?->setAttribute('action', $value);
         return $this;
     }
 
@@ -167,9 +165,7 @@ class Form
      */
     public function setMethod(string $value): Form
     {
-        if ($this->form) {
-            $this->form->setAttribute('method', $value);
-        }
+        $this->form?->setAttribute('method', $value);
         return $this;
     }
 
@@ -185,9 +181,7 @@ class Form
      */
     public function setTarget(string $value): Form
     {
-        if ($this->form != null) {
-            $this->form->setAttribute('target', $value);
-        }
+        $this->form?->setAttribute('target', $value);
         return $this;
     }
 

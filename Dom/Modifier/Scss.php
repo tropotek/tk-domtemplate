@@ -4,7 +4,6 @@ namespace Dom\Modifier;
 use Dom\Exception;
 use ScssPhp\ScssPhp\OutputStyle;
 use ScssPhp\ScssPhp\ValueConverter;
-use Tk\Cache\Adapter\Filesystem;
 use Tk\Cache\Cache;
 
 /**

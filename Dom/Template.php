@@ -4,7 +4,6 @@ namespace Dom;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
-use DOMNodeList;
 use Psr\Log\LogLevel;
 use Psr\Log\LoggerInterface;
 
@@ -1159,7 +1158,7 @@ class Template
                 if (is_string($var) && $newNode instanceof DOMElement) {
                     $this->var[$var][$i] = $newNode;
                 }
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->log($e->__toString(), LogLevel::ERROR);
             }
         }
@@ -1176,7 +1175,7 @@ class Template
         foreach ($nodes as $node) {
             try {
                 self::appendDomHtml($node, $html, $this->encoding);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->log($e->__toString(), LogLevel::ERROR);
             }
         }
@@ -1193,7 +1192,7 @@ class Template
         foreach ($nodes as $node) {
             try {
                 self::prependDomHtml($node, $html);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->log($e->__toString(), LogLevel::ERROR);
             }
         }

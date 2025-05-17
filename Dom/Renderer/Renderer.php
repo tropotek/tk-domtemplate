@@ -2,7 +2,6 @@
 namespace Dom\Renderer;
 
 use Dom\Renderer\Traits\RendererTrait;
-use Dom\Template;
 
 /**
  * For classes that render \Dom\Templates.

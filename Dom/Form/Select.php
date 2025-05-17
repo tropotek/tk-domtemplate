@@ -1,9 +1,6 @@
 <?php
 namespace Dom\Form;
 
-use Dom\Form;
-use Dom\Template;
-
 /**
  * A class that handle a forms select element.
  *

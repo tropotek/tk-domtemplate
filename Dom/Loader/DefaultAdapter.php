@@ -1,7 +1,6 @@
 <?php
 namespace Dom\Loader;
 
-use Dom\Exception;
 use Dom\Template;
 
 /**
