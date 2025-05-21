@@ -58,10 +58,6 @@ class UrlPath extends ModifierInterface
      */
     protected array $attrJs = ['onmouseover', 'onmouseup', 'onmousedown', 'onmousemove', 'onmouseover', 'onclick'];
 
-    /**
-     * The site base file path
-     */
-    protected string $basePath = '';
 
     /**
      * The site base Url path
@@ -72,9 +68,8 @@ class UrlPath extends ModifierInterface
     /**
      * __construct
      */
-    public function __construct(string $basePath = '', string $baseUrl = '')
+    public function __construct(string $baseUrl = '')
     {
-        $this->basePath    = rtrim($basePath, '/');
         $this->baseUrl     = rtrim($baseUrl, '/');
     }
 
