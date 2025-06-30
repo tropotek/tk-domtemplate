@@ -117,10 +117,10 @@ $objRen->set('list2', $list2);
 $objRen->set('testChoiceExists', true); // value could be any non-false value 1 'string' etc....
 
 // Show Raw Template
-$template->insertHtml('tpl', htmlentities($xml));
+$template->setHtml('tpl', htmlentities($xml));
 // Execute Object Bootstrap
 $objRen->show();
 // Show parsed template
-$template->insertHtml('parsed', htmlentities($objRen->getTemplate()->toString()));
+$template->setHtml('parsed', htmlentities($objRen->getTemplate()->toString()));
 
 echo $template->toString();
