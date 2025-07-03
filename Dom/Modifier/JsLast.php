@@ -3,9 +3,9 @@ namespace Dom\Modifier;
 
 /**
  * Append all scripts to the bottom of the body tag.
- * This is a current technique employed by designers
- * for mobile devices to load faster.
  *
+ * Note: Be careful using this, if any JS is added inline after page rendering
+ *       ie: inserting markup using jQuery/HTMX, this could produce unexpected results.
  */
 class JsLast extends ModifierInterface
 {

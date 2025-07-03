@@ -4,7 +4,13 @@ namespace Dom\Modifier;
 use Dom\Exception;
 use ScssPhp\ScssPhp\OutputStyle;
 use ScssPhp\ScssPhp\ValueConverter;
+use Tk\Cache\Adapter\Filesystem;
 use Tk\Cache\Cache;
+use Tk\Cache\FileCache;
+use Tk\Config;
+use Tk\Path;
+use Tk\System;
+use Tk\Uri;
 
 /**
  * Compile all CSS LESS code to CSS
@@ -25,7 +31,7 @@ class Scss extends ModifierInterface
 
     private ?\DOMElement $insNode = null;
 
-    protected int    $cacheTimeout = 86400 * 2;  // 2 days
+    protected int    $cacheTimeout = 86400 * 7;  // 7 days
     protected bool   $compress     = true;
     protected array  $source       = [];
     protected array  $sourcePaths  = [];
@@ -33,7 +39,8 @@ class Scss extends ModifierInterface
     protected string $baseUrl      = '';
     protected array  $constants    = [];
     protected bool   $cacheEnabled = true;
-    protected Cache  $cache;
+    protected bool   $perPageCache = false; // create a cache per page
+    protected FileCache $cache;
 
 
     /**
@@ -44,8 +51,8 @@ class Scss extends ModifierInterface
         $this->basePath     = $basePath;
         $this->baseUrl      = $baseUrl;
         $this->constants    = $constants;
-        $this->cache        = Cache::instance();
-        $this->cacheEnabled = false;
+        $this->cache        = new FileCache(Path::createDataPath('/cache'), $this->cacheTimeout);
+        //$this->cacheEnabled = false;
     }
 
     public function init(\DOMDocument $doc): void
@@ -58,16 +65,22 @@ class Scss extends ModifierInterface
     public function executeNode(\DOMElement $node): void
     {
         if ($node->nodeName == 'link' && $node->hasAttribute('href') && preg_match('/\.scss/', $node->getAttribute('href'))) {
+            if (!$this->insNode) {
+                $this->insNode = $node->previousElementSibling;
+            }
+
             $url = \Tk\Uri::create($node->getAttribute('href'));
             $path = $this->basePath . $url->getRelativePath();
             $this->source[$path] = '';
             $this->sourcePaths[] = $url->getRelativePath();
             $this->domModifier->removeNode($node);
-            $this->insNode = $node;
         } else if ($node->nodeName == 'style' && $node->getAttribute('type') == 'text/scss' ) {
+            if (!$this->insNode) {
+                $this->insNode = $node->previousElementSibling;
+            }
+
             $this->source[] = $node->nodeValue;
             $this->domModifier->removeNode($node);
-            $this->insNode = $node;
         }
     }
 
@@ -79,54 +92,48 @@ class Scss extends ModifierInterface
             $this->constants[$k] = ValueConverter::fromPhp($v);
         }
         $scss->addVariables($this->constants);
-
         $scss->setOutputStyle($this->isCompress() ? OutputStyle::COMPRESSED : OutputStyle::EXPANDED);
 
+        if ($this->isPerPageCache()) {
+            $cacheKey = 'css_' . hash('md5', Uri::create()->getRelativePath()).'.css';
+        } else {
+            $cacheKey = 'css_cache.css';
+        }
         $css = '';
-        foreach ($this->source as $path => $v) {
-            if (preg_match('/\.scss/', $path) && is_file($path)) {
-                $cCss = '';
-                $cacheKey = 'scss_' . hash('md5', $path);
-                if ($this->isCacheEnabled()) {
-                    $cCss = $this->cache->fetch($cacheKey);
-                }
-                if (!$cCss) {
-                    \Tk\Log::notice('SCSS Compiling File: ' . $path);
+        if ($this->isCacheEnabled()) {
+            $css = $this->cache->fetch($cacheKey);
+        }
+        if (($css === false) || System::isRefreshCacheRequest()) {
+            foreach ($this->source as $path => $v) {
+                if (preg_match('/\.scss/', $path) && is_file($path)) {
+                    \Tk\Log::debug('SCSS Compiling File: ' . $path);
                     $scss->setImportPaths(array($this->baseUrl, dirname($path)));
                     $src = strval(file_get_contents($path));
                     $cCss = $scss->compileString($src);
-                    $this->cache->store($cacheKey, $cCss, $this->cacheTimeout);
+                    $css .= $cCss->getCss();
+                } else {
+                    \Tk\Log::warning('Invalid SCSS file: ' . $path);
                 }
-                $css .= $cCss->getCss();
-            } else {
-                \Tk\Log::notice('Invalid file: ' . $path);
+            }
+            if (!empty($css)) {
+                $this->cache->store($cacheKey, $css);
             }
         }
 
-        if ($css) {
-            $newNode = $doc->createElement('style');
+        if (!empty($css)) {
+            $newNode = $doc->createElement('link');
+            $cssUrl = Uri::create(Uri::createDataUri('/cache/' . $cacheKey));
+            $newNode->setAttribute('href', $cssUrl->toString());
+            $newNode->setAttribute('rel', 'stylesheet');
             $newNode->setAttribute('type', 'text/css');
-            if (self::$IS_DEBUG) {
-                $newNode->setAttribute('data-paths', implode(',', $this->sourcePaths));
-            }
-            $ct = $doc->createCDATASection("\n" . $css . "\n");
-            $newNode->appendChild($ct);
 
             if ($this->insNode) {
-                $this->insNode->parentNode->insertBefore($newNode, $this->insNode);
-            } else {
+                $this->insNode->parentElement->insertBefore($newNode, $this->insNode->nextElementSibling ?? $this->insNode);
+            } elseif ($this->domModifier->getHead()) {
                 $this->domModifier->getHead()->appendChild($newNode);
             }
         }
 
-    }
-
-    /**
-     * Surround a string by quotation marks. Single quote by default
-     */
-    protected function enquote(string $str, string $quote = '"'): string
-    {
-        return $quote . $str . $quote;
     }
 
     public function isCompress(): bool
@@ -159,6 +166,21 @@ class Scss extends ModifierInterface
     public function setCacheTimeout(int $cacheTimeout): Scss
     {
         $this->cacheTimeout = $cacheTimeout;
+        return $this;
+    }
+
+    public function isPerPageCache(): bool
+    {
+        return $this->perPageCache;
+    }
+
+    /**
+     * Set this to true when you want to create a css cache for individual pages
+     * Individual page caching should be used when each page has unique scss scripts
+     */
+    public function setPerPageCache(bool $perPageCache): Scss
+    {
+        $this->perPageCache = $perPageCache;
         return $this;
     }
 }
