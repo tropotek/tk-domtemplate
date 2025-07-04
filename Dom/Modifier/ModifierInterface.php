@@ -16,7 +16,7 @@ abstract class ModifierInterface
     protected bool $enabled = true;
 
     /**
-     * pre init the front controller
+     * pre init the modifier
      */
     abstract function init(\DOMDocument $doc): void;
 
@@ -31,7 +31,7 @@ abstract class ModifierInterface
     public function executeComment(\DOMComment $node): void { }
 
     /**
-     * called after DOM tree is traversed
+     * called once after the DOM tree is traversed
      */
     public function postTraverse(\DOMDocument $doc): void { }
 

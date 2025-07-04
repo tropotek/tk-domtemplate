@@ -31,28 +31,27 @@ class Scss extends ModifierInterface
 
     private ?\DOMElement $insNode = null;
 
-    protected int    $cacheTimeout = 86400 * 7;  // 7 days
-    protected bool   $compress     = true;
-    protected array  $source       = [];
-    protected array  $sourcePaths  = [];
-    protected string $basePath     = '';
-    protected string $baseUrl      = '';
-    protected array  $constants    = [];
-    protected bool   $cacheEnabled = true;
-    protected bool   $perPageCache = false; // create a cache per page
-    protected FileCache $cache;
+    protected int       $cacheTimeout = 86400 * 7;  // 7 days
+    protected bool      $compress     = true;
+    protected array     $source       = [];
+    protected array     $sourcePaths  = [];
+    protected array     $constants    = [];
+    protected bool      $perPageCache = false;
+
+    protected ?string   $cachePath    = null;       // null cachePath = cache disabled
+    protected string    $basePath     = '';
+    protected string    $baseUrl      = '';
 
 
     /**
      * @param array $constants Any parameters you want accessible via the scss parser via @{paramName}
      */
-    public function __construct(string $basePath, string $baseUrl, array $constants = [])
+    public function __construct(array $constants = [], ?string $cachePath = null, ?string $basePath = null, ?string $baseUrl = null)
     {
-        $this->basePath     = $basePath;
-        $this->baseUrl      = $baseUrl;
         $this->constants    = $constants;
-        $this->cache        = new FileCache(Path::createDataPath('/cache'), $this->cacheTimeout);
-        //$this->cacheEnabled = false;
+        $this->cachePath    = $cachePath;
+        $this->basePath     = is_null($basePath) ? Config::getBasePath() : $basePath;
+        $this->baseUrl      = is_null($baseUrl) ? Config::getBaseUrl() : $baseUrl;
     }
 
     public function init(\DOMDocument $doc): void
@@ -87,6 +86,11 @@ class Scss extends ModifierInterface
     public function postTraverse(\DOMDocument $doc): void
     {
         $scss = new \ScssPhp\ScssPhp\Compiler();
+        $cache = null;
+        if ($cache instanceof FileCache) {
+            $cache = new FileCache($this->cachePath, $this->cacheTimeout);
+        }
+        $isCached = !is_null($cache);
 
         foreach ($this->constants as $k => $v) {
             $this->constants[$k] = ValueConverter::fromPhp($v);
@@ -100,8 +104,8 @@ class Scss extends ModifierInterface
             $cacheKey = 'css_cache.css';
         }
         $css = '';
-        if ($this->isCacheEnabled()) {
-            $css = $this->cache->fetch($cacheKey);
+        if ($isCached) {
+            $css = $cache->fetch($cacheKey);
         }
         if (($css === false) || System::isRefreshCacheRequest()) {
             foreach ($this->source as $path => $v) {
@@ -115,8 +119,8 @@ class Scss extends ModifierInterface
                     \Tk\Log::warning('Invalid SCSS file: ' . $path);
                 }
             }
-            if (!empty($css)) {
-                $this->cache->store($cacheKey, $css);
+            if (!empty($css) && $isCached) {
+                $cache->store($cacheKey, $css);
             }
         }
 
@@ -145,17 +149,6 @@ class Scss extends ModifierInterface
     {
         $this->compress = $compress;
         return $this;
-    }
-
-    public function setCacheEnabled(bool $cacheEnabled): Scss
-    {
-        $this->cacheEnabled = $cacheEnabled;
-        return $this;
-    }
-
-    public function isCacheEnabled(): bool
-    {
-        return $this->cacheEnabled;
     }
 
     public function getCacheTimeout(): int

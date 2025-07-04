@@ -70,7 +70,7 @@ class UrlPath extends ModifierInterface
      */
     public function __construct(string $baseUrl = '')
     {
-        $this->baseUrl     = rtrim($baseUrl, '/');
+        $this->baseUrl = rtrim($baseUrl, '/');
     }
 
     /**
@@ -134,7 +134,6 @@ class UrlPath extends ModifierInterface
         $node->data = $this->replaceStr($node->data);
     }
 
-
     /**
      * Add a custom src url attribute
      */
@@ -190,39 +189,4 @@ class UrlPath extends ModifierInterface
         return str_replace('{siteUrl}', $this->baseUrl, $str);
     }
 
-
-    /**
-     * Clean a path from ./ ../ but keep path integrity.
-     * eg:
-     *
-     *   From: /Work/Projects/tk003-trunk/template/default/../../../../relative/path/from/template.html
-     *     To: /Work/relative/path/from/template.html
-     *
-     * Note: This function can give access to unwanted paths if not used carefully.
-     */
-//    private function cleanRelative(string $path): string
-//    {
-//        if (preg_match('/^\/\//', $path)) {
-//            // Should not be `http://` at the start
-//            throw new \Tk\Exception('Invalid url path: ' . $path);
-//        }
-//
-//        //$path = str_replace(array('//','\\\\'), array('/','\\'), $path);
-//        $array = explode( '/', $path);
-//        $parents = array();
-//        foreach( $array as $dir) {
-//            switch( $dir) {
-//                case '.':
-//                    // Don't need to do anything here
-//                    break;
-//                case '..':
-//                    array_pop( $parents);
-//                    break;
-//                default:
-//                    $parents[] = $dir;
-//                    break;
-//            }
-//        }
-//        return implode( '/', $parents);
-//    }
 }
