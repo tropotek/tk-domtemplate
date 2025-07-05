@@ -1,5 +1,10 @@
 #CHANGELOG#
 
+Ver 8.0.34 [2025-07-06]:
+-------------------------------
+  - Fix SCSS object properties
+
+
 Ver 8.0.32 [2025-07-04]:
 -------------------------------
   - masive cache object cleanup
