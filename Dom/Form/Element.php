@@ -7,12 +7,7 @@ use Dom\Template;
 /**
  * All form elements must use this class/interface.
  *
- *
- * @author Michael Mifsud
- * @author Darryl Ross
- * @see http://www.domtemplate.com/
- * @see http://www.tropotek.com/
- * @license Copyright 2007
+ * @author Tropotek <http://www.tropotek.com/>
  */
 abstract class Element
 {

@@ -26,10 +26,10 @@ namespace Dom;
  *     $fieldTemplate3 = $builder->getTemplate('tpl-input');
  *  </code>
  *
- * This is a way that a front end devs can create a single HTML
- * page with all the templates required for system objects.
+ * This is a way for front-end devs to create a single HTML
+ * page with internal sub-templates.
  *
- * To see it in action look at the \Tk\Table and \Tk\Form libs.
+ * To see it in action, see the \Tk\Table and \Tk\Form lib templates.
  *
  * @author Tropotek <http://www.tropotek.com/>
  */

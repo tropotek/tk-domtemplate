@@ -10,6 +10,8 @@ namespace Dom\Modifier;
  *
  * Note: No image sizes are calculated.
  * Note: Do not use in production environments.
+ *
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class PageBytes extends ModifierInterface
 {

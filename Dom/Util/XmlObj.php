@@ -5,6 +5,8 @@ use Dom\Exception;
 
 /**
  * Class XmlObj
+ *
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class XmlObj
 {

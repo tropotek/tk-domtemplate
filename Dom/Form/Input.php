@@ -4,11 +4,7 @@ namespace Dom\Form;
 /**
  * A class that handle a forms input element.
  *
- * @author Michael Mifsud
- * @author Darryl Ross
- * @see http://www.domtemplate.com/
- * @see http://www.tropotek.com/
- * @license Copyright 2007
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class Input extends Element
 {

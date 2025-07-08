@@ -5,11 +5,7 @@ namespace Dom\Form;
  * A class that handles a forms textarea element.
  *
  *
- * @author Michael Mifsud
- * @author Darryl Ross
- * @see http://www.domtemplate.com/
- * @see http://www.tropotek.com/
- * @license Copyright 2007
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class Textarea extends Element
 {

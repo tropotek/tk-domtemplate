@@ -6,6 +6,8 @@ namespace Dom\Modifier;
  *
  * Note: Be careful using this, if any JS is added inline after page rendering
  *       ie: inserting markup using jQuery/HTMX, this could produce unexpected results.
+ *
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class JsLast extends ModifierInterface
 {

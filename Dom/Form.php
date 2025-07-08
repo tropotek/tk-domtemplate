@@ -12,11 +12,7 @@ use Dom\Form\Textarea;
  * The form package currently does not fully support element multidimensional arrays.
  * It can be done it is not fully supported or tested.
  *
- * @author Michael Mifsud
- * @author Darryl Ross
- * @see http://www.domtemplate.com/
- * @see http://www.tropotek.com/
- * @license Copyright 2007
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class Form
 {

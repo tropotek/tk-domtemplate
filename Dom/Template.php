@@ -10,11 +10,7 @@ use Psr\Log\LoggerInterface;
 /**
  * A PHP DOM Template Library
  *
- * @author Michael Mifsud
- * @author Darryl Ross
- * @see http://www.domtemplate.com/
- * @see http://www.tropotek.com/
- * @license Copyright 2007
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class Template
 {
@@ -29,13 +25,6 @@ class Template
      * to show the code location that the data was inserted from.
      */
     const string ATTR_DATA_TRACE = 'data-trace';
-
-    /**
-     * All header nodes are deleted on parse
-     * add this attribute to the header tag to force the template to ignore it.
-     * Header nodes include <script>, <style>, <link> and <meta> (self::$HEADER_NODES)
-     */
-    //const ATTR_HEAD_IGNORE = 'data-headParse';
 
 
     /**
@@ -391,21 +380,6 @@ class Template
                 $this->title = $node;
                 return;
             }
-//            if (!$this->head) {
-//                // move all header nodes for compilation
-//                if (in_array($node->nodeName, self::$HEADER_NODES)) {
-//                    if ($node->hasAttribute(self::ATTR_HEAD_IGNORE)) return;
-//                    $attrs = [];
-//                    foreach ($node->attributes as $k => $v) {
-//                        if (in_array($k, [self::$ATTR_VAR, self::$ATTR_CHOICE, self::$ATTR_REPEAT]))
-//                            continue;
-//                        $attrs[$k] = $v->nodeValue;
-//                    }
-//                    $this->appendHeadElement($node->nodeName, $attrs, $node->textContent);
-//                    $this->delete[] = $node;
-//                    return;
-//                }
-//            }
 
             // iterate through the dom elements
             $children = $node->childNodes;

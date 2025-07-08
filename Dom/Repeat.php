@@ -4,11 +4,7 @@ namespace Dom;
 /**
  * A repeat region is a sub template of a parent templates nodes.
  *
- * @author Michael Mifsud
- * @author Darryl Ross
- * @see http://www.domtemplate.com/
- * @see http://www.tropotek.com/
- * @license Copyright 2007
+ * @author Tropotek <http://www.tropotek.com/>
  */
 class Repeat extends Template
 {
