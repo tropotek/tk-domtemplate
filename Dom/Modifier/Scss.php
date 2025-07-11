@@ -6,6 +6,7 @@ use ScssPhp\ScssPhp\OutputStyle;
 use ScssPhp\ScssPhp\ValueConverter;
 use Tk\Cache\FileCache;
 use Tk\Config;
+use Tk\Log;
 use Tk\System;
 use Tk\Uri;
 
@@ -24,8 +25,6 @@ use Tk\Uri;
  */
 class Scss extends ModifierInterface
 {
-    public static bool $IS_DEBUG = false;
-
     private ?\DOMElement $insNode = null;
 
     protected int       $cacheTimeout = 86400 * 7;  // 7 days
@@ -38,6 +37,7 @@ class Scss extends ModifierInterface
     protected ?string   $cachePath    = null;       // null cachePath = cache disabled
     protected string    $basePath     = '';
     protected string    $baseUrl      = '';
+    protected bool      $enabled      = true;
 
 
     /**
@@ -49,17 +49,22 @@ class Scss extends ModifierInterface
         $this->cachePath    = $cachePath;
         $this->basePath     = is_null($basePath) ? Config::getBasePath() : $basePath;
         $this->baseUrl      = is_null($baseUrl) ? Config::getBaseUrl() : $baseUrl;
+        $this->enabled      = class_exists('ScssPhp\ScssPhp\Compiler');
+        if (!class_exists('ScssPhp\ScssPhp\Compiler')) {
+            $this->enabled = false;
+            Log::warning('ScssPhp is not enabled. Please install scssphp/scssphp composer package. [Installer: "scssphp/scssphp": "^1.11.0-@stable"]');
+        }
     }
 
     public function init(\DOMDocument $doc): void
     {
-        if (!class_exists('ScssPhp\ScssPhp\Compiler')) {
-            throw new Exception('Please install scssphp/scssphp composer package. [Installer: "scssphp/scssphp": "^1.11.0-@stable"]');
-        }
+
     }
 
     public function executeNode(\DOMElement $node): void
     {
+        if (!$this->enabled) return;
+
         if ($node->nodeName == 'link' && $node->hasAttribute('href') && preg_match('/\.scss/', $node->getAttribute('href'))) {
             if (!$this->insNode) {
                 $this->insNode = $node->previousElementSibling;
@@ -82,6 +87,8 @@ class Scss extends ModifierInterface
 
     public function postTraverse(\DOMDocument $doc): void
     {
+        if (!$this->enabled) return;
+
         $scss = new \ScssPhp\ScssPhp\Compiler();
         $cache = null;
         if ($cache instanceof FileCache) {
