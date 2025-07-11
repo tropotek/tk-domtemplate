@@ -376,7 +376,6 @@ class Template
                 $this->prepareDoc($child, $form);
             }
         }
-
     }
 
 
@@ -449,7 +448,7 @@ class Template
 
     /**
      * Return the current list of header nodes
-     * Holds arrays of headers descriptions in the format of:
+     * Holds arrays of header descriptions in the format of:
      * [
      *   'elementName' => null,     // string
      *   'attributes' => null,      // string[]
@@ -464,7 +463,7 @@ class Template
     }
 
     /**
-     * Get a DOMElement from the document based on its unique ID
+     * Get a DOMElement from the document based on its unique
      * ID attributes should be unique for XHTML documents, multiple names
      * are ignored and only the first node found is returned.
      */
@@ -602,7 +601,7 @@ class Template
     }
 
     /**
-     * Check if a repeat,choice,var,form (template property) Exists.
+     * Check if a repeat, choice, var, form (template property) Exists.
      */
     public function keyExists(string $property, string $key): bool
     {
@@ -740,7 +739,7 @@ class Template
      *   - Node creation will iterate up the parent when using the insert Template methods
      *
      * @param array $attributes An associative array of (attr, value) pairs.
-     * @param DOMElement|null $node (optional) If sent this head element will append after the supplied node
+     * @param DOMElement|null $node (optional) If set,the tag will be appended after the supplied node
      */
     public function appendHeadElement(string $elementName, array $attributes, string $value = '', ?DOMElement $node = null): Template
     {
@@ -768,7 +767,7 @@ class Template
      *   - if template parsed without a head tag node will not be added
      *   - Node creation will iterate up the parent when using the insert Template methods
      *
-     * @param DOMElement|null $node (optional) If sent this head element will append after the supplied node
+     * @param DOMElement|null $node (optional) If set,the tag will be appended after the supplied node
      */
     public function appendMetaTag(string $name, string $content, ?DOMElement $node = null): Template
     {
@@ -781,7 +780,7 @@ class Template
      *   - node is not created until parse
      *   - if template parsed without a head tag node will not be added
      *
-     * @param DOMElement|null $node (optional) If sent this head element will append after the supplied node
+     * @param DOMElement|null $node (optional) If set,the tag will be appended after the supplied node
      */
     public function appendCssUrl(string $styleUrl, array $attrs = [], ?DOMElement $node = null): Template
     {
@@ -836,7 +835,7 @@ class Template
      *   - if template parsed without a head tag node will not be added
      *   - Node creation will iterate up the parent when using the insert Template methods
      *
-     * @param DOMElement|null $node (optional) If sent this head element will append after the supplied node
+     * @param DOMElement|null $node (optional) If set,the tag will be appended after the supplied node
      */
     public function appendHeadCss(string $styles, array $attrs = [], ?DOMElement $node = null): Template
     {
@@ -854,7 +853,7 @@ class Template
      *   - if template parsed without a head tag node will not be added
      *   - Node creation will iterate up the parent when using the insert Template methods
      *
-     * @param DOMElement|null $node (optional) If sent this head element will append after the supplied node
+     * @param DOMElement|null $node (optional) If set,the tag will be appended after the supplied node
      */
     public function appendJsUrl(string $urlString, array $attrs = [], ?DOMElement $node = null): Template
     {
