@@ -1,13 +1,14 @@
 {
   "name": "ttek/tk-domtemplate",
   "type": "library",
-  "description": "Tk8 Lib: PHP DOM Template library with inline SCSS file compiler",
+  "description": "Tk Lib: PHP DOM Template library",
   "keywords": [
     "Dom",
     "tropotek",
-    "dom-template"
+    "dom-template",
+    "scss"
   ],
-  "time": "2022-10-15",
+  "time": "2025-07-12",
   "license": "MIT",
   "authors": [
     {
@@ -27,10 +28,14 @@
     }
   },
   "require": {
-    "php": "^8.1",
+    "php": "^8.3",
+    "ext-libxml": "*",
     "ext-dom": "*",
+    "ext-mbstring": "*",
     "ext-tidy": "*",
-    "scssphp/scssphp": "^1.11.0-@stable"
+
+    "psr/log": "^3.0.2",
+    "ttek/tk-framework": "~8.0.0"
   },
   "extra": {
     "branch-alias": {

@@ -4,8 +4,7 @@ namespace Dom;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
-use Psr\Log\LogLevel;
-use Psr\Log\LoggerInterface;
+use Tk\Log;
 
 /**
  * A PHP DOM Template Library
@@ -41,15 +40,7 @@ class Template
     public static string $ATTR_CHOICE = 'choice';
     public static string $ATTR_REPEAT = 'repeat';
 
-    //public static array $HEADER_NODES = ['script', 'style', 'link', 'meta'];
     public static array $FORM_ELEMENT_NODES = ['input', 'textarea', 'select', 'button'];
-
-    /**
-     * Set the logger in your boostrap if you want to enable logging.
-     *     \Dom\Template::$LOGGER = $factory->getLogger();
-     */
-    public static ?LoggerInterface $LOGGER = null;
-
 
     /**
      * Enable addition of data-tracer attributes to inserted JS and CSS
@@ -79,11 +70,6 @@ class Template
      * Cache the string state of this template when being serialized
      */
     protected ?string $serialHtml = null;
-
-    /**
-     * Cache of the string document of the template after it has been parsed
-     */
-    protected ?string $parsedXml = null;
 
     /**
      * The template document
@@ -727,7 +713,7 @@ class Template
     {
         if (!$this->isParsed()) {
             if ($this->title == null) {
-                $this->log(__CLASS__.'::setTitleText() This document has no title node.');
+                Log::debug(__CLASS__.'::setTitleText() This document has no title node.');
                 return $this;
             }
             $this->removeChildren($this->title);
@@ -1100,7 +1086,7 @@ class Template
                 $this->removeChildren($node);
                 self::insertDomHtml($node, $html, $this->encoding);
             } catch (\Exception $e) {
-                $this->log($e->__toString(), LogLevel::ERROR);
+                Log::error($e->__toString());
             }
         }
         return $this;
@@ -1133,7 +1119,7 @@ class Template
                     $this->var[$var][$i] = $newNode;
                 }
             } catch (\Exception $e) {
-                $this->log($e->__toString(), LogLevel::ERROR);
+                Log::error($e->__toString());
             }
         }
         return $this;
@@ -1150,7 +1136,7 @@ class Template
             try {
                 self::appendDomHtml($node, $html, $this->encoding);
             } catch (\Exception $e) {
-                $this->log($e->__toString(), LogLevel::ERROR);
+                Log::error($e->__toString());
             }
         }
         return $this;
@@ -1167,7 +1153,7 @@ class Template
             try {
                 self::prependDomHtml($node, $html);
             } catch (\Exception $e) {
-                $this->log($e->__toString(), LogLevel::ERROR);
+                Log::error($e->__toString());
             }
         }
         return $this;
@@ -1656,7 +1642,7 @@ class Template
             }
 
         } catch (\Exception $e) {
-            $this->log($e->__toString(), LogLevel::ERROR);
+            Log::error($e->__toString());
         }
         return $str;
     }
@@ -1704,17 +1690,6 @@ class Template
         $k1 = ord(substr($k, 0, 1));
         $k2 = ord(substr($k, 1, 1));
         return $k2 * 256 + $k1;
-    }
-
-    protected function log(string $msg, string $level = LogLevel::DEBUG): LoggerInterface
-    {
-        if (!self::$LOGGER) {
-            self::$LOGGER = new \Psr\Log\NullLogger();
-        }
-
-        self::$LOGGER->log($level, $msg);
-
-        return self::$LOGGER;
     }
 
 }

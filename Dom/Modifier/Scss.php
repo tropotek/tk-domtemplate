@@ -4,11 +4,8 @@ namespace Dom\Modifier;
 use Dom\Exception;
 use ScssPhp\ScssPhp\OutputStyle;
 use ScssPhp\ScssPhp\ValueConverter;
-use Tk\Cache\Adapter\Filesystem;
-use Tk\Cache\Cache;
 use Tk\Cache\FileCache;
 use Tk\Config;
-use Tk\Path;
 use Tk\System;
 use Tk\Uri;
 
@@ -19,7 +16,7 @@ use Tk\Uri;
  *
  * {
  *   "require": {
- *     "scssphp/scssphp": "1.0.*"
+ *     "scssphp/scssphp": "^1.11.0-@stable"
  *   }
  * }
  *
@@ -57,7 +54,7 @@ class Scss extends ModifierInterface
     public function init(\DOMDocument $doc): void
     {
         if (!class_exists('ScssPhp\ScssPhp\Compiler')) {
-            throw new Exception('Please install composer package scssphp. (https://packagist.org/packages/scssphp/scssphp) [Installer: "scssphp/scssphp": "1.0.*"]');
+            throw new Exception('Please install scssphp/scssphp composer package. [Installer: "scssphp/scssphp": "^1.11.0-@stable"]');
         }
     }
 
