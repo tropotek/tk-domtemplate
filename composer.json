@@ -1,45 +1,44 @@
 {
-  "name": "ttek/tk-domtemplate",
-  "type": "library",
-  "description": "Tk Lib: PHP DOM Template library",
-  "keywords": [
-    "Dom",
-    "tropotek",
-    "dom-template",
-    "scss"
-  ],
-  "time": "2025-07-12",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Michael Mifsud",
-      "homepage": "http://www.tropotek.com/"
+    "name": "ttek/tk-domtemplate",
+    "type": "library",
+    "description": "Tk Lib: PHP DOM Template library",
+    "keywords":  [
+        "Dom",
+        "tropotek",
+        "dom-template",
+        "scss"
+    ],
+    "time": "2025-07-13",
+    "license": "MIT",
+    "authors":  [
+         {
+            "name": "Michael Mifsud",
+            "homepage": "http://www.tropotek.com/"
+        }
+    ],
+    "funding":  [
+         {
+            "type": "Paypal",
+            "url": "https://www.paypal.me/tropotek"
+        }
+    ],
+    "autoload":  {
+        "psr-4":  {
+            "Dom\\": "Dom/"
+        }
+    },
+    "require":  {
+        "php": "^8.3",
+        "ext-libxml": "*",
+        "ext-dom": "*",
+        "ext-mbstring": "*",
+        "ext-tidy": "*",
+        "psr/log": "^3.0.2",
+        "ttek/tk-framework": "~8.0.0"
+    },
+    "extra":  {
+        "branch-alias":  {
+            "dev-master": "8.0.x-dev"
+        }
     }
-  ],
-  "funding": [
-    {
-      "type": "Paypal",
-      "url": "https://www.paypal.me/tropotek"
-    }
-  ],
-  "autoload": {
-    "psr-4": {
-      "Dom\\": "Dom/"
-    }
-  },
-  "require": {
-    "php": "^8.3",
-    "ext-libxml": "*",
-    "ext-dom": "*",
-    "ext-mbstring": "*",
-    "ext-tidy": "*",
-
-    "psr/log": "^3.0.2",
-    "ttek/tk-framework": "~8.0.0"
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-master": "8.0.x-dev"
-    }
-  }
 }
