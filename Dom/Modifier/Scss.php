@@ -56,6 +56,7 @@ class Scss extends ModifierInterface
         $this->basePath     = is_null($basePath) ? Config::getBasePath() : $basePath;
         $this->baseUrl      = is_null($baseUrl) ? Config::getBaseUrl() : $baseUrl;
         $this->enabled      = class_exists('ScssPhp\ScssPhp\Compiler');
+
         if (!class_exists('ScssPhp\ScssPhp\Compiler')) {
             $this->enabled = false;
             Log::warning('ScssPhp is not enabled. Please install scssphp/scssphp composer package. [Installer: "scssphp/scssphp": "^1.11.0-@stable"]');
@@ -96,11 +97,7 @@ class Scss extends ModifierInterface
         if (!$this->enabled) return;
 
         $scss = new \ScssPhp\ScssPhp\Compiler();
-        $cache = null;
-        if ($cache instanceof FileCache) {
-            $cache = new FileCache($this->cachePath, $this->cacheTimeout);
-        }
-        $isCached = !is_null($cache);
+        $cache = new FileCache($this->cachePath, $this->cacheTimeout);
 
         foreach ($this->constants as $k => $v) {
             $this->constants[$k] = ValueConverter::fromPhp($v);
@@ -113,14 +110,13 @@ class Scss extends ModifierInterface
         } else {
             $cacheKey = 'css_cache.css';
         }
-        $css = '';
-        if ($isCached) {
-            $css = $cache->fetch($cacheKey);
-        }
+
+        $css = $cache->fetch($cacheKey);
+
         if (($css === false) || System::isRefreshCacheRequest()) {
             foreach ($this->source as $path => $v) {
                 if (preg_match('/\.scss/', $path) && is_file($path)) {
-                    \Tk\Log::debug('SCSS Compiling File: ' . $path);
+                    //\Tk\Log::debug('SCSS Compiling File: ' . $path);
                     $scss->setImportPaths(array($this->baseUrl, dirname($path)));
                     $src = strval(file_get_contents($path));
                     $cCss = $scss->compileString($src);
@@ -129,14 +125,14 @@ class Scss extends ModifierInterface
                     \Tk\Log::warning('Invalid SCSS file: ' . $path);
                 }
             }
-            if (!empty($css) && $isCached) {
+            if (!empty($css)) {
                 $cache->store($cacheKey, $css);
             }
         }
 
         if (!empty($css)) {
             $newNode = $doc->createElement('link');
-            $cssUrl = Uri::create(Uri::createDataUri('/cache/' . $cacheKey));
+            $cssUrl = Uri::createDataUri('/cache/' . $cacheKey, ['t' => filemtime($cache->getFileName($cacheKey))]);
             $newNode->setAttribute('href', $cssUrl->toString());
             $newNode->setAttribute('rel', 'stylesheet');
             $newNode->setAttribute('type', 'text/css');
