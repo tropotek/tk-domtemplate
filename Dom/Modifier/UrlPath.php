@@ -33,6 +33,7 @@ namespace Dom\Modifier;
  *       All relative and template URLS can be removed...
  *
  * @author Tropotek <https://www.tropotek.com/>
+ * @requires https://github.com/tropotek/tk-framework (v8.0+)
  */
 class UrlPath extends ModifierInterface
 {

@@ -12,6 +12,7 @@ namespace Dom\Modifier;
  * Note: Do not use in production environments.
  *
  * @author Tropotek <http://www.tropotek.com/>
+ * @requires https://github.com/tropotek/tk-framework (v8.0+)
  */
 class PageBytes extends ModifierInterface
 {

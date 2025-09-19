@@ -82,6 +82,61 @@ class Template
     protected ?DOMDocument $orgDocument = null;
 
     /**
+     * An internal list of nodes to delete after init()
+     * @var array<int,DOMNode>
+     */
+    protected array $delete = [];
+
+    /**
+     * Comment tags to be removed
+     * @todo move these to the $delete list
+     * @var array<int,DOMNode>
+     */
+    protected array $comments = [];
+
+    /**
+     * Headers to be created and appended to the <head> tag
+     * on rendering of template
+     * Holds arrays of headers descriptions in the format of:
+     * [
+     *   'elementName' => null,     // string
+     *   'attributes' => null,      // string[]
+     *   'value' => null,           // string
+     *   'node' => null,            // (optional) \DOMElement to append to
+     * ]
+     */
+    protected array $headers = [];
+
+    /**
+     * Templates to be appended to the <body> tag
+     * on rendering of the template
+     * @var array<int,Template>
+     */
+    protected array $bodyTemplates = [];
+
+    /**
+     * Blocking var to avoid a callback recursive loop
+     */
+    protected bool $parsing = false;
+
+    /**
+     * Set to true if this template has been parsed
+     */
+    protected bool $parsed = false;
+
+    /**
+     * @var null|callable
+     */
+    protected $onPreParse = null;
+
+    /**
+     * @var null|callable
+     */
+    protected $onPostParse = null;
+
+
+
+    /**
      * @var array<string,array<int,DOMElement>>
      */
     protected array $var = [];
@@ -113,18 +168,6 @@ class Template
     protected array $idList = [];
 
     /**
-     * An internal list of nodes to delete after init()
-     * @var array<int,DOMNode>
-     */
-    protected array $delete = [];
-
-    /**
-     * Comment tags to be removed
-     * @var array<int,DOMNode>
-     */
-    protected array $comments = [];
-
-    /**
      * The head tag of a html page
      */
     protected ?DOMElement $head = null;
@@ -140,49 +183,9 @@ class Template
     protected ?DOMElement $title = null;
 
     /**
-     * Headers to be created and appended to the <head> tag
-     * on rendering of template
-     * Holds arrays of headers descriptions in the format of:
-     * [
-     *   'elementName' => null,     // string
-     *   'attributes' => null,      // string[]
-     *   'value' => null,           // string
-     *   'node' => null,            // (optional) \DOMElement to append to
-     * ]
-     */
-    protected array $headers = [];
-
-    /**
-     * Templates to be appended to the <body> tag
-     * on rendering of the template
-     * @var array<int,Template>
-     */
-    protected array $bodyTemplates = [];
-
-    /**
      * An array of errors thrown
      */
     protected array $errors = [];
-
-    /**
-     * Blocking var to avoid a callback recursive loop
-     */
-    protected bool $parsing = false;
-
-    /**
-     * Set to true if this template has been parsed
-     */
-    protected bool $parsed = false;
-
-    /**
-     * @var null|callable
-     */
-    protected $onPreParse = null;
-
-    /**
-     * @var null|callable
-     */
-    protected $onPostParse = null;
 
 
     public function __construct(DOMDocument $doc, string $xml = '', string $encoding = 'UTF-8')
@@ -218,9 +221,13 @@ class Template
                 $str .= sprintf("\n[%s:%s] %s", $error->line, $error->column, trim($error->message));
             }
             libxml_clear_errors();
-            $str .= "\n\n" . \Tk\Str::lineNumbers($html) . "\n";
-            $e = new Exception('Error Parsing DOM Template', 500, null, $str);
-            throw $e;
+            // add line numbers to the error message
+            $lines = explode("\n", $html);
+            foreach ($lines as $i => $line) {
+                $lines[$i] = ($i+1) . '  ' . $line;
+            }
+            $str .= "\n\n" . implode("\n", $lines) . "\n";
+            throw new Exception('Error Parsing DOM Template', 500, null, $str);
         }
 
         $obj = new self($doc, $html, $encoding);
@@ -712,7 +719,7 @@ class Template
     {
         if (!$this->isParsed()) {
             if ($this->title == null) {
-                Log::debug(__CLASS__.'::setTitleText() This document has no title node.');
+                error_log(__CLASS__.'::setTitleText() This document has no title node.');
                 return $this;
             }
             $this->removeChildren($this->title);
@@ -1085,7 +1092,7 @@ class Template
                 $this->removeChildren($node);
                 self::insertDomHtml($node, $html, $this->encoding);
             } catch (\Exception $e) {
-                Log::error($e->__toString());
+                error_log($e->__toString());
             }
         }
         return $this;
@@ -1118,7 +1125,7 @@ class Template
                     $this->var[$var][$i] = $newNode;
                 }
             } catch (\Exception $e) {
-                Log::error($e->__toString());
+                error_log($e->__toString());
             }
         }
         return $this;
@@ -1135,7 +1142,7 @@ class Template
             try {
                 self::appendDomHtml($node, $html, $this->encoding);
             } catch (\Exception $e) {
-                Log::error($e->__toString());
+                error_log($e->__toString());
             }
         }
         return $this;
@@ -1152,7 +1159,7 @@ class Template
             try {
                 self::prependDomHtml($node, $html);
             } catch (\Exception $e) {
-                Log::error($e->__toString());
+                error_log($e->__toString());
             }
         }
         return $this;
@@ -1613,6 +1620,8 @@ class Template
 
     /**
      * Return the document as an HTML string
+     *
+     * @todo Review this method and see if it is required
      */
     public function toString(bool $parse = true): string
     {
@@ -1621,10 +1630,13 @@ class Template
             $doc = $this->getDocument($parse);
             $str = strval($doc->saveHTML($doc->documentElement));
 
+            // TODO: check if all of the following aare needed
             // Cleanup Document
-            if (substr($str, 0, 5) == '<' . '?xml') {    // Remove xml declaration
+            if (substr($str, 0, 5) == '<' . '?xml') {    // Remove any xml declaration
                 $str = substr($str, strpos($str, "\n") + 1);
             }
+
+            // Add html5 doctype
             if ($this->html5 && strtolower(substr($str, 0, 15)) != '<!doctype html>') {
                 $str = "<!doctype html>\n" . $str;
             }
@@ -1634,14 +1646,16 @@ class Template
                 function ($m) {
                     $xhtml_tags = array("br", "hr", "input", "frame", "img", "area", "link", "col", "base", "basefont", "param", "meta");
                     return in_array($m[1], $xhtml_tags) ? "<$m[1]$m[2] />" : "<$m[1]$m[2]></$m[1]>";
-                }, $str);
+                },
+                $str
+            );
 
             if (self::$REMOVE_CDATA) {
                 $str = preg_replace('~<!\[CDATA\[\s*|\s*\]\]>~', '', $str);
             }
 
         } catch (\Exception $e) {
-            Log::error($e->__toString());
+            error_log($e->__toString());
         }
         return $str;
     }
@@ -1657,9 +1671,12 @@ class Template
     /**
      * Get the html and return the cleaned string
      * A good place to clean any nasty html entities and other non-valid HTML elements
+     *
+     * @todo See if we can remove this with the modern versions of DOMDocument
      */
-    static function cleanHtml(string $xml, string $encoding = 'UTF-8'): string
+    static function cleanHtml(string $html, string $encoding = 'UTF-8'): string
     {
+        //return $html;
         static $mapping = [];
         if (!$mapping) {
             $list1 = get_html_translation_table(HTML_ENTITIES, ENT_NOQUOTES);
@@ -1674,9 +1691,9 @@ class Template
             $mapping = array_merge($mapping, $extras);
         }
         /** @phpstan-ignore-next-line  */
-        $xml = str_replace(array_keys($mapping), array_values($mapping), $xml);
-        $xml = preg_replace ('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', ' ', $xml);       // Strip out unsupported characters from XML
-        return $xml;
+        $html = str_replace(array_keys($mapping), array_values($mapping), $html);
+        $html = preg_replace ('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', ' ', $html);       // Strip out unsupported characters from XML
+        return $html;
     }
 
     /**

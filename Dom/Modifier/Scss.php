@@ -28,6 +28,7 @@ use Tk\Uri;
  * }
  *
  * @see http://leafo.github.io/scssphp/docs/
+ * @requires https://github.com/tropotek/tk-framework (v8.0+)
  */
 class Scss extends ModifierInterface
 {

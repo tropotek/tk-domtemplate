@@ -1,0 +1,19 @@
+site_name: PHP DomTemplate
+repo_url: https://github.com/tropotek/tk-domtemplate/
+site_description: 'PHP DomTemplate, a fast and simple template engine for PHP'
+site_author: 'Michael Mifsud <http://www.tropotek.com/>'
+copyright: 'Copyright (c) 2008-present Tropotek'
+use_directory_urls: false
+theme: readthedocs
+nav:
+  - Home: index.md
+  - Test: aitest.md
+  - examples: examples/index.html
+  - About: about.md
+markdown_extensions:
+  - toc:
+      permalink: true
+plugins:
+  - git-revision-date
+  - search
+  - pdf-export

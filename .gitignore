@@ -2,6 +2,8 @@
 *.DS_Store
 .phpunit.result.cache
 
+_notes/
+site/
 vendor/
 composer.lock
 /.idea

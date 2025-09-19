@@ -33,9 +33,7 @@
     "ext-dom": "*",
     "ext-mbstring": "*",
     "ext-tidy": "*",
-
-    "psr/log": "^3.0.2",
-    "ttek/tk-framework": "~8.0.0"
+    "psr/log": "^3.0.2"
   },
   "extra": {
     "branch-alias": {
