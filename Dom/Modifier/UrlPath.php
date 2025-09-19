@@ -3,7 +3,7 @@ namespace Dom\Modifier;
 
 
 /**
- * Convert Urls to Template relative and project relative
+ * Convert Urls to Template relative and Project relative urls
  *
  * This filter assumes that the paths are used as follows:
  *

@@ -8,20 +8,21 @@ use DOMComment;
  * This class is designed to take a DOMDocument, traverse it and pass each Node to
  * the filters attached.
  *
- * The main aim of this object is to make final pass alterations to a dom document before rendering.
- * This ensures that we only traverse the DOM tree once on the final render stage.
+ * The main aim of this class is to make a final pass over the dom document before rendering.
+ * Allowing you to make any final changes to the dom document before rendering.
  *
- * The modifier traverses each node and on each DOMElement node it will run all the filters
- * in the $filters array on that node before continuing on to the next one.
+ * ---
+ * This modifier class traverses each DOMElement/DOMComment node in a DOMDocument and runs all the
+ * attached modifiers during the traversal.
  *
- * NOTE: It is important to note that you do not use the DOM functions to remove a node
- *       in your filters. Use $filter->getDomModifier()->removeNode($node);
- *       Then the modifier will remove all nodes in the trash on cleanup.
+ * NOTE: Do not use the DOMNode functions to remove a node from the DOMDocument during traversed.
+ *       Use $myModifier->getDomModifier()->removeNode($node);
+ *       Then the modifier will remove the node after traversal.
  *
- * Example:<br/>
+ * Example:
  * <code>
- *      $dm = new \Tk\Dom\Modifier\Modifier();
- *      $dm->add(new \Tk\Dom\Modifier\Filter\Path($apUrl, $templateUrl));
+ *      $dm = new \Tk\Dom\Modifier();
+ *      $dm->add(new \Tk\Dom\Modifier\Path($apUrl, $templateUrl));
  *      $dm->execute($template->getDocument());
  * </code>
  *
@@ -43,16 +44,21 @@ class Modifier
 
 
     /**
-     * add a Dome modifier filter object to the queue
+     * Add a DOM modifier filter object to the queue
+     * The name is optional, only required when adding multiple filters of the same class
      */
-    public function addFilter(string $name, ModifierInterface $mod): ModifierInterface
+    public function addModifier(ModifierInterface $mod, ?string $name = null): ModifierInterface
     {
+        if (is_null($name)) $name = get_class($mod);
+        if (isset($this->modifiers[$name])) {
+            throw new \Exception("Modifier $name already exists");
+        }
         $mod->setDomModifier($this);
         $this->modifiers[$name] = $mod;
         return $mod;
     }
 
-    public function getFilter(string $name): ?ModifierInterface
+    public function getModifier(string $name): ?ModifierInterface
     {
         return $this->modifiers[$name] ?? null;
     }
@@ -80,8 +86,9 @@ class Modifier
     /**
      * Use this method to delete nodes,
      * They will be added to a queue for removal after traversal of template
-     * If you used the DOM remove a node while traversing
-     * the DOM tree traversing will get screwed up and work unpredictably.
+     * NOTE: If you used the DOMDocument to remove a node while traversing
+     * the DOM tree, unexpected errors may occur due to the DOMDocument
+     * being in an inconsistent state.
      */
     public function removeNode(\DOMNode $node): Modifier
     {

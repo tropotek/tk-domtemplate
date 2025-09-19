@@ -2,7 +2,7 @@
 namespace Dom;
 
 /**
- * A repeat region is a sub template of a parent templates nodes.
+ * A repeat region is a sub template of its parent template.
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
@@ -36,21 +36,20 @@ class Repeat extends Template
      * Append a repeating region to the document.
      * Repeating regions are appended to the supplied var.
      * If the var is null or '' then the repeating region is appended
-     * to is original location in the parent template.
-     * @throws \DOMException
+     * to the original location in the parent template.
      */
-    public function appendRepeat(string|\DOMElement $var = '', ?Template $destRepeat = null): \DOMNode|false
+    public function appendRepeat(string $var = '', ?Template $destRepeat = null): \DOMNode|false
     {
         if ($this->getParent()->isParsed()) return false;
 
-        $this->parent->headers = array_merge($this->parent->getHeaderList(), $this->getHeaderList());
-        $this->parent->bodyTemplates = array_merge($this->parent->getBodyTemplateList(), $this->getBodyTemplateList());
+        $this->getParent()->headers = array_merge($this->getParent()->getHeaderList(), $this->getHeaderList());
+        $this->getParent()->bodyTemplates = array_merge($this->getParent()->getBodyTemplateList(), $this->getBodyTemplateList());
 
         $appendNode = $this->repeatNode;
         if ($var) {
-            $appendNode = $this->parent->getVar($var);
-            if ($destRepeat && $destRepeat->getVar($var)) {
-                $appendNode = $destRepeat->getVar($var);
+            $appendNode = $this->getParent()->getNode(self::TYPE_VAR, $var);
+            if ($destRepeat && $destRepeat->getNode(self::TYPE_VAR, $var)) {
+                $appendNode = $destRepeat->getNode(self::TYPE_VAR, $var);
             }
         }
 
@@ -74,13 +73,13 @@ class Repeat extends Template
     {
         if ($this->getParent()->isParsed()) return false;
 
-        $this->parent->headers = array_merge($this->parent->getHeaderList(), $this->getHeaderList());
-        $this->parent->bodyTemplates = array_merge($this->parent->getBodyTemplateList(), $this->getBodyTemplateList());
+        $this->getParent()->headers = array_merge($this->getParent()->getHeaderList(), $this->getHeaderList());
+        $this->getParent()->bodyTemplates = array_merge($this->getParent()->getBodyTemplateList(), $this->getBodyTemplateList());
         $appendNode = $this->repeatNode;
         if ($var) {
-            $appendNode = $this->parent->getVar($var);
-            if ($destRepeat && $destRepeat->getVar($var)) {
-                $appendNode = $destRepeat->getVar($var);
+            $appendNode = $this->getParent()->getNode(self::TYPE_VAR, $var);
+            if ($destRepeat && $destRepeat->getNode(self::TYPE_VAR, $var)) {
+                $appendNode = $destRepeat->getNode(self::TYPE_VAR, $var);
             }
         }
 

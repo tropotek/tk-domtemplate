@@ -16,24 +16,26 @@ abstract class ModifierInterface
     protected bool $enabled = true;
 
     /**
-     * pre init the modifier
+     * Initialize any custom modifier properties.
+     * Called before the DOM tree is traversed.
      */
     abstract function init(\DOMDocument $doc): void;
 
     /**
-     * The code to perform any modification to the node goes here.
+     * Called when traversing each DOMElement node in the DOM tree.
      */
     abstract function executeNode(\DOMElement $node): void;
 
     /**
-     * Execute code on the current Comment Node
+     * Called when traversing each DOMComment node in the DOM tree.
      */
     public function executeComment(\DOMComment $node): void { }
 
     /**
-     * called once after the DOM tree is traversed
+     * Final call after the DOM tree is traversed.
      */
     public function postTraverse(\DOMDocument $doc): void { }
+
 
 
     public function setDomModifier(Modifier $dm): ModifierInterface
