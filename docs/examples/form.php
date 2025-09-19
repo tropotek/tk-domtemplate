@@ -2,12 +2,16 @@
 // Start the output buffer
 ob_start();
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>PHP Dom Template (PDT) Library</title>
-    <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+
+    <link rel="stylesheet" type="text/css" href="stylesheet.css" />
 </head>
 <body>
     <div id="content">
@@ -79,6 +83,8 @@ include_once $path . '/Dom/Form/Select.php';
 
 // Create a template from the html in the buffer
 $buff = ob_get_clean();
+
+\Dom\Template::addTemplateParser(\Dom\Parser\FormParser::class);
 $template = \Dom\Template::load($buff);
 
 // Set the pageTitle tag  --> <h1 var="pageTitle">Default Text</h1>

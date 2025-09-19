@@ -38,6 +38,8 @@ class Template
      */
     public static bool $ENABLE_TRACER = false;
 
+    public static int $LIBXML_FLAGS = LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD;
+
     /**
      * These are the default attributes the DomTemplate uses for key nodes.
      * You can change these if they conflict with your template designs.
@@ -58,14 +60,14 @@ class Template
     protected static array $TEMPLATE_PARSERS = [];
 
     /**
-     * Set to true if this template uses HTML5
-     */
-    protected bool $html5 = false;
-
-    /**
      * The character encoding use with this Template
      */
     protected string $encoding = 'UTF-8';
+
+    /**
+     * store the doctype of the template if one exists
+     */
+    protected string $doctype = '';
 
     /**
      * Cached for template when being serialized
@@ -124,11 +126,6 @@ class Template
     protected ?DOMElement $body = null;
 
     /**
-     * @var array<int,ParserInterface>
-     */
-    protected array $parsers = [];
-
-    /**
      * Blocking var to avoid a callback recursive loop
      */
     protected bool $parsing = false;
@@ -137,6 +134,12 @@ class Template
      * Set to true if this template has been parsed
      */
     protected bool $parsed = false;
+
+    /**
+     * The list of parsers attached to this template
+     * @var array<int,ParserInterface>
+     */
+    protected array $parsers = [];
 
     /**
      * The template node list for all parsable nodes
@@ -150,6 +153,7 @@ class Template
     ];
 
 
+    // TODO Remove if the form parser works
     /**
      * @var array<string,DOMElement>
      */
@@ -160,18 +164,6 @@ class Template
      */
     protected array $formElement = [];
 
-
-    // TODO: see if we can clean this up a bit
-
-    /**
-     * @var null|callable
-     */
-    protected $onPreParse = null;
-
-    /**
-     * @var null|callable
-     */
-    protected $onPostParse = null;
 
 
     public function __construct(DOMDocument $doc, string $html = '', string $encoding = 'UTF-8')
@@ -188,19 +180,22 @@ class Template
     public static function load(string $html, string $encoding = 'UTF-8'): Template
     {
         $html = trim($html);
-        if ($html == '' || $html[0] != '<') {
-            throw new Exception('Please supply a valid XHTML/XML string to create the DOMDocument.');
-        }
-
         $doc = new DOMDocument();
         libxml_use_internal_errors(true);
 
-        $isHtml5 = false;
-        if ('<!doctype html>' == strtolower(substr($html, 0, 15))) {
-            $isHtml5 = true;
-            $html = substr($html, 16);
+        // get the doctype line if one exists
+        $doctype = '';
+        $newlinePos = strpos($html, "\n");
+        if ($newlinePos !== false) {
+            $doctype = substr($html, 0, $newlinePos);
+            if(preg_match('/^<!doctype\s+html/i', $doctype)) {
+                $html = substr($html, $newlinePos + 1);
+            } else {
+                $doctype = '';
+            }
         }
-        $ok = $doc->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+        $ok = $doc->loadHTML($html, self::$LIBXML_FLAGS);
         if (!$ok) {
             $str = '';
             foreach (libxml_get_errors() as $error) {
@@ -217,7 +212,7 @@ class Template
         }
 
         $obj = new self($doc, $html, $encoding);
-        $obj->html5 = $isHtml5;
+        $obj->doctype = $doctype;
         return $obj;
     }
 
@@ -244,7 +239,7 @@ class Template
     public function __wakeup()
     {
         $doc = new DOMDocument();
-        $doc->loadHTML($this->serialHtml, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        $doc->loadHTML($this->serialHtml, self::$LIBXML_FLAGS);
         $this->reset($doc);
     }
 
@@ -275,7 +270,7 @@ class Template
         $this->document = $doc;
         $this->encoding = $encoding;
         $this->parsed = false;
-        $this->html5 = false;
+        //$this->doctype = '';
         $this->head = $this->body = $this->title = null;
         $this->nodeList = [
             self::TYPE_VAR => [],
@@ -292,6 +287,9 @@ class Template
 
         if (!empty(self::$TEMPLATE_PARSERS) && empty($this->parsers)) {
             foreach (self::$TEMPLATE_PARSERS as $parser) {
+                if (!class_exists($parser)) {
+                    throw new Exception('Template Parser Class ' . $parser . ' does not exist');
+                }
                 $this->parsers[$parser] = new $parser($this);
             }
         }
@@ -478,7 +476,7 @@ class Template
                         $n->parentNode->insertBefore($nl, $n);
                     } else {
                         if (strtolower($header['elementName']) == 'meta' && $this->title) {
-                            // insert meta tags above <title> tag where possible
+                            // insert meta-tags above <title> tag where possible
                             // Note this may reverse the order, not sure that matters for meta tags tho
                             $headNode->insertBefore($node, $this->title);
                             $headNode->insertBefore($nl, $this->title);
@@ -497,11 +495,6 @@ class Template
             $this->document->preserveWhiteSpace = false;
             $this->document->normalizeDocument();
 
-            // On Post Parse Event
-            if (is_callable($this->onPostParse)) {
-                call_user_func_array($this->onPostParse, [$this]);
-            }
-
             // Call attached parsers
             foreach ($this->parsers as $parser) {
                 $parser->postParse();
@@ -517,7 +510,7 @@ class Template
     /**
      * Get the parsed state of the template.
      * Changes cannot be made to a parsed template.
-     * `reset()` must be called to re-parse the template.
+     * `reset()` must be called to reparse the template.
      */
     public function isParsed(): bool
     {
@@ -535,18 +528,17 @@ class Template
      */
     public function toString(bool $parse = true): string
     {
-        $str = '';
+        $html = '';
         try {
             $doc = $this->getDocument($parse);
-            $str = strval($doc->saveHTML($doc->documentElement));
-            // Add html5 doctype
-            if ($this->html5 && strtolower(substr($str, 0, 15)) != '<!doctype html>') {
-                $str = "<!doctype html>\n" . $str;
+            $html = strval($doc->saveHTML($doc->documentElement));
+            if ($this->doctype) {
+                $html = $this->doctype . "\n" . $html;
             }
         } catch (\Exception $e) {
             error_log($e->__toString());
         }
-        return $str;
+        return $html;
     }
 
     /**
@@ -555,42 +547,6 @@ class Template
     public function __toString(): string
     {
         return $this->toString();
-    }
-
-
-
-    // TODO: replace with adapters/Parsers
-    /**
-     * Add a callable function on pre document parsing
-     *
-     * EG: $template->setOnPreParse(function ($template) { });
-     */
-    public function setOnPreParse(callable $onPreParse): Template
-    {
-        $this->onPreParse = $onPreParse;
-        return $this;
-    }
-
-    /**
-     * Add a callable function on post document parsing
-     *
-     * EG: $template->setOnPostParse(function ($template) { });
-     */
-    public function setOnPostParse(callable $onPostParse): Template
-    {
-        $this->onPostParse = $onPostParse;
-        return $this;
-    }
-
-
-
-    /**
-     * Test if this template is HTML5 compliant
-     * This only checks to see if the `<!doctype html>` tag exists at the start of the document
-     */
-    public function isHtml5(): bool
-    {
-        return $this->html5;
     }
 
     /**
@@ -602,9 +558,18 @@ class Template
     }
 
     /**
+     * Test if this template is HTML5 compliant
+     * This only checks to see if the `<!doctype html>` tag exists at the start of the document
+     */
+    public function isHtml5(): bool
+    {
+        return '<!doctype html>' == strtolower(substr($this->doctype, 0, 15));
+    }
+
+    /**
      * Get the original text used to create this Template
      */
-    public function getTemplateHtml(): string
+    public function getOriginalHtml(): string
     {
         return $this->html;
     }
@@ -615,15 +580,6 @@ class Template
     public function getOriginalDocument(): DOMDocument
     {
         return $this->orgDocument;
-    }
-
-    /**
-     * Return the document file path if one exists.
-     * For non file based templates this value will be the same as dirname($_SERVER['PHP_SELF'])
-     */
-    public function getTemplatePath(): string
-    {
-        return $this->document->documentURI;
     }
 
     /**
@@ -643,23 +599,7 @@ class Template
     }
 
     /**
-     * Return the current list of header nodes
-     * Holds arrays of header descriptions in the format of:
-     * [
-     *   'elementName' => null,     // string
-     *   'attributes' => null,      // string[]
-     *   'value' => null,           // string
-     *   'node' => null,            // (optional) \DOMElement to append to
-     * ]
-     *
-     */
-    public function getHeaderList(): array
-    {
-        return $this->headers;
-    }
-
-    /**
-     * Return the root document node.
+     * Return the document root node.
      * IE: DomDocument->documentElement
      */
     public function getRootElement(): DOMElement
@@ -899,6 +839,14 @@ class Template
             $this->title->nodeValue = htmlentities(html_entity_decode($value));
         }
         return $this;
+    }
+
+    /**
+     * Return the current list of header nodes
+     */
+    public function getHeaderList(): array
+    {
+        return $this->headers;
     }
 
     /**
@@ -1547,7 +1495,7 @@ class Template
         $doc->substituteEntities = false;
         libxml_use_internal_errors(true);
 
-        $ok = $doc->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        $ok = $doc->loadHTML($html, self::$LIBXML_FLAGS);
         if (!$ok) {
             $str = '';
             foreach (libxml_get_errors() as $error) {
@@ -1583,9 +1531,10 @@ class Template
 
     public static function addTemplateParser(string $parserClass): void
     {
-        if (!class_exists($parserClass)) {
-            throw new Exception('Parser class does not exist: ' . $parserClass);
-        }
+//        error_log($parserClass);
+//        if (!class_exists($parserClass)) {
+//            throw new Exception('Parser class does not exist: ' . $parserClass);
+//        }
         self::$TEMPLATE_PARSERS[$parserClass] = $parserClass;
     }
 
