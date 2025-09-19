@@ -29,8 +29,6 @@ class Template
     const string TYPE_CHOICE       = 'choice';
     const string TYPE_REPEAT       = 'repeat';
     const string TYPE_ID           = 'id';
-    const string TYPE_FORM         = 'form';
-    const string TYPE_FORM_ELEMENT = 'form-element';
 
     /**
      * Enable the addition of data-tracer attributes to inserted JS and CSS
@@ -140,6 +138,27 @@ class Template
      */
     protected bool $parsed = false;
 
+    /**
+     * The template node list for all parsable nodes
+     * @var array<string,array<string,mixed>>
+     */
+    protected array $nodeList = [
+        self::TYPE_VAR => [],
+        self::TYPE_CHOICE => [],
+        self::TYPE_REPEAT => [],
+        self::TYPE_ID => [],
+    ];
+
+
+    /**
+     * @var array<string,DOMElement>
+     */
+    protected array $form = [];
+
+    /**
+     * @var array<string,array<string,array<int,DOMElement>>>
+     */
+    protected array $formElement = [];
 
 
     // TODO: see if we can clean this up a bit
@@ -155,55 +174,11 @@ class Template
     protected $onPostParse = null;
 
 
-    /**
-     * The template node list for all parsable nodes
-     * @var array<string,array<string,mixed>>
-     */
-    protected array $nodeList = [
-        self::TYPE_VAR => [],
-        self::TYPE_CHOICE => [],
-        self::TYPE_REPEAT => [],
-        self::TYPE_FORM => [],
-        self::TYPE_FORM_ELEMENT => [],
-        self::TYPE_ID => [],
-    ];
-
-    /**
-     * @var array<string,array<int,DOMElement>>
-     */
-    protected array $var = [];
-
-    /**
-     * @var array<string,array<int,DOMElement>>
-     */
-    protected array $choice = [];
-
-    /**
-     * @var array<string,Repeat>
-     */
-    protected array $repeat = [];
-
-    /**
-     * @var array<string,DOMElement>
-     */
-    protected array $form = [];
-
-    /**
-     * @var array<string,array<string,array<int,DOMElement>>>
-     */
-    protected array $formElement = [];
-
-    /**
-     * @var array<string,DOMElement>
-     */
-    protected array $idList = [];
-
-
-
-    public function __construct(DOMDocument $doc, string $xml = '', string $encoding = 'UTF-8')
+    public function __construct(DOMDocument $doc, string $html = '', string $encoding = 'UTF-8')
     {
-        $this->html = $xml;
-        $this->reset($doc, $encoding);
+        $this->html = $html;
+        $this->encoding = $encoding;
+        $this->reset($doc);
     }
 
     /**
@@ -270,12 +245,12 @@ class Template
     {
         $doc = new DOMDocument();
         $doc->loadHTML($this->serialHtml, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-        $this->reset($doc, $this->encoding);
+        $this->reset($doc);
     }
 
     public function __clone()
     {
-        $this->reset(clone $this->getOriginalDocument(), $this->encoding);
+        $this->reset(clone $this->getOriginalDocument());
     }
 
     /**
@@ -283,7 +258,7 @@ class Template
      */
     public function init(?DOMDocument $doc = null, ?string $encoding = null): Template
     {
-        $this->reset($this->getOriginalDocument(), $this->getEncoding());
+        $this->reset($doc, $encoding);
         return $this;
     }
 
@@ -306,17 +281,8 @@ class Template
             self::TYPE_VAR => [],
             self::TYPE_CHOICE => [],
             self::TYPE_REPEAT => [],
-            self::TYPE_FORM => [],
-            self::TYPE_FORM_ELEMENT => [],
             self::TYPE_ID => [],
         ];
-
-        $this->var = [];
-        $this->choice = [];
-        $this->repeat = [];
-        $this->form = [];
-        $this->formElement = [];
-        $this->idList = [];
 
         $this->headers = [];
         $this->orgDocument = clone $doc;
@@ -345,8 +311,6 @@ class Template
             // Store all repeat regions
             if ($node->hasAttribute(self::$ATTR_REPEAT)) {
                 $repeatName = $node->getAttribute(self::$ATTR_REPEAT);
-                $this->repeat[$repeatName] = new Repeat($node, $this);
-                // TODO
                 $this->addNode(self::TYPE_REPEAT, $repeatName, new Repeat($node, $this));
                 $node->removeAttribute(self::$ATTR_REPEAT);
                 return;
@@ -357,8 +321,6 @@ class Template
                 $varStr = $node->getAttribute(self::$ATTR_VAR);
                 $arrAttrs = explode(' ', $varStr);
                 foreach ($arrAttrs as $var) {
-                    $this->var[$var][] = $node;
-                    // TODO
                     $this->addNode(self::TYPE_VAR, $var, $node);
                     $node->removeAttribute(self::$ATTR_VAR);
                 }
@@ -368,9 +330,6 @@ class Template
             if ($node->hasAttribute(self::$ATTR_CHOICE)) {
                 $arrAttrs = explode(' ', $node->getAttribute(self::$ATTR_CHOICE));
                 foreach ($arrAttrs as $choice) {
-                    $this->choice[$choice][] = $node;
-                    $this->var[$choice][] = $node;
-                    // TODO
                     $this->addNode(self::TYPE_VAR, $choice, $node);
                     $this->addNode(self::TYPE_CHOICE, $choice, $node);
                     $node->setAttribute(self::ATTR_DELETE, 'true');
@@ -380,11 +339,10 @@ class Template
 
             // Store all Id nodes.
             if ($node->hasAttribute('id')) {
-                $this->idList[$node->getAttribute('id')] = $node;
-                // TODO
                 $this->addNode(self::TYPE_ID, $node->getAttribute('id'), $node);
             }
 
+            // TODO:
             // Store all Form nodes
             if ($node->nodeName == 'form') {
                 $form = strval($node->getAttribute('id') ?? $node->getAttribute('name') ?? '');
@@ -393,10 +351,9 @@ class Template
                 }
                 $this->formElement[$form] = [];
                 $this->form[$form] = $node;
-                // TODO
-                $this->addNode(self::TYPE_FORM, $form, $node);
             }
 
+            // TODO:
             // Store all FormElement nodes
             if (in_array($node->nodeName, self::$FORM_ELEMENT_NODES)) {
                 $id = $node->getAttribute('name');
@@ -404,14 +361,9 @@ class Template
                     $id = $node->getAttribute('id');
                 }
 
+                // TODO we should be using name here not id, fix this when moving to a Parser
                 $this->formElement[$form][$id][] = $node;
                 if (!isset($this->form[$form]) && $form == '') $this->form[$form] = $this->document->documentElement;
-
-                // TODO we should be using name here not id, fix this when moving to a Parser
-                $this->addNode(self::TYPE_FORM_ELEMENT, $form.'-'.$id, $node);
-                if (!$this->hasNode(self::TYPE_FORM, $form)) {
-                    $this->addNode(self::TYPE_FORM, $form, $this->document->documentElement);
-                }
             }
 
             if ($node->nodeName == 'head') {
@@ -425,13 +377,17 @@ class Template
                 return;
             }
 
+            // Call attached parsers
+            foreach ($this->parsers as $parser) {
+                $parser->prepareDoc($node, $form);
+            }
+
             // iterate through the dom elements
             foreach ($node->childNodes as $child) {
                 $this->prepareDoc($child, $form);
             }
         }
     }
-
 
     /**
      * Return a parsed \Dom document.
@@ -446,9 +402,9 @@ class Template
         if (!$this->parsing) {
             $this->parsing = true;
 
-            // Call Pre Parse Event
-            if (is_callable($this->onPreParse)) {
-                call_user_func_array($this->onPreParse, [$this]);
+            // Call attached parsers
+            foreach ($this->parsers as $parser) {
+                $parser->preParse();
             }
 
             // Insert body templates
@@ -545,6 +501,12 @@ class Template
             if (is_callable($this->onPostParse)) {
                 call_user_func_array($this->onPostParse, [$this]);
             }
+
+            // Call attached parsers
+            foreach ($this->parsers as $parser) {
+                $parser->postParse();
+            }
+
             $this->parsing = false;
         }
 
