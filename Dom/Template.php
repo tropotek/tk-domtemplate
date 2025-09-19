@@ -61,20 +61,14 @@ class Template
     protected string $encoding = 'UTF-8';
 
     /**
-     * This is the original string document sent to the template
-     * before template initialization
+     * Cached for template when being serialized
+     */
+    private ?string $serialHtml = null;
+
+    /**
+     * Original HTML document
      */
     protected string $html = '';
-
-    /**
-     * Cache the string state of this template when being serialized
-     */
-    protected ?string $serialHtml = null;
-
-    /**
-     * The template document
-     */
-    protected ?DOMDocument $document = null;
 
     /**
      * The original template document before template initialization
@@ -82,7 +76,12 @@ class Template
     protected ?DOMDocument $orgDocument = null;
 
     /**
-     * An internal list of nodes to delete after init()
+     * The DOM template document created from the source HTML
+     */
+    protected ?DOMDocument $document = null;
+
+    /**
+     * An internal list of nodes to delete after parsing the template
      * @var array<int,DOMNode>
      */
     protected array $delete = [];
@@ -96,23 +95,43 @@ class Template
 
     /**
      * Headers to be created and appended to the <head> tag
-     * on rendering of template
-     * Holds arrays of headers descriptions in the format of:
+     * on parsing the template
+     *
+     * Holds arrays of header descriptions in the format of:
      * [
      *   'elementName' => null,     // string
      *   'attributes' => null,      // string[]
      *   'value' => null,           // string
      *   'node' => null,            // (optional) \DOMElement to append to
      * ]
+     * @var array<int,mixed>
      */
     protected array $headers = [];
 
     /**
-     * Templates to be appended to the <body> tag
-     * on rendering of the template
+     * Templates to be appended to the <body> tag on parsing the template
      * @var array<int,Template>
      */
     protected array $bodyTemplates = [];
+
+    /**
+     * The head tag of the template if exists
+     */
+    protected ?DOMElement $head = null;
+
+    /**
+     * The title tag of the template if exists
+     */
+    protected ?DOMElement $title = null;
+
+    /**
+     * The body tag of the template if exists
+     */
+    protected ?DOMElement $body = null;
+
+
+
+    // TODO: see if we can clean this up a bit
 
     /**
      * Blocking var to avoid a callback recursive loop
@@ -162,36 +181,38 @@ class Template
     protected array $formElement = [];
 
     /**
-     * Track all id attribute nodes
      * @var array<string,DOMElement>
      */
     protected array $idList = [];
 
-    /**
-     * The head tag of a html page
-     */
-    protected ?DOMElement $head = null;
+
+    const string ELEM_VAR          = 'var';
+    const string ELEM_CHOICE       = 'choice';
+    const string ELEM_REPEAT       = 'repeat';
+    const string ELEM_FORM         = 'form';
+    const string ELEM_FORM_ELEMENT = 'form-element';
+    const string ELEM_ID           = 'id';
 
     /**
-     * The body tag of a html page
+     * @todo New element storage, add get/set/delete methods
+     *       Will allow for external adapters to track their own elements
+     *       Test with a form adapter to see if it works
      */
-    protected ?DOMElement $body = null;
+    protected array $elements = [
+        self::ELEM_VAR => [],
+        self::ELEM_CHOICE => [],
+        self::ELEM_REPEAT => [],
+        self::ELEM_FORM => [],
+        self::ELEM_FORM_ELEMENT => [],
+        self::ELEM_ID => [],
+    ];
 
-    /**
-     * The head tag of a html page
-     */
-    protected ?DOMElement $title = null;
-
-    /**
-     * An array of errors thrown
-     */
-    protected array $errors = [];
 
 
     public function __construct(DOMDocument $doc, string $xml = '', string $encoding = 'UTF-8')
     {
         $this->html = $xml;
-        $this->init($doc, $encoding);
+        $this->reset($doc, $encoding);
     }
 
     /**
@@ -259,21 +280,33 @@ class Template
     {
         $doc = new DOMDocument();
         $doc->loadHTML($this->serialHtml, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-        $this->init($doc, $this->encoding);
+        $this->reset($doc, $this->encoding);
     }
 
     public function __clone()
     {
-        $this->init(clone $this->getOriginalDocument(), $this->encoding);
+        $this->reset(clone $this->getOriginalDocument(), $this->encoding);
     }
 
     /**
-     * Reset and prepare the template object.
-     * Mainly used for the Repeat objects
-     * but could be useful for your own methods.
+     * Reset the template to its unedited state
      */
-    public function init(DOMDocument $doc, string $encoding = 'UTF-8'): Template
+    public function init(?DOMDocument $doc = null, ?string $encoding = null): Template
     {
+        $this->reset($this->getOriginalDocument(), $this->getEncoding());
+        return $this;
+    }
+
+    /**
+     * Reset and prepare the template object for use.
+     * Can be called after parsing a template to reset the template
+     * to its original state.
+     */
+    public function reset(?DOMDocument $doc = null, ?string $encoding = null): Template
+    {
+        $doc = $doc ?? $this->getOriginalDocument();
+        $encoding = $encoding ?? $this->getEncoding();
+
         $this->document = $doc;
         $this->encoding = $encoding;
         $this->var = [];
@@ -387,6 +420,269 @@ class Template
 
 
     /**
+     * Return a parsed \Dom document.
+     *
+     * After using this call ($parse = true) you can no longer use the template render functions
+     * as no changes can be made to the template unless you use DOMDocument functions directly
+     */
+    public function parseDoc(): ?DOMDocument
+    {
+        if ($this->isParsed()) return $this->document;
+
+        if (!$this->parsing) {
+            $this->parsing = true;
+
+            // Call Pre Parse Event
+            if (is_callable($this->onPreParse)) {
+                call_user_func_array($this->onPreParse, [$this]);
+            }
+
+            // Insert body templates
+            if ($this->body) {
+                foreach ($this->bodyTemplates as $child) {
+                    $this->appendTemplate($this->body, $child);
+                }
+            }
+
+            // Remove comments if not used
+            foreach ($this->comments as $node) {
+                if (!$node || !isset($node->parentNode) || !$node->parentNode || !$node->ownerDocument ) {
+                    continue;
+                }
+                // Keep the IE comment control statements
+                if ($node->nodeName == null || preg_match('/^\[if /', $node->nodeValue)) {
+                    continue;
+                }
+                if ($node->parentNode->nodeName != 'script' && $node->parentNode->nodeName != 'style') {
+                    $node->parentNode->removeChild($node);
+                }
+            }
+
+            // Remove repeat template notes
+            foreach ($this->repeat as $name => $repeat) {
+                $node = $repeat->getRepeatNode();
+                if (!$node instanceof DOMElement || !isset($node->parentNode) || !$node->parentNode) {
+                    continue;
+                }
+                $node->parentNode->removeChild($node);
+                unset($this->repeat[$name]);
+            }
+
+            // Remove nodes marked hidden
+            foreach ($this->var as $var => $nodes) {
+                foreach ($nodes as $node) {
+                    if (!$node instanceof DOMElement || !isset($node->parentNode) || !$node->parentNode) continue;
+                    if ($node->hasAttribute(self::ATTR_HIDDEN)) {
+                        $node->parentNode->removeChild($node);
+                    }
+                }
+            }
+
+            // Remove choice node marked hidden
+            foreach ($this->choice as $choice => $nodes) {
+                foreach ($nodes as $node) {
+                    if (!$node instanceof DOMElement || !isset($node->parentNode) || !$node->parentNode) continue;
+                    if ($node->hasAttribute(self::ATTR_HIDDEN)) {
+                        $node->parentNode->removeChild($node);
+                    }
+                }
+            }
+
+            // Insert headers
+            $headNode = $this->head;
+            if ($headNode instanceof DOMElement) {
+                $meta = [];
+                $other = [];
+                foreach ($this->headers as $i => $header) {
+                    if ($header['elementName'] == 'meta') {
+                        $meta[$i] = $header;
+                    } else {
+                        $other[$i] = $header;
+                    }
+                }
+                $ordered = array_merge($meta, $other);
+                foreach ($ordered as $header) {
+                    $node = $this->document->createElement($header['elementName']);
+                    if ($header['value'] != null) {
+                        $ct = $this->document->createCDATASection("\n" . trim($header['value']) . "\n");
+                        $node->appendChild($ct);
+                    }
+                    if (isset($header['attributes'])) {
+                        foreach ($header['attributes'] as $k => $v) {
+                            $node->setAttribute($k, $v);
+                        }
+                    }
+                    $nl = $this->document->createTextNode("\n");
+                    $t = $this->document->createTextNode("  ");
+                    $n = $header['node'] ?? false;
+                    if ($n instanceof DOMElement) {
+                        $n->parentNode->insertBefore($node, $n);
+                        $n->parentNode->insertBefore($nl, $n);
+                    } else {
+                        if (strtolower($header['elementName']) == 'meta' && $this->title) {
+                            // insert meta tags above <title> tag where possible
+                            // Note this may reverse the order, not sure that matters for meta tags tho
+                            $headNode->insertBefore($node, $this->title);
+                            $headNode->insertBefore($nl, $this->title);
+                            $headNode->insertBefore($t, $this->title);
+                        } else {
+                            $headNode->append($node);
+                            $headNode->append($t);
+                            $headNode->append($nl);
+                        }
+                    }
+                }
+            }
+
+            $this->parsed = true;
+            $this->document->formatOutput = true;
+            $this->document->preserveWhiteSpace = false;
+            $this->document->normalizeDocument();
+
+            // On Post Parse Event
+            if (is_callable($this->onPostParse)) {
+                call_user_func_array($this->onPostParse, [$this]);
+            }
+            $this->parsing = false;
+        }
+
+        $this->document->normalizeDocument();
+        return $this->document;
+    }
+
+
+    public function getDocument(bool $parse = true): ?DOMDocument
+    {
+        if ($parse) $this->parseDoc();
+        return $this->document;
+    }
+
+    /**
+     * Return the document as an HTML string
+     */
+    public function toString(bool $parse = true): string
+    {
+        $str = '';
+        try {
+            $doc = $this->getDocument($parse);
+            $str = strval($doc->saveHTML($doc->documentElement));
+
+            // TODO: check if all of the following aare needed
+            // Cleanup Document
+//            if (substr($str, 0, 5) == '<' . '?xml') {    // Remove any xml declaration
+//                $str = substr($str, strpos($str, "\n") + 1);
+//            }
+//
+            // Add html5 doctype
+            if ($this->html5 && strtolower(substr($str, 0, 15)) != '<!doctype html>') {
+                $str = "<!doctype html>\n" . $str;
+            }
+//
+//            // fix allowable non-closeable tags
+//            $str = preg_replace_callback('#<(\w+)([^>]*)\s*/>#s',
+//                function ($m) {
+//                    $xhtml_tags = array("br", "hr", "input", "frame", "img", "area", "link", "col", "base", "basefont", "param", "meta");
+//                    return in_array($m[1], $xhtml_tags) ? "<$m[1]$m[2] />" : "<$m[1]$m[2]></$m[1]>";
+//                },
+//                $str
+//            );
+//
+//            if (self::$REMOVE_CDATA) {
+//                $str = preg_replace('~<!\[CDATA\[\s*|\s*\]\]>~', '', $str);
+//            }
+
+        } catch (\Exception $e) {
+            error_log($e->__toString());
+        }
+        return $str;
+    }
+
+    /**
+     * Return a string representation of this object
+     */
+    public function __toString(): string
+    {
+        return $this->toString();
+    }
+
+    /**
+     * Get the html and return the cleaned string
+     * A good place to clean any nasty html entities and other non-valid HTML elements
+     *
+     * @todo See if we can remove this with the modern versions of DOMDocument
+     */
+    static function cleanHtml(string $html, string $encoding = 'UTF-8'): string
+    {
+        return $html;
+        static $mapping = [];
+        if (!$mapping) {
+            $list1 = get_html_translation_table(HTML_ENTITIES, ENT_NOQUOTES);
+            $list2 = get_html_translation_table(HTML_SPECIALCHARS, ENT_NOQUOTES);
+            $list = array_merge($list1, $list2);
+            $mapping = [];
+            foreach ($list as $char => $entity) {
+                $mapping[strtolower($entity)] = '&#' . self::ord($char) . ';';
+            }
+            //$extras = array('&times;' => '&#215;', '&copy;' => '&#169;', '&nbsp;' => '&#160;', '&raquo;' => '&#187;', '&laquo;' => '&#171;');
+            $extras = array('&times;' => '&#215;');
+            $mapping = array_merge($mapping, $extras);
+        }
+        /** @phpstan-ignore-next-line  */
+        $html = str_replace(array_keys($mapping), array_values($mapping), $html);
+        $html = preg_replace ('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', ' ', $html);       // Strip out unsupported characters from XML
+        return $html;
+    }
+
+    /**
+     * Since PHP's ord() function is not compatible with UTF-8
+     * Here is a workaround.
+     */
+    static protected function ord(string $ch): int
+    {
+        $k = mb_convert_encoding($ch, 'UCS-2LE', 'UTF-8');
+        $k1 = ord(substr($k, 0, 1));
+        $k2 = ord(substr($k, 1, 1));
+        return $k2 * 256 + $k1;
+    }
+
+
+    // TODO: replace with adapters/Parsers
+
+    /**
+     * Get the parsed state of the template.
+     * Changes cannot be made to a parsed template.
+     * `reset()` must be called to re-parse the template.
+     */
+    public function isParsed(): bool
+    {
+        return $this->parsed;
+    }
+
+    /**
+     * Add a callable function on pre document parsing
+     *
+     * EG: $template->setOnPreParse(function ($template) { });
+     */
+    public function setOnPreParse(callable $onPreParse): Template
+    {
+        $this->onPreParse = $onPreParse;
+        return $this;
+    }
+
+    /**
+     * Add a callable function on post document parsing
+     *
+     * EG: $template->setOnPostParse(function ($template) { });
+     */
+    public function setOnPostParse(callable $onPostParse): Template
+    {
+        $this->onPostParse = $onPostParse;
+        return $this;
+    }
+
+
+
+    /**
      * Test if this template is HTML5 compliant
      * This only checks to see if the `<!doctype html>` tag exists at the start of the document
      */
@@ -417,15 +713,6 @@ class Template
     public function getOriginalDocument(): DOMDocument
     {
         return $this->orgDocument;
-    }
-
-    /**
-     * Reset the template to its unedited state
-     */
-    public function reset(): Template
-    {
-        $this->init($this->getOriginalDocument(), $this->getEncoding());
-        return $this;
     }
 
     /**
@@ -1439,7 +1726,7 @@ class Template
     }
 
     /**
-     * Check if a repeat,choice,var,form (template property) exist,
+     * Check if a repeat, choice, var, form (template property) exist,
      * and if the document has been parsed.
      *
      * @param string $property [var, choice, repeat]
@@ -1453,259 +1740,6 @@ class Template
                 return false;
         }
         return true;
-    }
-
-    /**
-     * Get the parsed state of the template.
-     * If true then no more changes can be made to the template
-     * because the template has already been parsed.
-     */
-    public function isParsed(): bool
-    {
-        return $this->parsed;
-    }
-
-    /**
-     * Add a callable function on pre document parsing
-     *
-     * EG: $template->setOnPreParse(function ($template) { });
-     */
-    public function setOnPreParse(callable $onPreParse): Template
-    {
-        $this->onPreParse = $onPreParse;
-        return $this;
-    }
-
-    /**
-     * Add a callable function on post document parsing
-     *
-     * EG: $template->setOnPostParse(function ($template) { });
-     */
-    public function setOnPostParse(callable $onPostParse): Template
-    {
-        $this->onPostParse = $onPostParse;
-        return $this;
-    }
-
-    /**
-     * Return a parsed \Dom document.
-     *
-     * After using this call ($parse = true) you can no longer use the template render functions
-     * as no changes can be made to the template unless you use DOMDocument functions directly
-     */
-    public function getDocument(bool $parse = true): ?DOMDocument
-    {
-        if (!$parse || $this->isParsed()) return $this->document;
-
-        if (!$this->parsing) {
-            $this->parsing = true;
-
-            // Call Pre Parse Event
-            if (is_callable($this->onPreParse)) {
-                call_user_func_array($this->onPreParse, [$this]);
-            }
-
-            // Insert body templates
-            if ($this->body) {
-                foreach ($this->bodyTemplates as $child) {
-                    $this->appendTemplate($this->body, $child);
-                }
-            }
-
-            // Remove comments if not used
-            foreach ($this->comments as $node) {
-                if (!$node || !isset($node->parentNode) || !$node->parentNode || !$node->ownerDocument ) {
-                    continue;
-                }
-                // Keep the IE comment control statements
-                if ($node->nodeName == null || preg_match('/^\[if /', $node->nodeValue)) {
-                    continue;
-                }
-                if ($node->parentNode->nodeName != 'script' && $node->parentNode->nodeName != 'style') {
-                    $node->parentNode->removeChild($node);
-                }
-            }
-
-            // Remove repeat template notes
-            foreach ($this->repeat as $name => $repeat) {
-                $node = $repeat->getRepeatNode();
-                if (!$node instanceof DOMElement || !isset($node->parentNode) || !$node->parentNode) {
-                    continue;
-                }
-                $node->parentNode->removeChild($node);
-                unset($this->repeat[$name]);
-            }
-
-            // Remove nodes marked hidden
-            foreach ($this->var as $var => $nodes) {
-                foreach ($nodes as $node) {
-                    if (!$node instanceof DOMElement || !isset($node->parentNode) || !$node->parentNode) continue;
-                    if ($node->hasAttribute(self::ATTR_HIDDEN)) {
-                        $node->parentNode->removeChild($node);
-                    }
-                }
-            }
-
-            // Remove choice node marked hidden
-            foreach ($this->choice as $choice => $nodes) {
-                foreach ($nodes as $node) {
-                    if (!$node instanceof DOMElement || !isset($node->parentNode) || !$node->parentNode) continue;
-                    if ($node->hasAttribute(self::ATTR_HIDDEN)) {
-                        $node->parentNode->removeChild($node);
-                    }
-                }
-            }
-
-            // Insert headers
-            $headNode = $this->head;
-            if ($headNode instanceof DOMElement) {
-                $meta = [];
-                $other = [];
-                foreach ($this->headers as $i => $header) {
-                    if ($header['elementName'] == 'meta') {
-                        $meta[$i] = $header;
-                    } else {
-                        $other[$i] = $header;
-                    }
-                }
-                $ordered = array_merge($meta, $other);
-                foreach ($ordered as $header) {
-                    $node = $this->document->createElement($header['elementName']);
-                    if ($header['value'] != null) {
-                        $ct = $this->document->createCDATASection("\n" . trim($header['value']) . "\n");
-                        $node->appendChild($ct);
-                    }
-                    if (isset($header['attributes'])) {
-                        foreach ($header['attributes'] as $k => $v) {
-                            $node->setAttribute($k, $v);
-                        }
-                    }
-                    $nl = $this->document->createTextNode("\n");
-                    $t = $this->document->createTextNode("  ");
-                    $n = $header['node'] ?? false;
-                    if ($n instanceof DOMElement) {
-                        $n->parentNode->insertBefore($node, $n);
-                        $n->parentNode->insertBefore($nl, $n);
-                    } else {
-                        if (strtolower($header['elementName']) == 'meta' && $this->title) {
-                            // insert meta tags above <title> tag where possible
-                            // Note this may reverse the order, not sure that matters for meta tags tho
-                            $headNode->insertBefore($node, $this->title);
-                            $headNode->insertBefore($nl, $this->title);
-                            $headNode->insertBefore($t, $this->title);
-                        } else {
-                            $headNode->append($node);
-                            $headNode->append($t);
-                            $headNode->append($nl);
-                        }
-                    }
-                }
-            }
-
-            $this->parsed = true;
-            $this->document->formatOutput = true;
-            $this->document->preserveWhiteSpace = false;
-            $this->document->normalizeDocument();
-
-            // On Post Parse Event
-            if (is_callable($this->onPostParse)) {
-                call_user_func_array($this->onPostParse, [$this]);
-            }
-            $this->parsing = false;
-        }
-
-        $this->document->normalizeDocument();
-        return $this->document;
-    }
-
-    /**
-     * Return the document as an HTML string
-     *
-     * @todo Review this method and see if it is required
-     */
-    public function toString(bool $parse = true): string
-    {
-        $str = '';
-        try {
-            $doc = $this->getDocument($parse);
-            $str = strval($doc->saveHTML($doc->documentElement));
-
-            // TODO: check if all of the following aare needed
-            // Cleanup Document
-            if (substr($str, 0, 5) == '<' . '?xml') {    // Remove any xml declaration
-                $str = substr($str, strpos($str, "\n") + 1);
-            }
-
-            // Add html5 doctype
-            if ($this->html5 && strtolower(substr($str, 0, 15)) != '<!doctype html>') {
-                $str = "<!doctype html>\n" . $str;
-            }
-
-            // fix allowable non-closeable tags
-            $str = preg_replace_callback('#<(\w+)([^>]*)\s*/>#s',
-                function ($m) {
-                    $xhtml_tags = array("br", "hr", "input", "frame", "img", "area", "link", "col", "base", "basefont", "param", "meta");
-                    return in_array($m[1], $xhtml_tags) ? "<$m[1]$m[2] />" : "<$m[1]$m[2]></$m[1]>";
-                },
-                $str
-            );
-
-            if (self::$REMOVE_CDATA) {
-                $str = preg_replace('~<!\[CDATA\[\s*|\s*\]\]>~', '', $str);
-            }
-
-        } catch (\Exception $e) {
-            error_log($e->__toString());
-        }
-        return $str;
-    }
-
-    /**
-     * Return a string representation of this object
-     */
-    public function __toString(): string
-    {
-        return $this->toString();
-    }
-
-    /**
-     * Get the html and return the cleaned string
-     * A good place to clean any nasty html entities and other non-valid HTML elements
-     *
-     * @todo See if we can remove this with the modern versions of DOMDocument
-     */
-    static function cleanHtml(string $html, string $encoding = 'UTF-8'): string
-    {
-        //return $html;
-        static $mapping = [];
-        if (!$mapping) {
-            $list1 = get_html_translation_table(HTML_ENTITIES, ENT_NOQUOTES);
-            $list2 = get_html_translation_table(HTML_SPECIALCHARS, ENT_NOQUOTES);
-            $list = array_merge($list1, $list2);
-            $mapping = [];
-            foreach ($list as $char => $entity) {
-                $mapping[strtolower($entity)] = '&#' . self::ord($char) . ';';
-            }
-            //$extras = array('&times;' => '&#215;', '&copy;' => '&#169;', '&nbsp;' => '&#160;', '&raquo;' => '&#187;', '&laquo;' => '&#171;');
-            $extras = array('&times;' => '&#215;');
-            $mapping = array_merge($mapping, $extras);
-        }
-        /** @phpstan-ignore-next-line  */
-        $html = str_replace(array_keys($mapping), array_values($mapping), $html);
-        $html = preg_replace ('/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+/u', ' ', $html);       // Strip out unsupported characters from XML
-        return $html;
-    }
-
-    /**
-     * Since PHP's ord() function is not compatible with UTF-8
-     * Here is a workaround.
-     */
-    static protected function ord(string $ch): int
-    {
-        $k = mb_convert_encoding($ch, 'UCS-2LE', 'UTF-8');
-        $k1 = ord(substr($k, 0, 1));
-        $k2 = ord(substr($k, 1, 1));
-        return $k2 * 256 + $k1;
     }
 
 }

@@ -1,11 +1,13 @@
 {
   "name": "ttek/tk-domtemplate",
   "type": "library",
-  "description": "Tk Lib: PHP DOM Template library",
+  "description": "PHP DomTemplate library",
   "keywords": [
-    "Dom",
     "tropotek",
-    "dom-template",
+    "DomTemplate",
+    "DOM",
+    "HTML",
+    "XML",
     "scss"
   ],
   "time": "2025-07-12",
@@ -37,7 +39,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "8.0.x-dev"
+      "dev-master": "8.1.x-dev"
     }
   }
 }

@@ -2,8 +2,7 @@
 namespace Dom;
 
 /**
- * Use this object to take a HTML page and extract
- * sections by their id attribute as \Dom\Templates.
+ * A class uses HTML `id` attributes as hooks to create DomTemplate's from.
  *
  * Eg:
  *   <div class="row g-3">
@@ -26,12 +25,11 @@ namespace Dom;
  *     $fieldTemplate3 = $builder->getTemplate('tpl-input');
  *  </code>
  *
- * This is a way for front-end devs to create a single HTML
- * page with internal sub-templates.
- *
  * To see it in action, see the \Tk\Table and \Tk\Form lib templates.
  *
  * @author Tropotek <http://www.tropotek.com/>
+ * @see https://github.com/tropotek/tk-form
+ * @see https://github.com/tropotek/tk-table
  */
 class Builder
 {
