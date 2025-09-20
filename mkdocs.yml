@@ -12,6 +12,8 @@ nav:
   - Dom Parser: domParser.md
   - Dom Modifier: domModifier.md
   - Dom Builder: domBuilder.md
+  - Examples: examples/index.html
+  - Test: aitest.md
   - About: about.md
 markdown_extensions:
   - toc:
