@@ -2,24 +2,63 @@
 
 namespace Dom\Parser;
 
+use Dom\Form\Form;
+
 class FormParser extends ParserInterface
 {
+    public static array $FORM_ELEMENT_NODES = ['input', 'textarea', 'select', 'button'];
 
-    public function prepareDoc(\DOMNode $node, string $form = ''): void
+    /**
+     * @var array<string,\DOMElement>
+     */
+    protected array $form = [];
+
+    /**
+     * @var array<string,array<string,array<int,\DOMElement>>>
+     */
+    protected array $formElement = [];
+
+    protected string $currFormId = '';
+
+
+    public function prepare(\DOMNode $node, string $form = ''): void
     {
-        // TODO: Implement prepareDoc() method.
-        error_log(__METHOD__);
+        // Store all Form nodes
+        if ($node->nodeName == 'form') {
+            $this->currFormId = strval($node->getAttribute('id') ?? $node->getAttribute('name') ?? '');
+            if (!$this->currFormId) {
+                $this->currFormId = 'form-' . count($this->form);
+            }
+            $this->formElement[$this->currFormId] = [];
+            $this->form[$this->currFormId] = $node;
+        }
+
+        // Store all FormElement nodes
+        if (in_array($node->nodeName, self::$FORM_ELEMENT_NODES)) {
+            $name = $node->getAttribute('name');
+            if ($name == null && $node->getAttribute('id')) {
+                $name = $node->getAttribute('id');
+            }
+
+            $this->formElement[$this->currFormId][$name][] = $node;
+            if (!isset($this->form[$this->currFormId]) && $form == '') $this->form[$this->currFormId] = $this->getTemplate()->getDocument(false)->documentElement;
+        }
+
     }
 
-    public function preParse(): void
-    {
-        // TODO: Implement preParse() method.
-        error_log(__METHOD__);
-    }
+    public function preParse(): void { }
 
-    public function postParse(): void
+    public function postParse(): void { }
+
+
+    /**
+     * Return a form object from the document.
+     */
+    public function getForm(string $id = ''): ?Form
     {
-        // TODO: Implement postParse() method.
-        error_log(__METHOD__);
+        if (!$this->getTemplate()->isParsed() && isset($this->form[$id])) {
+            return new Form($this->form[$id], $this->formElement[$id], $this->getTemplate());
+        }
+        return null;
     }
 }

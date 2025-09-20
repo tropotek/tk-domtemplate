@@ -48,8 +48,6 @@ class Template
     public static string $ATTR_CHOICE = 'choice';
     public static string $ATTR_REPEAT = 'repeat';
 
-    public static array $FORM_ELEMENT_NODES = ['input', 'textarea', 'select', 'button'];
-
     /**
      * Parsers that are instantiated when a Template is constructed.
      * Recommended to keep these to a minimum.
@@ -151,19 +149,6 @@ class Template
         self::TYPE_REPEAT => [],
         self::TYPE_ID => [],
     ];
-
-
-    // TODO Remove if the form parser works
-    /**
-     * @var array<string,DOMElement>
-     */
-    protected array $form = [];
-
-    /**
-     * @var array<string,array<string,array<int,DOMElement>>>
-     */
-    protected array $formElement = [];
-
 
 
     public function __construct(DOMDocument $doc, string $html = '', string $encoding = 'UTF-8')
@@ -270,7 +255,6 @@ class Template
         $this->document = $doc;
         $this->encoding = $encoding;
         $this->parsed = false;
-        //$this->doctype = '';
         $this->head = $this->body = $this->title = null;
         $this->nodeList = [
             self::TYPE_VAR => [],
@@ -287,14 +271,11 @@ class Template
 
         if (!empty(self::$TEMPLATE_PARSERS) && empty($this->parsers)) {
             foreach (self::$TEMPLATE_PARSERS as $parser) {
-                if (!class_exists($parser)) {
-                    throw new Exception('Template Parser Class ' . $parser . ' does not exist');
-                }
                 $this->parsers[$parser] = new $parser($this);
             }
         }
 
-        $this->prepareDoc($this->document->documentElement);
+        $this->prepare($this->document->documentElement);
 
         return $this;
     }
@@ -302,7 +283,7 @@ class Template
     /**
      * A recursive method to initialize the template.
      */
-    protected function prepareDoc(DOMNode $node, string $form = ''): void
+    protected function prepare(DOMNode $node, string $form = ''): void
     {
         if ($this->isParsed()) return;
         if ($node instanceof DOMElement) {
@@ -340,30 +321,6 @@ class Template
                 $this->addNode(self::TYPE_ID, $node->getAttribute('id'), $node);
             }
 
-            // TODO:
-            // Store all Form nodes
-            if ($node->nodeName == 'form') {
-                $form = strval($node->getAttribute('id') ?? $node->getAttribute('name') ?? '');
-                if (!$form) {
-                    $form = 'form-' . count($this->formElement);
-                }
-                $this->formElement[$form] = [];
-                $this->form[$form] = $node;
-            }
-
-            // TODO:
-            // Store all FormElement nodes
-            if (in_array($node->nodeName, self::$FORM_ELEMENT_NODES)) {
-                $id = $node->getAttribute('name');
-                if ($id == null) {
-                    $id = $node->getAttribute('id');
-                }
-
-                // TODO we should be using name here not id, fix this when moving to a Parser
-                $this->formElement[$form][$id][] = $node;
-                if (!isset($this->form[$form]) && $form == '') $this->form[$form] = $this->document->documentElement;
-            }
-
             if ($node->nodeName == 'head') {
                 $this->head = $node;
             }
@@ -377,12 +334,12 @@ class Template
 
             // Call attached parsers
             foreach ($this->parsers as $parser) {
-                $parser->prepareDoc($node, $form);
+                $parser->prepare($node, $form);
             }
 
             // iterate through the dom elements
             foreach ($node->childNodes as $child) {
-                $this->prepareDoc($child, $form);
+                $this->prepare($child, $form);
             }
         }
     }
@@ -393,7 +350,7 @@ class Template
      * After using this call ($parse = true) you can no longer use the template render functions
      * as no changes can be made to the template unless you use DOMDocument functions directly
      */
-    public function parseDoc(): ?DOMDocument
+    public function parse(): ?DOMDocument
     {
         if ($this->isParsed()) return $this->document;
 
@@ -490,20 +447,16 @@ class Template
                 }
             }
 
-            $this->parsed = true;
-            $this->document->formatOutput = true;
-            $this->document->preserveWhiteSpace = false;
-            $this->document->normalizeDocument();
-
             // Call attached parsers
             foreach ($this->parsers as $parser) {
                 $parser->postParse();
             }
-
-            $this->parsing = false;
         }
 
-        $this->document->normalizeDocument();
+        // finalized parsed document
+        $this->parsing = false;
+        $this->parsed = true;
+
         return $this->document;
     }
 
@@ -519,7 +472,7 @@ class Template
 
     public function getDocument(bool $parse = true): ?DOMDocument
     {
-        if ($parse && !$this->isParsed()) $this->parseDoc();
+        if ($parse && !$this->isParsed()) $this->parse();
         return $this->document;
     }
 
@@ -648,19 +601,6 @@ class Template
         }
         return $this;
     }
-
-    /**
-     * Return a form object from the document.
-     * @deprecated move top a parser ??
-     */
-    public function getForm(string $id = ''): ?Form
-    {
-        if (!$this->isParsed() && isset($this->form[$id])) {
-            return new Form($this->form[$id], $this->formElement[$id], $this);
-        }
-        return null;
-    }
-
 
     /**
      * Get a repeating region from a document.
@@ -1531,10 +1471,9 @@ class Template
 
     public static function addTemplateParser(string $parserClass): void
     {
-//        error_log($parserClass);
-//        if (!class_exists($parserClass)) {
-//            throw new Exception('Parser class does not exist: ' . $parserClass);
-//        }
+        if (!class_exists($parserClass)) {
+            throw new Exception('Parser class does not exist: ' . $parserClass);
+        }
         self::$TEMPLATE_PARSERS[$parserClass] = $parserClass;
     }
 

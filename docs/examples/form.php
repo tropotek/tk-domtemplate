@@ -72,25 +72,20 @@ ob_start();
 </html>
 <?php
 // Include lib, you should use use composer if available.
-$path = dirname(__FILE__, 3);
-include_once $path . '/Dom/Exception.php';
-include_once $path . '/Dom/Template.php';
-include_once $path . '/Dom/Form.php';
-include_once $path . '/Dom/Form/Element.php';
-include_once $path . '/Dom/Form/Input.php';
-include_once $path . '/Dom/Form/Textarea.php';
-include_once $path . '/Dom/Form/Select.php';
+$basepath = dirname(__FILE__, 3);
+include_once $basepath . '/vendor/autoload.php';
 
 // Create a template from the html in the buffer
 $buff = ob_get_clean();
 
 \Dom\Template::addTemplateParser(\Dom\Parser\FormParser::class);
 $template = \Dom\Template::load($buff);
+$formParser = $template->getParser(\Dom\Parser\FormParser::class);
 
 // Set the pageTitle tag  --> <h1 var="pageTitle">Default Text</h1>
 $template->setText('pageTitle', 'Dynamic Form Example');
+$domForm = $formParser->getForm('contactForm');
 
-$domForm = $template->getForm('contactForm');
 // Init any form elements to a default status
 $select = $domForm->getFormElement('country');
 /* @var $select \Dom\Form\Select */

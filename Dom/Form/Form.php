@@ -1,10 +1,7 @@
 <?php
-namespace Dom;
+namespace Dom\Form;
 
-use Dom\Form\Element;
-use Dom\Form\Input;
-use Dom\Form\Select;
-use Dom\Form\Textarea;
+use Dom\Template;
 
 /**
  * The form package make an API available for rendering a form and its elements

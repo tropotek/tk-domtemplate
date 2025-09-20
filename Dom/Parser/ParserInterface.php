@@ -18,7 +18,7 @@ abstract class ParserInterface
         $this->template = $template;
     }
 
-    public abstract function prepareDoc(\DOMNode $node, string $form = ''): void;
+    public abstract function prepare(\DOMNode $node, string $form = ''): void;
 
     public abstract function preParse(): void;
 
