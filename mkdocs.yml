@@ -15,7 +15,7 @@ nav:
   - Dom Parser: domParser.md
   - Dom Modifier: domModifier.md
   - Dom Builder: domBuilder.md
-  - Symfony Intergration: symfony.md
+  - Symfony Integration: symfony.md
   - Examples: examples/index.html
 
 markdown_extensions:

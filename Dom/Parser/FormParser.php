@@ -6,6 +6,9 @@ use Dom\Form\Form;
 
 class FormParser extends ParserInterface
 {
+    /**
+     * @var list<string>
+     */
     public static array $FORM_ELEMENT_NODES = ['input', 'textarea', 'select', 'button'];
 
     /**
@@ -23,6 +26,8 @@ class FormParser extends ParserInterface
 
     public function prepare(\DOMNode $node, string $form = ''): void
     {
+        if (!($node instanceof \DOMElement)) return;
+
         // Store all Form nodes
         if ($node->nodeName == 'form') {
             $this->currFormId = strval($node->getAttribute('id') ?? $node->getAttribute('name') ?? '');

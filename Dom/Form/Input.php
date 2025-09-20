@@ -9,6 +9,9 @@ namespace Dom\Form;
 class Input extends Element
 {
 
+    /**
+     * @param string|array<int,string> $value
+     */
     public function setValue(string|array $value): Input
     {
         if (is_array($value)) $value = strval($value[0]);
@@ -21,6 +24,9 @@ class Input extends Element
         return $this;
     }
 
+    /**
+     * @return array<string,string>
+     */
     public function getValue(): array|string
     {
         return $this->element->getAttribute('value');

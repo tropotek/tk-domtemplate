@@ -38,8 +38,11 @@ class Scss extends ModifierInterface
 
     protected int       $cacheTimeout = 86400 * 7;  // 7 days
     protected bool      $compress     = true;
+    /** @var array<string|int,string> */
     protected array     $source       = [];
+    /** @var list<string> */
     protected array     $sourcePaths  = [];
+    /** @var array<string,string> */
     protected array     $constants    = [];
     protected bool      $perPageCache = false;
 
@@ -50,7 +53,7 @@ class Scss extends ModifierInterface
 
 
     /**
-     * @param array $constants Any parameters you want accessible via the scss parser via @{paramName}
+     * @param array<string,string> $constants Any parameters you want accessible via the scss parser via @{paramName}
      */
     public function __construct(array $constants = [], ?string $cachePath = null, ?string $basePath = null, ?string $baseUrl = null)
     {
@@ -118,6 +121,7 @@ class Scss extends ModifierInterface
 
         if (($css === false) || System::isRefreshCacheRequest()) {
             foreach ($this->source as $path => $v) {
+                $path = strval($path);
                 if (preg_match('/\.scss/', $path) && is_file($path)) {
                     //\Tk\Log::debug('SCSS Compiling File: ' . $path);
                     $scss->setImportPaths(array($this->baseUrl, dirname($path)));

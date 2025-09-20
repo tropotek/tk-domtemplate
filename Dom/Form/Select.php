@@ -85,26 +85,22 @@ class Select extends Element
         return $option;
     }
 
+    /**
+     * @param string|array<string|int,string> $value
+     */
     public function setValue(string|array $value): static
     {
-        if (is_array($value)) {
-            if ($this->isMultiple()) {
-                foreach ($value as $v) {
-                    $option = $this->findOption($this->element, $v);
-                    if ($option instanceof \DOMElement) {
-                        $option->setAttribute('selected', 'selected');
-                    }
-                }
-            } else {
-                $option = $this->findOption($this->element, $value[0]);
+        $this->clearSelected();
+
+        if ($this->isMultiple() && is_array($value)) {
+            foreach ($value as $v) {
+                $option = $this->findOption($this->element, $v);
                 if ($option instanceof \DOMElement) {
                     $option->setAttribute('selected', 'selected');
                 }
             }
         } else {
-            if (!$this->isMultiple()) {
-                $this->clearSelected();
-            }
+            if (is_array($value)) $value = $value[0];
             $option = $this->findOption($this->element, $value);
             if ($option instanceof \DOMElement) {
                 $option->setAttribute('selected', 'selected');
@@ -115,11 +111,13 @@ class Select extends Element
 
     /**
      * Will return an array if multiple select is enabled.
+     * 
+     * @return string|array<int,string>
      */
     public function getValue(): string|array
     {
         $selected = $this->findSelected($this->element);
-        if (is_array($selected) && count($selected) > 0) {
+        if (count($selected) > 0) {
             if ($this->isMultiple()) {
                 return array_map(fn($r) => $r->textContent, $selected);
             } else {
@@ -183,6 +181,7 @@ class Select extends Element
                 $fNode = $this->findOption($child, $value);
                 if ($fNode != null) {
                     $foundNode = $fNode;
+                    break;
                 }
             }
         }
@@ -191,16 +190,18 @@ class Select extends Element
 
     /**
      * Find the selected values to this select box
+     * 
+     * @return array<int,\DOMElement>
      */
-    public function findSelected(\DOMNode $node): \DOMNode|array
+    public function findSelected(\DOMNode $node): array
     {
-        $foundNodes = array();
+        $foundNodes = [];
         if ($node instanceof \DOMElement) {
             if ($node->nodeName == 'option' && $node->hasAttribute('selected')) {
-                return $node;
+                return [$node];
             }
             foreach ($node->childNodes as $child) {
-                $fNode = $this->findSelected($child);
+                $fNode = $this->findSelected($child)[0] ?? null;
                 if ($fNode != null) {
                     $foundNodes[] = $fNode;
                 }

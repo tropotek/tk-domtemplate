@@ -32,7 +32,7 @@ To enable the \Dom\Form lib, you must register the [\Dom\Parser\FormParser](domP
 // ...
 
 // Register the parser to load for all template forms call \Dom\Template::clearTemplateParsers() to reset.
-\Dom\Template::addTemplateParser(\Dom\Parser\FormParser::class);
+\Dom\Template::registerParser(\Dom\Parser\FormParser::class);
 // Load the template containing the form markup.
 $template = \Dom\Template::load($html);
 // Get the form from the parser object.
@@ -224,7 +224,7 @@ include_once $basepath . '/vendor/autoload.php';
 // Create a template from the html in the buffer
 $html = ob_get_clean();
 
-\Dom\Template::addTemplateParser(\Dom\Parser\FormParser::class);
+\Dom\Template::registerParser(\Dom\Parser\FormParser::class);
 $template = \Dom\Template::load($html);
 $formParser = $template->getParser(\Dom\Parser\FormParser::class);
 

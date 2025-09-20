@@ -41,6 +41,7 @@ class UrlPath extends ModifierInterface
 
     /**
      * element attributes to search for path URL's
+     * @var array<int,string>
      */
     protected array $attrSrc = [
         'src', 'href', 'action', 'background',  // standard attributes
@@ -50,6 +51,7 @@ class UrlPath extends ModifierInterface
 
     /**
      * Javascript attributes to search for URL`s
+     * @var array<int,string>
      */
     protected array $attrJs = ['onmouseover', 'onmouseup', 'onmousedown', 'onmousemove', 'onmouseover', 'onclick'];
 

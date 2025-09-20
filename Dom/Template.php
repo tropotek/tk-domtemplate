@@ -5,7 +5,6 @@ use Dom\Parser\ParserInterface;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
-use Tk\Log;
 
 /**
  * A PHP DOM Template Library
@@ -53,7 +52,7 @@ class Template
      * Recommended to keep these to a minimum.
      * Use DOM Modifiers where possible.
      *
-     * @var array<int,string>
+     * @var array<string,string>
      */
     protected static array $TEMPLATE_PARSERS = [];
 
@@ -98,7 +97,7 @@ class Template
      *   'value' => '',
      *   'node' => null, // (optional) \DOMElement to append to
      * ]
-     * @var array<int,mixed>
+     * @var array<string, array<string,mixed>>
      */
     protected array $headers = [];
 
@@ -135,7 +134,7 @@ class Template
 
     /**
      * The list of parsers attached to this template
-     * @var array<int,ParserInterface>
+     * @var array<string,ParserInterface>
      */
     protected array $parsers = [];
 
@@ -168,14 +167,12 @@ class Template
         $doc = new DOMDocument();
         libxml_use_internal_errors(true);
 
-        // get the doctype line if one exists
+        // get and remove the doctype line if one exists
         $doctype = '';
         $newlinePos = strpos($html, "\n");
         if ($newlinePos !== false) {
             $doctype = substr($html, 0, $newlinePos);
-            if(preg_match('/^<!doctype\s+html/i', $doctype)) {
-                $html = substr($html, $newlinePos + 1);
-            } else {
+            if(!preg_match('/^<!doctype\s+html/i', $doctype)) {
                 $doctype = '';
             }
         }
@@ -271,7 +268,9 @@ class Template
 
         if (!empty(self::$TEMPLATE_PARSERS) && empty($this->parsers)) {
             foreach (self::$TEMPLATE_PARSERS as $parser) {
-                $this->parsers[$parser] = new $parser($this);
+                /** @var ParserInterface $p */
+                $p = new $parser($this);
+                $this->parsers[$parser] = $p;
             }
         }
 
@@ -365,7 +364,8 @@ class Template
             // Insert body templates
             if ($this->body) {
                 foreach ($this->bodyTemplates as $child) {
-                    $this->appendTemplate($this->body, $child);
+                    $node = $this->document->importNode($child->getDocument()->documentElement, true);
+                    $this->body->appendChild($node);
                 }
             }
 
@@ -640,6 +640,8 @@ class Template
     /**
      * Return all available nodes for a node type and name from the nodeList array
      * Returns all nodes for the type if the name is null
+     *
+     * @return array<string, array<int, mixed>>|array<int, mixed>
      */
     public function getNodeList(string $type, ?string $name = null): array
     {
@@ -670,6 +672,8 @@ class Template
     /**
      * Mark a node name/type group for deletion on the parsing of the template
      * returns the nodes marked for deletion
+     *
+     * @return array<int|string, mixed>
      */
     public function removeNode(string $type, string $name): array
     {
@@ -702,6 +706,9 @@ class Template
 
     // -------------- Document Modifier code ---------------
 
+    /**
+     * @param array<string,string>|string $class
+     */
     public function addCss(string $var, array|string $class): Template
     {
         if (is_string($class)) {
@@ -721,7 +728,7 @@ class Template
         return $this;
     }
 
-    public function removeCss(string|DOMElement $var, string $class): Template
+    public function removeCss(string $var, string $class): Template
     {
         $str = $this->getAttr($var, 'class');
         $str = preg_replace('/(' . $class . ')\s?/', '', trim($str));
@@ -729,6 +736,9 @@ class Template
         return $this;
     }
 
+    /**
+     * @param array<string,string>|string $attr
+     */
     public function setAttr(string $var, array|string $attr, null|string|int|float $value = null): Template
     {
         if ($this->isParsed()) return $this;
@@ -783,6 +793,8 @@ class Template
 
     /**
      * Return the current list of header nodes
+     *
+     * @return array<string, array<string,mixed>>
      */
     public function getHeaderList(): array
     {
@@ -832,12 +844,13 @@ class Template
      */
     public function appendMetaTag(string $name, string $content, ?DOMElement $node = null): Template
     {
-        return $this->appendHeadElement('meta', array('name' => $name, 'content' => $content), '', $node);
+        return $this->appendHeadElement('meta', ['name' => $name, 'content' => $content], '', $node);
     }
 
     /**
      * Append a CSS file to the template head element
      *
+     * @param array<string, string> $attrs An associative array of (attr, value) pairs.
      * @param DOMElement|null $node (optional) If set,the tag will be appended after the supplied node
      * @see appendHeadElement()
      */
@@ -854,6 +867,7 @@ class Template
 
     /**
      * Append CSS to the template parentElement or document body if exists
+     * @param array<string, string> $attrs An associative array of (attr, value) pairs.
      */
     public function appendCss(string $styles, array $attrs = []): Template
     {
@@ -889,6 +903,7 @@ class Template
     /**
      * Append CSS to the template head element
      *
+     * @param array<string, string> $attrs An associative array of (attr, value) pairs.
      * @param DOMElement|null $node (optional) If set,the tag will be appended after the supplied node
      * @see appendHeadElement()
      */
@@ -904,6 +919,7 @@ class Template
     /**
      * Append a JavaScript file to the template head element
      *
+     * @param array<string, string> $attrs An associative array of (attr, value) pairs.
      * @param DOMElement|null $node (optional) If set,the tag will be appended after the supplied node
      * @see appendHeadElement()
      */
@@ -926,6 +942,7 @@ class Template
 
     /**
      * Append JavaScript to the template parentElement or document body if exists
+     * @param array<string, string> $attrs An associative array of (attr, value) pairs.
      */
     public function appendJs(string $js, array $attrs = []): Template
     {
@@ -958,6 +975,7 @@ class Template
     /**
      * Append JavaScript to the template head element
      *
+     * @param array<string, string> $attrs An associative array of (attr, value) pairs.
      * @param DOMElement|null $node (optional) append the JS after the supplied node
      * @see appendHeadElement()
      */
@@ -1012,7 +1030,7 @@ class Template
     /**
      * Merge the supplied body template with this document body template list.
      *
-     * @param array|Template[] $arr
+     * @param array<int,Template> $arr
      */
     public function appendBodyTemplateList(array $arr): Template
     {
@@ -1023,6 +1041,8 @@ class Template
 
     /**
      * merge existing header array with this template header array
+     *
+     * @param array<string,array<string,mixed>> $arr
      */
     public function appendHeaderList(array $arr): Template
     {
@@ -1415,7 +1435,7 @@ class Template
      * @param bool $preserveAttrs Retain any attributes from the exiting template tag
      * @note If duplicate attributes exist, the inserted HTML gets precedence
      */
-    public function replaceTemplate(string|DOMElement $var, Template $template, bool $preserveAttrs = true): Template
+    public function replaceTemplate(string $var, Template $template, bool $preserveAttrs = true): Template
     {
         if ($this->isParsed()) return $this;
         $this->mergeTemplate($template);
@@ -1469,7 +1489,7 @@ class Template
         return $this->parsers[$class] ?? null;
     }
 
-    public static function addTemplateParser(string $parserClass): void
+    public static function registerParser(string $parserClass): void
     {
         if (!class_exists($parserClass)) {
             throw new Exception('Parser class does not exist: ' . $parserClass);
@@ -1477,12 +1497,15 @@ class Template
         self::$TEMPLATE_PARSERS[$parserClass] = $parserClass;
     }
 
-    public static function getTemplateParsers(): array
+    /**
+     * @return array<string,string>
+     */
+    public static function getRegisteredParsers(): array
     {
         return self::$TEMPLATE_PARSERS;
     }
 
-    public static function resetTemplateParsers(): void
+    public static function resetRegisteredParsers(): void
     {
         self::$TEMPLATE_PARSERS = [];
     }

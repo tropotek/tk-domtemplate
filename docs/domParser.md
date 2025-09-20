@@ -20,7 +20,7 @@ Template instances.
 // ...
 
 // Register the parser to load for all template forms call \Dom\Template::clearTemplateParsers() to reset.
-\Dom\Template::addTemplateParser(\Dom\Parser\FormParser::class);
+\Dom\Template::registerParser(\Dom\Parser\FormParser::class);
 
 // Load the template containing the form markup.
 $template = \Dom\Template::load($html);
@@ -31,8 +31,8 @@ $domForm = $formParser->getForm();
 
 // ...
 
-// To reset the template parser queue.
-\Dom\Template::clearTemplateParsers();
+// Clear all registered Template parsers 
+\Dom\Template::resetRegisteredParsers();
 
 ```
 

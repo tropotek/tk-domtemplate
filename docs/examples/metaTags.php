@@ -30,16 +30,16 @@ ob_start();
 </body>
 </html>
 <?php
-// Include lib, you should use use composer if available.
+// Include lib, you should use composer if available.
 $basepath = dirname(__FILE__, 3);
 include_once $basepath . '/vendor/autoload.php';
 
-// Create a template from the html in the buffer
+// Create a template from the HTML in the buffer
 $buff = ob_get_clean();
 
 $template = \Dom\Template::load($buff);
 $template->setText('helloWorld', 'This is the `Hello World` Dynamic text.');
-// Create some css styles
+// Create some CSS styles
 $css = <<<CSS
 body {font-size: 80%; background-color: #CCC; }
 p { background-color: #9CF; }
@@ -47,7 +47,7 @@ CSS;
 // Append the styles to the head tag
 $template->appendCss($css);
 
-// This is how we append a javascript file
+// This is how we append a JavaScript file
 $template->appendJsUrl('/js/jquery.js');
 
 // Create Sub Template
@@ -68,9 +68,9 @@ $css = <<<CSS
 .subTemplate { background-color: #44C; }
 pre { background-color: #CFC; color: #333; border: 1px dashed #CCC; }
 CSS;
-// Append the sub template styles to template
+// Append the sub template styles to the template
 $subTpl->appendCss($css);
-// Append a url to a sub template
+// Append an url to a sub template
 $subTpl->appendJsUrl('/js/jquery2.js');
 
 // Now we add the sub template to the parent template

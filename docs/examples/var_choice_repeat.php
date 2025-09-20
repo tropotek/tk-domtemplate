@@ -37,11 +37,11 @@ ob_start();
 </body>
 </html>
 <?php
-// Include lib, you should use use composer if available.
+// Include lib, you should use composer if available.
 $basepath = dirname(__FILE__, 3);
 include_once $basepath . '/vendor/autoload.php';
 
-// Create a template from the html in the buffer
+// Create a template from the HTML in the buffer
 $buff = ob_get_clean();
 $template = \Dom\Template::load($buff);
 

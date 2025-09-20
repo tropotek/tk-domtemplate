@@ -71,11 +71,15 @@ abstract class Element
      *  o checkbox/radio => The value to check/select
      *  o select => The value of the option to be selected
      *  o textarea => the content of the textarea
+     * 
+     * @param string|array<string|int,string> $value
      */
     abstract function setValue(string|array $value): Element;
 
     /**
      * Return the value of the element, or the selected value.
+     * 
+     * @return string|array<string,string>
      */
     abstract function getValue(): string|array;
 

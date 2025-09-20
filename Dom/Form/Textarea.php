@@ -9,6 +9,9 @@ namespace Dom\Form;
 class Textarea extends Element
 {
 
+    /**
+     * @param string|array<int,string> $value
+     */
     public function setValue(string|array $value): Textarea
     {
         if (is_array($value)) $value = strval($value[0]);

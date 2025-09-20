@@ -35,6 +35,9 @@ class Modifier
      * @var array<string,ModifierInterface>
      */
     protected array $modifiers = [];
+    /**
+     * @var array<int,\DOMNode>
+     */
     protected array $nodeTrash = [];
     protected bool  $inHead    = false;
     protected bool  $inBody    = false;

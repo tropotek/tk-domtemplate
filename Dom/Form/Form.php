@@ -89,7 +89,7 @@ class Form
      * Used for radio boxes and multi select lists
      *
      * @param string $name
-     * @return array
+     * @return array<int,Element>
      */
     public function getFormElementList(string $name): array
     {
@@ -132,6 +132,8 @@ class Form
 
     /**
      * Get an array containing the form element names
+     * 
+     * @return array<int,string>
      */
     public function getElementNames(): array
     {
@@ -201,7 +203,7 @@ class Form
     /**
      * Get an array of the hidden elements in this form
      *
-     * @return array|Input[]
+     * @return array<int,Input>
      */
     public function getHiddenElements(): array
     {

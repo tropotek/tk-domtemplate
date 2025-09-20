@@ -4,7 +4,7 @@ namespace Dom;
 /**
  * A class uses HTML `id` attributes as hooks to create DomTemplate's from.
  *
- * Eg:
+ * E.g.:
  *   <div class="row g-3">
  *     <input type="hidden" class="form-control" var="element" id="tpl-hidden">
  *
@@ -35,8 +35,9 @@ class Builder
 {
 
     private   string $path         = '';
-    private   array  $sectionCache = [];
     protected bool   $removeId     = true;
+    /** @var array<string,string> */
+    private   array  $sectionCache = [];
 
     private \DOMDocument $document;
 

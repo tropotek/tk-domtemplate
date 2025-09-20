@@ -23,6 +23,7 @@ class PageBytes extends ModifierInterface
     private int   $cssTotal    = 0;
     private int   $jsTotal     = 0;
     private int   $htmlTotal   = 0;
+    /** @var list<string> */
     private array $checkedHash = [];
 
 

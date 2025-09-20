@@ -1,6 +1,8 @@
 <?php
 namespace Dom\Modifier;
 
+use DOMElement;
+
 /**
  * Append all scripts to the bottom of the body tag.
  *
@@ -27,10 +29,17 @@ class JsLast extends ModifierInterface
      * Flag to ensure the filter is run once only
      */
     private bool  $notRun = true;
+    /**
+     * @var array<int,\DOMElement>
+     */
     private array $head   = [];
+    /**
+     * @var array<int,\DOMElement>
+     */
     private array $body   = [];
     /**
      * track src urls to remove duplicates
+     * @var array<int,string>
      */
     private array $src    = [];
 
@@ -104,7 +113,7 @@ class JsLast extends ModifierInterface
      * This is a stable sort the php sort does not
      * keep the original order when items are not to be sorted.
      *
-     * @param array $array
+     * @param array<int,\DOMElement> $array
      * @param callable $value_compare_func
      * @see https://github.com/vanderlee/PHP-stable-sort-functions/blob/master/classes/StableSort.php
      */
@@ -112,15 +121,17 @@ class JsLast extends ModifierInterface
     {
         $index = 0;
         foreach ($array as &$item) {
-            $item = array($index++, $item);
+            $item = [$index++, $item];
         }
-        usort($array, function($a, $b) use($value_compare_func) {
-            $result = call_user_func($value_compare_func, $a[1], $b[1]);
-            return $result == 0 ? $a[0] - $b[0] : $result;
-        });
-        foreach ($array as &$item) {
-            $item = $item[1];
-        }
+        usort($array, $value_compare_func);
+        // TODO: this needs to be tested
+//        usort($array, function($a, $b) use($value_compare_func) {
+//            $result = call_user_func($value_compare_func, $a[1], $b[1]);
+//            return $result == 0 ? $a[0] - $b[0] : $result;
+//        });
+//        foreach ($array as &$item) {
+//            $item = $item[1];
+//        }
     }
 
 }

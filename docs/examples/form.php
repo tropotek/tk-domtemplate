@@ -71,14 +71,14 @@ ob_start();
 </body>
 </html>
 <?php
-// Include lib, you should use use composer if available.
+// Include lib, you should use composer if available.
 $basepath = dirname(__FILE__, 3);
 include_once $basepath . '/vendor/autoload.php';
 
 // Create a template from the html in the buffer
 $html = ob_get_clean();
 
-\Dom\Template::addTemplateParser(\Dom\Parser\FormParser::class);
+\Dom\Template::registerParser(\Dom\Parser\FormParser::class);
 $template = \Dom\Template::load($html);
 $formParser = $template->getParser(\Dom\Parser\FormParser::class);
 
@@ -113,6 +113,7 @@ if (($_REQUEST['action'] ?? '') === 'process') {
     $domForm->getFormElement('cars[]')->setValue($_REQUEST['cars']);
     $domForm->getFormElement('comments')->setValue($_REQUEST['comments']);
 
+    //error_log(print_r($_REQUEST, true));
     // Do some basic validation
     $email = $_REQUEST['email'];
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
