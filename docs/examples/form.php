@@ -5,13 +5,13 @@ ob_start();
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>PHP Dom Template (PDT) Library</title>
+  <title>PHP Dom Template (PDT) Library</title>
 
-    <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+  <link rel="stylesheet" type="text/css" href="stylesheet.css" />
 </head>
 <body>
     <div id="content">
@@ -51,7 +51,7 @@ ob_start();
                     </tr>
                     <tr>
                         <td class="label">&#160;</td>
-                        <td class="input"><input type="submit" name="process" value="Submit"/></td>
+                        <td class="input"><button type="submit" name="action" value="process">Send</button></td>
                     </tr>
                 </table>
             </form>
@@ -65,7 +65,7 @@ ob_start();
 
         <div class="footer">
             <p class="home"><a href="index.html">Home</a></p>
-            <p class="copyright"><a href="http://www.domtemplate.com" target="_blank">Copyright 2008 PHP DOMTemplate</a></p>
+            <p class="copyright"><a href="http://www.tropotek.com" target="_blank">Copyright 2008 PHP DOMTemplate</a></p>
         </div>
     </div>
 </body>
@@ -82,10 +82,10 @@ $html = ob_get_clean();
 $template = \Dom\Template::load($html);
 $formParser = $template->getParser(\Dom\Parser\FormParser::class);
 
-$domForm = $formParser->getForm('contactForm');
-
 // Set the pageTitle tag  --> <h1 var="pageTitle">Default Text</h1>
 $template->setText('pageTitle', 'Dynamic Form Example');
+
+$domForm = $formParser->getForm('contactForm');
 
 // Init any form elements to a default status
 $select = $domForm->getFormElement('country');
@@ -105,7 +105,7 @@ $select->appendOption('Blue', 'blue');
 $select->setValue(['red', 'blue']);
 
 // process the form
-if (isset($_REQUEST['process'])) {
+if (($_REQUEST['action'] ?? '') === 'process') {
     // Populate the form with the submitted values
     $domForm->getFormElement('name')->setValue($_REQUEST['name']);
     $domForm->getFormElement('email')->setValue($_REQUEST['email']);
@@ -115,12 +115,11 @@ if (isset($_REQUEST['process'])) {
 
     // Do some basic validation
     $email = $_REQUEST['email'];
-    if (!preg_match('/^[0-9a-zA-Z]([-_.]*[0-9a-zA-Z])*@[0-9a-zA-Z]([-.]?[0-9a-zA-Z])*$/', $email)) {
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $template->setText('email-error', 'Invalid email.');
         $template->setVisible('email-error');
     } else {
         // TODO: Send your email here!!!
-
         $template->setVisible('success');
         $template->setText('formData', print_r($_REQUEST, true));
     }

@@ -5,11 +5,10 @@ ob_start();
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>PHP Dom Template (PDT) Library</title>
   <title>PHP Dom Template (PDT) Library</title>
   <link rel="stylesheet" type="text/css" href="stylesheet.css" />
 </head>
@@ -32,7 +31,7 @@ ob_start();
 
     <div class="footer">
       <p class="home"><a href="index.html">Home</a></p>
-      <p class="copyright"><a href="http://www.domtemplate.com" target="_blank">Copyright 2008 PHP DOMTemplate</a></p>
+      <p class="copyright"><a href="http://www.tropotek.com" target="_blank">Copyright 2008 PHP DOMTemplate</a></p>
     </div>
   </div>
 </body>

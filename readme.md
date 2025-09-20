@@ -1,24 +1,41 @@
 # PHP DomTemplate :boom: 
 
 __Project:__ [ttek/tk-domtemplate](http://packagist.org/packages/ttek/tk-domtemplate)
-__Web:__ <http://www.domtemplate.com/>  
+__Web:__ <http://www.tropotek.com/tk-domtemplate/>  
 __Authors:__ Michael Mifsud <http://www.tropotek.com/>  
-  
-A PHP5 DOM Template engine for XHTML/XML
 
 
-## Contents
+## Introduction
 
-- [Installation](#installation)
-- [Introduction](#introduction)
-- [VAR](#var)
-- [CHOICE](#choice)
-- [REPEAT](#repeat)
-- [Forms](#form)
-- [Misc Functions](#misc-functions)
-- [Auto Renderer](#autorenderer)
-- [Loader](#loader)
-- [PHP Examples](docs/examples/)
+The PHP \Dom\Template wraps the DOMDocument and provides a fast, attribute-driven way to render
+HTML templates. We did not want another template language within a language, but a way to use PHP
+to render HTML templates keeping the render logic within PHP and the style and layout logic in HTML.
+
+An important feature for us was the template layout and design were kept in the HTML so that it could be easily
+edited by designers and not be affected by what the developers in the team are doing. Making communication
+between developers and designers relatively easy for most tasks.
+
+The \Dom\Template system enables developers to develop and share a basic markup structure, designers can then
+see visually and understand what the minimum markup requirements are.
+Saving on communication time and allowing designers to focus on making the project look great.
+
+Features:
+
+- Mark “variables” and “choices” in your HTML and set their content or visibility
+- Manage repeating regions for table row insertion
+- Insert/append/replace HTML fragments
+- Add CSS/JS (inline or external) and meta/head elements
+- Compose pages by merging templates, other DOMDocument's, or HTML strings
+
+Key ideas:
+
+- Use attributes in your HTML to mark nodes:
+ - var: mark nodes whose content/attributes you’ll set
+ - choice: mark nodes hidden that you can show in your renderer
+ - repeat: define repeating regions
+- Work with the template (set text/HTML, attributes, headers) before parsing.
+- Call `toString()` or `getDocument()` to parse the template and return a renderable DOMDocument or HTML string.
+
 
 
 ## Installation
@@ -26,318 +43,62 @@ A PHP5 DOM Template engine for XHTML/XML
 Available on Packagist ([ttek/tk-domtemplate](http://packagist.org/packages/ttek/tk-domtemplate))
 and as such installable via [Composer](http://getcomposer.org/).
 
-```bash
-composer require ttek/tk-domtemplate
+```
+$ composer require ttek/tk-domtemplate
 ```
 
 Or add the following to your composer.json file:
 
-```json
+```
 {
   "require": {
-    "ttek/tk-domtemplate": "~8.0.0"
+    "ttek/tk-domtemplate": "~8.0"
   }
 }
 ```
 
-__SCSS Auto compalation support__
 
-To enable SCSS auto compalation you will need to add the package "scssphp/scssphp" (https://packagist.org/packages/scssphp/scssphp)
+## Basic Template Usage
+
 ```
-composer require scssphp/scssphp
-```
+<?php
+ob_start();
+?>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PHP Dom Template (PDT) Library</title>
+</head>
+<body>
+  <div id="content">
+    <h1>Hello World</h1>
+    <p var="helloWorld">Default Text</p>
 
-Then use the `\Dom\Modifyer\Scss` DOM modifier:
-```php
-// Load a template with some valid SCSS inline:
-//     <style type="text/scss"> .. </style>
-// or with a standard css include:
-//     <link href="/assets/scss/styles.scss" />
-$template = new \Dom\Template::loadFile('index.html');
+    <p>&nbsp;</p>
+  </div>
+</body>
+</html>
+<?php
+// Include lib, you should use use composer if available.
+$basepath = dirname(__FILE__, 3);
+include_once $basepath . '/vendor/autoload.php';
 
-// use template as needed ...
 
-// final step befor rendering to the output stream is to execute andy DOM modifiers
-$dm = new \Tk\Dom\Modifier\Modifier();
-$dm->add(new \Tk\Dom\Modifier\Filter\Scss(
-    $basePath,    // site base path from the vendor dir 
-    $baseUrl,     // base url from the vbendor path
-    $cachePath,   // path to cache the compiled css files
-    // add any SCSS properties you may want to access in the source files during parsing
-    $constants = [
-        'backColor' => '#EFEFEF',
-        'borderWidth' => '1px',
-    ]
-));
-// modifier to move all JS to the bottom of the page
-$dm->add(new \Tk\Dom\Modifier\Filter\JsLast();
-$dm->execute($template->getDocument());
+// Create a template from the html in the buffer
+$html = trim(ob_get_clean());
+$template = \Dom\Template::load($buff);
+
+// Add some style
+$template->appendCssUrl('stylesheet.css');
+
+// Add some javascript
+$template->appendJs('alert();');
+
+// Set some dynamic text
+$template->setText('helloWorld', 'This is the `Hello World` Dynamic text.');
 
 echo $template->toString();
 ```
-
-
-
-## Introduction
-
-__NOTE: This engine uses the PHP DOM module that requires that all documents
-loaded into it must be strict [XML/XHTML markup](https://en.wikipedia.org/wiki/XHTML). Close all tags and ensure
-all & are &amp;amp;, even in URL query strings.__
-
-The DOM template engine has been developed so designers have a simple
-way to communicate to build templates and communicate their requirements
-to developers.
-
-There are three custom attributes the template engine uses. These are:
-
- 1. __[var](#var)__: Is used to allow to add attributes and content to a node.
- 2. __[choice](#choice)__: Is used to hide/show a node and its contents
- 3. __[repeat](#repeat)__: For repeating data like lists or tables.
-
-Do not be concerned that these attributes do not meet the HTML5 spec or some other spec
-because they are removed once the template is parsed.
-
-That's all there is to it from a designers point of view. For a developer it
-makes interacting with HTML template easy without overriding any of the designers hard work.
-
-PHP DOMTemplate also comes with a number of other features that help when rendering forms, css, javascript
-metatags, etc. The following sections will outline how to use these. Also check out the code examples to 
-see how we have used the DOMTemplate.
-
-
-## VAR
-
-This is the `var` attribute. This us used in a node if you want to modify its content or attributes.
- The following is an example of a `var` being used within a template:
-
-```html
-<div><a href="#" var="link"></a></div>
-```
-
-With this template the developer can then build coe to manipulate this node how they see fit:
-
-```php
-<?php
-// Load a new template from a file. (The file must be XHTML valid or errors will be produced) 
-$template = new \Dom\Template::loadFile('index.html');
-
-// Add some text content inside the anchor node
-$template->insertText('link', 'This is a link');
-
-//Add some HTML content inside the ancor node
-$template->insertHtml('link', '<i class="fa fa-times"></i> Close');
-
-// Add a real URL to the ancor
-$template->setAttr('link', 'href', 'http://www.example.com/');
-
-...
-```
-
-## CHOICE
-A `choice` attribute allows for the removal of a dom node.
-If the attribute exists then the node is removed by default. you must call setChoice().
-See the example below.
-
-```html
-<div choice="showNode"><a href="#" var="link"></a></div>
-```
-
-so by default this node would be removed from the DOM tree. To keep it visible simply use:
-
-```php
-<?php
-// Load a new template from a file. (The file must be XHTML valid or errors will be produced) 
-$template = new \Dom\Template::loadFile('index.html');
-
-// Add some text content inside the anchor node
-$template->setVisible('showNode');
-
-...
-```
-
-
-## REPEAT
-A `repeat` attribute is used for repeating data such as lists or tables. The `repeat` blocks can contain nested `var`, `choice`, `repeat`
-nodes as well.
-When retreiving the `repeat` object from a template it is important to note that the repeat object is a subClass of the Template object
-and thus has the same functionality with the added extra call to appendRepeat(); that is called when you are finished rendering a `repeat`
- and want it appended to its parent template node.
-See the example below.
-
-```html
-<ul>
-  <li repeat="item" var="item"><a href="#" var="url">Link</a></li>
-</ul>
-```
-
-With the repeat markup set you can then go ahead and populate your list or table.
-
-```php
-<?php
-// Load a new template from a file. (The file must be XHTML valid or errors will be produced) 
-$template = new \Dom\Template::loadFile('index.html');
-
-$list = array(
-  'Link 1' => 'http://www.example.com/link1.html',
-  'Link 2' => 'http://www.example.com/link2.html',
-  'Link 3' => 'http://www.example.com/link3.html',
-  'Link 4' => 'http://www.example.com/link4.html'
-);
-
-// Loop through the data and render each item
-foreach($list as $text => $url) {
-  $repeat = $template->getRepeat('item');
-  
-  $repeat->insertText('url', $text);
-  $repeat
-  
-  // Finish the repeat item and append it to its parent.
-  $repeat->appendRepeat();
-}
-
-...
-```
-
-
-
-## FORM
-
-Forms are handled a little differently with the DOMTemplate object. You do not need any vars or choices to access a form element node, but you can if you wish.
-
-If we are given the following basic form:
-
-```html
-<form id="contactForm" method="post">
-  <table>
-    <tr>
-      <td class="label">Name:</td>
-      <td class="input"><input type="text" name="name" /></td>
-    </tr>
-    <tr>
-      <td class="label">Email:</td>
-      <td class="input">
-        <p class="formError" choice="email-error" var="email-error" />
-        <input type="text" name="email" />
-      </td>
-    </tr>
-    <tr>
-      <td class="label">Country</td>
-      <td class="input">
-        <select name="country"></select>
-      </td>
-    </tr>
-    <tr>
-      <td class="label">Comments:</td>
-      <td class="input"><textarea name="comments" rows="5" cols="40"></textarea></td>
-    </tr>
-    <tr>
-      <td class="label">&#160;</td>
-      <td class="input"><input type="submit" name="process" value="Submit"/></td>
-    </tr>
-  </table>
-</form>
-```
-
-Then we can access the form through the code lik this:
-
-```php
-<?php
-$template = \Dom\Template::load($html);
-
-// Set the pageTitle tag  --> <h1 var="pageTitle">Default Text</h1>
-$template->setText('pageTitle', 'Dynamic Form Example');
-
-$domForm = $template->getForm('contactForm');
-// Init any form elements to a default status
-$select = $domForm->getFormElement('country');
-/* @var $select \Dom\Form\Select */
-$select->appendOption('-- Select --', '');
-$select->appendOption('New Zealand', 'NZ');
-$select->appendOption('England', 'UK');
-$select->appendOption('Australia', 'AU');
-$select->appendOption('America', 'US');
-$select->setValue('AU');
-
-...
-
-// Then you can set the value from the request if you like....
-$domForm->getFormElement('name')->setValue($_REQUEST['name']);
-$domForm->getFormElement('email')->setValue($_REQUEST['email']);
-$domForm->getFormElement('country')->setValue($_REQUEST['country']);
-$domForm->getFormElement('comments')->setValue($_REQUEST['comments']);
-
-```
-
-
-## Misc Methods 
-
-For CSS and Javascript we have added some unique methods, these allow you to call the insertTemplate(), \
-appendTemplate(), insertDoc(), appendDoc(), etc..
-methods and the javascript and CSS will be inserted into the parents <head> tag. This allows you
-insert these scripts or URLS anywhere in the rendering process as long as the final parent template has a Head tag.
-
- - appendCss(): 
-```
-$template->appendCss('body > p {background: #00FF00; }');
-```
- - appendCssUrl(): 
-```
-$template->appendCssUrl('http://example.com/css/style.css');
-```
- - appendJs(): 
-```
-$js = <<<JS
-jQuery(function ($) {
-    $('.act').click(function (e) {
-        return confirm('Are you sure you want to install this plugin?');
-    });
-});
-JS;
-$template->appendJs($js);
-```
- - appendJsUrl(): 
-```
-$template->appendJsUrl('http://example.com/js/sctipt.css');
-```
-   
-This functionality is fantastic if you want to iterate over the DOMTemplate just before displaying the document
-and manipulate all the CSS or Javascript nodes.
-
-
-
-Other functions of the DomTemplate include:
-
- - getElementById(): Retrieve a node via its ID attribute.
- - setTitleText(): Set the &lt;title&gt; tag text if the tag exists.
- - appendMetaTag(): will append a meta tag to the parent template if a &lt;head&gt; tag exists.
-
-
-
-## Loader
-
-The loader object gives the developer the ability to search for alternate templates before loading the 
-supplied template. This is handy when you want to be able to give users the ability to override existing
-default templates. Adapters can be added/created that search for alternate templates based on your own frameworks needs.
-
-First you need to setup the Loader and add any adapters that will look for existing templates. This uses a LIFO queue.
-So the Last added Adapter is the first to be executed.
-
-```php
-<?php
-// * Setup the Template loader, create adapters to look for templates as needed
-/* @var \Dom\Loader $dl */
-$dl = \Dom\Loader::getInstance();
-$dl->addAdapter(new \Dom\Loader\Adapter\DefaultAdapter());
-$dl->addAdapter(new \Dom\Loader\Adapter\ClassPath($config->getAppPath().'/html/xml'));
-```
-
-Then later you can retrieve it to load all your apps templates:
-```php
-<?php
-$tplFile = \Tk\Config::getInstance()->getTemplatePath().'/index.html';
-$template = \Dom\Loader::loadFile($tplFile);
-```
-
-
- 
-[See the Example](docs/examples/autoRenderer.php)
