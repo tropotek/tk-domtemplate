@@ -30,7 +30,7 @@
     }
   },
   "require": {
-    "php": "^8.3",
+    "php": "^7.4 || ^8.0",
     "ext-libxml": "*",
     "ext-dom": "*",
     "ext-mbstring": "*",
