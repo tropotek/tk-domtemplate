@@ -7,8 +7,11 @@ use_directory_urls: false
 theme: readthedocs
 nav:
   - Home: index.md
-  - Test: aitest.md
-  - examples: examples/index.html
+  - Dom Template: domTemplate.md
+  - Dom Form: domForm.md
+  - Dom Parser: domParser.md
+  - Dom Modifier: domModifier.md
+  - Dom Builder: domBuilder.md
   - About: about.md
 markdown_extensions:
   - toc:
