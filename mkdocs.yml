@@ -16,7 +16,6 @@ nav:
   - Dom Modifier: domModifier.md
   - Dom Builder: domBuilder.md
   - Symfony Integration: symfony.md
-  - Examples: examples/index.html
 
 markdown_extensions:
   - toc:

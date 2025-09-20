@@ -137,16 +137,17 @@ Example pattern:
 ```php
 <?php
 $template = Template::load('<ul><li repeat="item"><span var="itemName"></span></li></ul>');
-if ($repeat) {
-    foreach (['One', 'Two', 'Three'] as $name) {
-        $repeat = $template->getRepeat('item');
-        $repeat->setText('itemName', $name);
-        $repeat->appendRepeat();
-    }
+
+foreach (['One', 'Two', 'Three'] as $name) {
+  $repeat = $template->getRepeat('item');
+  $repeat->setText('itemName', $name);
+  $repeat->appendRepeat();
 }
 ```
-Tip: You can also target specific containers (var) and appendTemplate there. After parsing, the original repeat node is removed, leaving only the generated items.
-
+!!! tip
+    You can also target specific containers (var) using `appendRepeat('varName')` to append to a specific var node.
+    By default, a repeat is appended to its parent node.
+    
 
 ## Head Tag Management
 
@@ -182,7 +183,8 @@ $template->appendCss('.box{padding:1rem;}');
 $template->appendJs('alert("Hello");');
 ```
 
-Note: Head/body insertions only work before parsing.
+!!! Note
+    Head/body insertions only work before parsing.
 
 
 ## Composing Templates
@@ -200,7 +202,6 @@ $template->appendBodyTemplate($child);
 <?php
 $template->appendTemplate('content', $child);
 ```
-
 
 Headers (meta/link/script/style added via appendHeadElement/appendCssUrl/etc.) are merged when you combine templates.
 
