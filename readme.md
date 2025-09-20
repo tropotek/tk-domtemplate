@@ -103,3 +103,11 @@ $template->setText('helloWorld', 'This is the `Hello World` Dynamic text.');
 
 echo $template->toString();
 ```
+
+
+## Contributing
+
+If you wish to contribute updates to the code or documentation, we are open to any requests.
+
+Use the [GitHub discussions](https://github.com/tropotek/tk-domtemplate/discussions) area to chat about what you would like to see or contribute.
+
