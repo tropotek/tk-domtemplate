@@ -1,13 +1,14 @@
 # PHP DomTemplate :boom: 
 
-__Project:__ [ttek/tk-domtemplate](http://packagist.org/packages/ttek/tk-domtemplate)
-__Web:__ <http://www.tropotek.com/tk-domtemplate/>  
+__Project:__ [ttek/tk-domtemplate](http://packagist.org/packages/ttek/tk-domtemplate)  
+__Web:__ <http://domtemplate.tropotek.com/>  
 __Authors:__ Michael Mifsud <http://www.tropotek.com/>  
+
 
 
 ## Introduction
 
-The PHP \Dom\Template wraps the DOMDocument and provides a fast, attribute-driven way to render
+The PHP <\Dom\Template>(http://domtemplate.tropotek.com/) wraps the DOMDocument and provides a fast, attribute-driven way to render
 HTML templates. We did not want another template language within a language, but a way to use PHP
 to render HTML templates keeping the render logic within PHP and the style and layout logic in HTML.
 

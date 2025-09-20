@@ -1,14 +1,11 @@
 site_name: PHP DomTemplate
-site_url: https://www.tropotek.com/tk-domtemplate/
+site_url: https://domtemplate.tropotek.com/
 repo_url: https://github.com/tropotek/tk-domtemplate/
 site_description: 'PHP DomTemplate, a fast and simple template engine for PHP'
 site_author: 'Michael Mifsud <http://www.tropotek.com/>'
 copyright: 'Copyright (c) 2008-present Tropotek'
 use_directory_urls: false
 theme: readthedocs
-
-exclude_docs: |
-  *.py
 
 nav:
   - Home: index.md
@@ -18,6 +15,7 @@ nav:
   - Dom Parser: domParser.md
   - Dom Modifier: domModifier.md
   - Dom Builder: domBuilder.md
+  - Symfony Intergration: symfony.md
   - Examples: examples/index.html
 
 markdown_extensions:
@@ -31,3 +29,6 @@ markdown_extensions:
 plugins:
   - git-revision-date
   - search
+
+exclude_docs: |
+  *.py
