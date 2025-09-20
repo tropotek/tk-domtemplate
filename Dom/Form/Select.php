@@ -2,7 +2,7 @@
 namespace Dom\Form;
 
 /**
- * A class that handle a forms select element.
+ * Handle rendering of a form select element.
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
@@ -85,9 +85,6 @@ class Select extends Element
         return $option;
     }
 
-    /**
-     * Set the selected value of the form element
-     */
     public function setValue(string|array $value): static
     {
         if (is_array($value)) {
@@ -117,7 +114,6 @@ class Select extends Element
     }
 
     /**
-     * Return the selected value,
      * Will return an array if multiple select is enabled.
      */
     public function getValue(): string|array

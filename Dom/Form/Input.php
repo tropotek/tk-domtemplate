@@ -2,33 +2,12 @@
 namespace Dom\Form;
 
 /**
- * A class that handle a forms input element.
+ * Handle rendering of a form input element.
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
 class Input extends Element
 {
-
-    /**
-     * Set the checked attribute of an element
-     */
-    public function setChecked(bool $b): Input
-    {
-        if ($b) {
-            $this->element->setAttribute('checked', 'checked');
-        } else {
-            $this->element->removeAttribute('checked');
-        }
-        return $this;
-    }
-
-    /**
-     * Get the checked state of this element
-     */
-    public function isChecked(): bool
-    {
-        return $this->element->hasAttribute('checked');
-    }
 
     public function setValue(string|array $value): Input
     {
@@ -45,6 +24,21 @@ class Input extends Element
     public function getValue(): array|string
     {
         return $this->element->getAttribute('value');
+    }
+
+    public function setChecked(bool $b): Input
+    {
+        if ($b) {
+            $this->element->setAttribute('checked', 'checked');
+        } else {
+            $this->element->removeAttribute('checked');
+        }
+        return $this;
+    }
+
+    public function isChecked(): bool
+    {
+        return $this->element->hasAttribute('checked');
     }
 
 }

@@ -76,15 +76,16 @@ $basepath = dirname(__FILE__, 3);
 include_once $basepath . '/vendor/autoload.php';
 
 // Create a template from the html in the buffer
-$buff = ob_get_clean();
+$html = ob_get_clean();
 
 \Dom\Template::addTemplateParser(\Dom\Parser\FormParser::class);
-$template = \Dom\Template::load($buff);
+$template = \Dom\Template::load($html);
 $formParser = $template->getParser(\Dom\Parser\FormParser::class);
+
+$domForm = $formParser->getForm('contactForm');
 
 // Set the pageTitle tag  --> <h1 var="pageTitle">Default Text</h1>
 $template->setText('pageTitle', 'Dynamic Form Example');
-$domForm = $formParser->getForm('contactForm');
 
 // Init any form elements to a default status
 $select = $domForm->getFormElement('country');

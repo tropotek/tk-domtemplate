@@ -5,7 +5,7 @@ use Dom\Template;
 
 /**
  * Add the get/set template methods to your renderer object
- * Do not forget to implement the DisplayInterface if you need the show() method
+ * Remember to implement the DisplayInterface if you need the show() method
  *
  * @author Tropotek <http://www.tropotek.com/>
  */
@@ -24,7 +24,6 @@ trait RendererTrait
     }
 
     /**
-     * Get the template
      * This method will try to call the magic method __makeTemplate
      * to create a template within the object if non exits.
      */

@@ -3,13 +3,13 @@ namespace Dom\Modifier;
 
 
 /**
- * This class is meant to be an indicator of sizes not an exact measurement
+ * This class is meant to be an indicator of sizes, not an exact measurement
  *
- * For example any styles loaded using @import or flies loaded by dynamic javascript
+ * For example, any styles loaded using @import or flies loaded by dynamic JavaScript
  * will not be calculated.
  *
  * Note: No image sizes are calculated.
- * Note: Do not use in production environments.
+ * Note: Not for use in production environments.
  *
  * @author Tropotek <http://www.tropotek.com/>
  * @requires https://github.com/tropotek/tk-framework (v8.0+)

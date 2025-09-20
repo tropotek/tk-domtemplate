@@ -242,7 +242,7 @@ Then we can access the form through the code lik this:
 
 ```php
 <?php
-$template = \Dom\Template::load($buff);
+$template = \Dom\Template::load($html);
 
 // Set the pageTitle tag  --> <h1 var="pageTitle">Default Text</h1>
 $template->setText('pageTitle', 'Dynamic Form Example');

@@ -1,7 +1,6 @@
 <?php
 namespace Dom\Modifier;
 
-
 /**
  * Convert Urls to Template relative and Project relative urls
  *
@@ -13,24 +12,19 @@ namespace Dom\Modifier;
  *   in this case if the template path was in '/html/default' the converted path
  *   would be <img src="/html/default/img/image.png" />
  *   All links in pages even in sub paths would be converted
- *   <img src="./docs/api/image.png" />  TO  <img src="/html/default/docs/api/image.png" />
- *   <img src="./image.png" />  TO  <img src="/html/default/image.png" />
+ *   <img src="./docs/api/image.png" /> => <img src="/html/default/docs/api/image.png" />
+ *   <img src="./image.png" /> => <img src="/html/default/image.png" />
  *
  * Absolute: <img src="/img/image.png" />, <img src="img/image.png" />
  *   For absolute paths we assume the template is accessing
  *   assets from the project base. So a path of "/js/image.png"
  *   will be converted to "{projectPath}/js/image.png".
  *   Assuming the project baseUrl is '/project'
- *   <img src="image.png" />  TO  <img src="/project/image.png" />
- *   <img src="/img/image.png" />  TO  <img src="/project/img/image.png" />
+ *   <img src="image.png" /> => <img src="/project/image.png" />
+ *   <img src="/img/image.png" /> => <img src="/project/img/image.png" />
  *
- * The modifier attempts to convert some javascript event attribute paths but it is expected
- * that the designer uses javascript to config paths using the project code.
- *
- *  TODO:
- *       Refactor this to only replace full paths:
- *       <img src="/img/image.png" />  TO  <img src="/project/img/image.png" />
- *       All relative and template URLS can be removed...
+ * The modifier attempts to convert some JavaScript event attribute paths, but it is expected
+ * that the designer uses JavaScript to config paths using the project code.
  *
  * @author Tropotek <https://www.tropotek.com/>
  * @requires https://github.com/tropotek/tk-framework (v8.0+)
@@ -46,7 +40,7 @@ class UrlPath extends ModifierInterface
     public static bool $IS_DEBUG = false;
 
     /**
-     * element attributes to search for path URL`s
+     * element attributes to search for path URL's
      */
     protected array $attrSrc = [
         'src', 'href', 'action', 'background',  // standard attributes
@@ -61,7 +55,7 @@ class UrlPath extends ModifierInterface
 
 
     /**
-     * The site base Url path
+     * The sites base URL path
      */
     protected string $baseUrl = '';
 
@@ -100,7 +94,7 @@ class UrlPath extends ModifierInterface
                 }
                 if ($noRel) continue;
 
-                // And start of URL  matched existing dev path, then ignore.
+                // If the start of a URL matches an existing dev path, then ignore.
                 // Temp fix to stop conversion of WYSIWYG links in debug mode.
                 if (self::$IS_DEBUG && !empty(rtrim($this->baseUrl, '/')) && str_starts_with($attr->value, $this->baseUrl)) {
                     continue;
@@ -149,7 +143,7 @@ class UrlPath extends ModifierInterface
     /**
      * Prepend the path to a relative link
      *
-     * Eg:
+     * E.g.:
      *      $path = /path/to/resource.js
      *      return /site/root/path/to/resource.js
      */
@@ -182,7 +176,7 @@ class UrlPath extends ModifierInterface
     }
 
     /**
-     * replace a string with paths using string replace.
+     * Replace a string with paths using string replace.
      * Useful for urls in script text and comments.
      */
     protected function replaceStr(string $str): string

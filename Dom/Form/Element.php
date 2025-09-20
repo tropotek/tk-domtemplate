@@ -4,7 +4,7 @@ namespace Dom\Form;
 use Dom\Template;
 
 /**
- * All form elements must use this class/interface.
+ * Base element for all form elements.
  *
  * @author Tropotek <http://www.tropotek.com/>
  */

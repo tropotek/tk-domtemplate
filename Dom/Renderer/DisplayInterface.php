@@ -15,11 +15,11 @@ interface DisplayInterface
 
     /**
      * Implement this in your object to be rendered.
-     * All the code to modify the Template object should reside here
-     * and once done return the Template.
-     * Be sure to avoid calling this after the template has been parsed
      *
-     * You can call $template->isParsed() and if true return the template to be sure.
+     * All the code to modify your Template variable elements should reside here
+     * and once done, return the Template.
+     *
+     * Not to be called after the template has been parsed, use `$template->isParsed()` if you need to check.
      */
     function show(): ?Template;
 

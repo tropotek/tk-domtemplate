@@ -59,7 +59,6 @@ In hac habitasse platea dictumst.</p>');
 $template->appendText('content01', $content);
 $template->appendHtml('content02', $content);
 $template->appendHtml('content02', $content);
-//$template->replaceHtml('content02', $content);
 
 // Add some list data --> <ul choice="list">...
 $listData = array('http://www.tropotek.com/' => 'Tropotek Home Page', 'http://www.phpdruid.com/' => 'PHPDruid Home Page', 'http://www.domtemplate.com' => 'Php Dom Template');
@@ -74,7 +73,6 @@ foreach ($listData as $url => $value) {
     $repeat->setAttr('listUrl', 'onclick', 'window.open(this.href);return false;');
     $repeat->appendRepeat();
 }
-
 
 echo $template->toString();
 

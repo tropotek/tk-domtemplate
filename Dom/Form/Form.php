@@ -4,12 +4,13 @@ namespace Dom\Form;
 use Dom\Template;
 
 /**
- * The form package make an API available for rendering a form and its elements
+ * Basic form and form element management class.
  *
- * The form package currently does not fully support element multidimensional arrays.
- * It can be done it is not fully supported or tested.
+ * The form package currently does not fully support multidimensional arrays for form elements.
+ * You may have to create your own form classes to support this.
  *
  * @author Tropotek <http://www.tropotek.com/>
+ * @requires \Dom\Parser\FormParser
  */
 class Form
 {

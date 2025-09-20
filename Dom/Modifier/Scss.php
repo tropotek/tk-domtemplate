@@ -11,11 +11,13 @@ use Tk\System;
 use Tk\Uri;
 
 /**
- * Compile all CSS SCSS code to CSS
- * This enables SCSS files to be added to your HTML headers just like CSS:
+ * Compile any SCSS code to CSS found within a template.
+ *
+ * This enables the ability to add SCSS files to HTML template headers just like CSS:
  * ```
  *    <link href="https://example.org/assets/css/bootstrap.scss" rel="stylesheet">
  * ```
+ *
  * They will be compiled/cached, the CSS result will be added in it place.
  * All files are compiled together, see http://leafo.github.io/scssphp/docs/ for more info.
  *
