@@ -1,8 +1,8 @@
 # PHP DomTemplate :boom: 
 
 __Project:__ [ttek/tk-domtemplate](http://packagist.org/packages/ttek/tk-domtemplate)  
-__Web:__ <http://domtemplate.tropotek.com/>  
 __Authors:__ Michael Mifsud <http://www.tropotek.com/>  
+__Documentation:__ <http://domtemplate.tropotek.com/>  
 
 
 
