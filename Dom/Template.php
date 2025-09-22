@@ -48,15 +48,6 @@ class Template
     public static string $ATTR_REPEAT = 'repeat';
 
     /**
-     * Parsers that are instantiated when a Template is constructed.
-     * Recommended to keep these to a minimum.
-     * Use DOM Modifiers where possible.
-     *
-     * @var array<string,string>
-     */
-    protected static array $TEMPLATE_PARSERS = [];
-
-    /**
      * The character encoding use with this Template
      */
     protected string $encoding = 'UTF-8';
@@ -131,12 +122,6 @@ class Template
      * Set to true if this template has been parsed
      */
     protected bool $parsed = false;
-
-    /**
-     * The list of parsers attached to this template
-     * @var array<string,ParserInterface>
-     */
-    protected array $parsers = [];
 
     /**
      * The template node list for all parsable nodes
@@ -266,14 +251,6 @@ class Template
             $this->html = strval($this->document->saveHTML());
         }
 
-        if (!empty(self::$TEMPLATE_PARSERS) && empty($this->parsers)) {
-            foreach (self::$TEMPLATE_PARSERS as $parser) {
-                /** @var ParserInterface $p */
-                $p = new $parser($this);
-                $this->parsers[$parser] = $p;
-            }
-        }
-
         $this->prepare($this->document->documentElement);
 
         return $this;
@@ -332,9 +309,7 @@ class Template
             }
 
             // Call attached parsers
-            foreach ($this->parsers as $parser) {
-                $parser->prepare($node, $form);
-            }
+            Parser::instance($this)->prepare($node, $form);
 
             // iterate through the dom elements
             foreach ($node->childNodes as $child) {
@@ -357,9 +332,7 @@ class Template
             $this->parsing = true;
 
             // Call attached parsers
-            foreach ($this->parsers as $parser) {
-                $parser->preParse();
-            }
+            Parser::instance($this)->preParse();
 
             // Insert body templates
             if ($this->body) {
@@ -448,9 +421,7 @@ class Template
             }
 
             // Call attached parsers
-            foreach ($this->parsers as $parser) {
-                $parser->postParse();
-            }
+            Parser::instance($this)->postParse();
         }
 
         // finalized parsed document
@@ -1479,34 +1450,5 @@ class Template
             $node->removeChild($node->childNodes->item(0));
         }
         return $this;
-    }
-
-    /**
-     * Get a parser instance for this template
-     */
-    public function getParser(string $class): ?ParserInterface
-    {
-        return $this->parsers[$class] ?? null;
-    }
-
-    public static function registerParser(string $parserClass): void
-    {
-        if (!class_exists($parserClass)) {
-            throw new Exception('Parser class does not exist: ' . $parserClass);
-        }
-        self::$TEMPLATE_PARSERS[$parserClass] = $parserClass;
-    }
-
-    /**
-     * @return array<string,string>
-     */
-    public static function getRegisteredParsers(): array
-    {
-        return self::$TEMPLATE_PARSERS;
-    }
-
-    public static function resetRegisteredParsers(): void
-    {
-        self::$TEMPLATE_PARSERS = [];
     }
 }

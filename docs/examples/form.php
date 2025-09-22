@@ -1,5 +1,7 @@
 <?php
 // Start the output buffer
+use Dom\Parser\FormParser;
+
 ob_start();
 ?>
 <!doctype html>
@@ -78,9 +80,14 @@ include_once $basepath . '/vendor/autoload.php';
 // Create a template from the html in the buffer
 $html = ob_get_clean();
 
-\Dom\Template::registerParser(\Dom\Parser\FormParser::class);
+// register the form parser to access form nodes
+$formParser = new FormParser();
+\Dom\Parser::instance()->registerParser($formParser);
+
 $template = \Dom\Template::load($html);
-$formParser = $template->getParser(\Dom\Parser\FormParser::class);
+
+// optional: remove the registered form parsers, do not do this if you want to create more templates implementing the same parsers.
+// \Dom\Parser::instance()->clear();
 
 // Set the pageTitle tag  --> <h1 var="pageTitle">Default Text</h1>
 $template->setText('pageTitle', 'Dynamic Form Example');

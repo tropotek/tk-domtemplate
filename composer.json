@@ -30,12 +30,11 @@
     }
   },
   "require": {
-    "php": "^7.4 || ^8.0",
+    "php": "^8.3",
     "ext-libxml": "*",
     "ext-dom": "*",
     "ext-mbstring": "*",
-    "ext-tidy": "*",
-    "psr/log": "^3.0.2"
+    "ext-tidy": "*"
   },
   "extra": {
     "branch-alias": {

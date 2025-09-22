@@ -19,20 +19,18 @@ Template instances.
 
 // ...
 
-// Register the parser to load for all template forms call \Dom\Template::clearTemplateParsers() to reset.
-\Dom\Template::registerParser(\Dom\Parser\FormParser::class);
+// register the form parser to access form nodes
+$formParser = new FormParser();
+\Dom\Parser::instance()->registerParser($formParser);
 
-// Load the template containing the form markup.
 $template = \Dom\Template::load($html);
 
-// Get the form from the parser object.
-$formParser = $template->getParser(\Dom\Parser\FormParser::class);
+// optional: remove the registered form parsers, do not do this if you want to create more templates implementing the same parsers.
+// \Dom\Parser::instance()->clear();
+
 $domForm = $formParser->getForm();
 
 // ...
-
-// Clear all registered Template parsers 
-\Dom\Template::resetRegisteredParsers();
 
 ```
 
