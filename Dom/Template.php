@@ -576,13 +576,13 @@ class Template
     /**
      * Get a repeating region from a document.
      */
-    public function getRepeat(string $repeat): ?Repeat
+    public function getRepeat(string $repeat): Repeat
     {
         $repeat = $this->getNode(self::TYPE_REPEAT, $repeat);
-        if ($repeat instanceof Repeat) {
-            return clone $repeat;
+        if (!($repeat instanceof Repeat)) {
+            throw new \Exception('Invalid repeat name: ' . $repeat);
         }
-        return null;
+        return clone $repeat;
     }
 
     /**
