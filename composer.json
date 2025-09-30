@@ -9,7 +9,7 @@
   "authors": [
     {
       "name": "Michael Mifsud",
-      "homepage": "http://www.tropotek.com/"
+      "homepage": "https://www.tropotek.com/"
     }
   ],
   "funding": [
@@ -32,7 +32,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-8.0": "8.1.x-dev"
+      "dev-master": "8.1.x-dev"
     }
   }
 }
