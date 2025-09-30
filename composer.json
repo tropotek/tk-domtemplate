@@ -2,16 +2,10 @@
   "name": "ttek/tk-domtemplate",
   "type": "library",
   "description": "PHP DomTemplate library",
-  "keywords": [
-    "tropotek",
-    "DomTemplate",
-    "DOM",
-    "HTML",
-    "XML",
-    "scss"
-  ],
+  "keywords": ["tropotek", "DomTemplate", "DOM", "HTML", "XML", "scss"],
   "time": "2025-07-12",
   "license": "MIT",
+  "minimum-stability": "dev",
   "authors": [
     {
       "name": "Michael Mifsud",
