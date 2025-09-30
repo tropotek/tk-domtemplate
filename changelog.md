@@ -1,5 +1,12 @@
 #CHANGELOG#
 
+Ver 8.1.0 [2025-09-30]:
+-------------------------------
+  - Merge branch '8.0' of github.com:tropotek/tk-domtemplate into 8.0
+  - Major refactor of DomTemplate lib
+  - start of new documentation and template refactoring
+
+
 Ver 8.0.40 [2025-08-01]:
 -------------------------------
 
