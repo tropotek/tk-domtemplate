@@ -1,5 +1,9 @@
 #CHANGELOG#
 
+Ver 8.0.42 [2025-09-30]:
+-------------------------------
+
+
 Ver 8.1.0 [2025-09-30]:
 -------------------------------
   - Merge branch '8.0' of github.com:tropotek/tk-domtemplate into 8.0
