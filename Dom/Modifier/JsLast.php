@@ -123,6 +123,7 @@ class JsLast extends ModifierInterface
         foreach ($array as &$item) {
             $item = [$index++, $item];
         }
+        // @phpstan-ignore-next-line
         usort($array, $value_compare_func);
         // TODO: this needs to be tested
 //        usort($array, function($a, $b) use($value_compare_func) {
