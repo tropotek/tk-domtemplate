@@ -123,8 +123,11 @@ class Scss extends ModifierInterface
             foreach ($this->source as $path => $v) {
                 $path = strval($path);
                 if (preg_match('/\.scss/', $path) && is_file($path)) {
-                    //\Tk\Log::debug('SCSS Compiling File: ' . $path);
-                    $scss->setImportPaths(array($this->baseUrl, dirname($path)));
+                    // remove empty paths
+                    $paths = [$this->baseUrl, dirname($path)];
+                    $paths = array_filter($paths);
+
+                    $scss->setImportPaths($paths);
                     $src = strval(file_get_contents($path));
                     $cCss = $scss->compileString($src);
                     $css .= $cCss->getCss();
