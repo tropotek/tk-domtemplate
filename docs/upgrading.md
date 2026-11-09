@@ -19,6 +19,8 @@ Keep your constraint on 8.x and Composer will never pick up v9:
 
 Older lines are still available on their own branches: `8.0`, `7.0`, `3.2` and `3.0`.
 
+The 8.x documentation is still at <https://domtemplate.tropotek.com/> (no longer updated).
+
 ## What changes in v9
 
 Changes already on `main`:
