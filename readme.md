@@ -2,7 +2,7 @@
 
 __Project:__ [ttek/tk-domtemplate](http://packagist.org/packages/ttek/tk-domtemplate)  
 __Authors:__ Michael Mifsud <http://www.tropotek.com/>  
-__Documentation:__ <http://domtemplate.tropotek.com/>  
+__Documentation:__ <https://tropotek.github.io/tk-domtemplate/>  
 
 
 

@@ -1,32 +1,74 @@
 site_name: PHP DomTemplate
-site_url: https://domtemplate.tropotek.com/
-repo_url: https://github.com/tropotek/tk-domtemplate/
-site_description: 'PHP DomTemplate, a fast and simple template engine for PHP'
-site_author: 'Michael Mifsud <http://www.tropotek.com/>'
-copyright: 'Copyright (c) 2008-present Tropotek'
-use_directory_urls: false
-theme: readthedocs
+site_description: Attribute-driven HTML templates for PHP. Layout stays in HTML, render logic stays in PHP.
+site_url: https://tropotek.github.io/tk-domtemplate/
+repo_url: https://github.com/tropotek/tk-domtemplate
+repo_name: tropotek/tk-domtemplate
+edit_uri: edit/main/docs/
+site_author: Michael Mifsud
+copyright: Copyright &copy; 2008-present Tropotek
+docs_dir: docs
+exclude_docs: |
+  requirements.txt
+  *.py
+
+theme:
+  name: material
+  favicon: img/favicon.ico
+  icon:
+    logo: material/code-tags
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.indexes
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - content.code.copy
+    - content.action.edit
 
 nav:
   - Home: index.md
-  - Dom Template: domTemplate.md
-  - Dom Form: domForm.md
-  - Dom Renderer: domRenderer.md
-  - Dom Parser: domParser.md
-  - Dom Modifier: domModifier.md
-  - Dom Builder: domBuilder.md
-  - Symfony Integration: symfony.md
+  - Getting started: getting-started.md
+  - Example site: examples.md
+  - Guides:
+      - Templates: domTemplate.md
+      - Forms: domForm.md
+      - Renderers: domRenderer.md
+      - Parsers: domParser.md
+      - Modifiers: domModifier.md
+      - Builder: domBuilder.md
+      - Symfony integration: symfony.md
+  - Upgrading from 8.x: upgrading.md
 
 markdown_extensions:
-  - toc:
-      permalink: true
   - admonition
   - attr_list
   - def_list
   - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.details
 
-plugins:
-  - search
-
-exclude_docs: |
-  *.py
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+  links:
+    not_found: warn

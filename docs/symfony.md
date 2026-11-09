@@ -1,4 +1,4 @@
-# Intergrate DomTemplate into Symfony
+# Symfony integration
 
 ## Symfony Response Handler
 

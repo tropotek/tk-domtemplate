@@ -1,4 +1,4 @@
-# Getting Started with Tk\DomTemplate\Template
+# Templates
 
 This guide shows how to load, modify, and render HTML using the Tk\DomTemplate\Template class. It assumes you’re familiar with PHP and the DOM extension.
 

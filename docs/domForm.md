@@ -1,5 +1,5 @@
 
-# Getting Started with Tk\DomTemplate\Form
+# Forms
 
 This guide introduces the Tk\DomTemplate\Form API and its element wrappers to help you read and 
 manipulate form markup from a Tk\DomTemplate\Template.
