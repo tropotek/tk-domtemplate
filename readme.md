@@ -115,11 +115,11 @@ The `example/` folder is a small Bootstrap site that shows each feature with its
 It runs in a FrankenPHP container:
 
 ```bash
+cp .env.example .env   # set APP_HOST, HTTP_APP_PORT, APP_UID/APP_GID
 docker compose up -d --build
 ```
 
-Then open <http://localhost:8080>. Set `HTTP_APP_PORT` to use another port, and
-`APP_UID`/`APP_GID` if your host user isn't 1000.
+Then open `http://APP_HOST:HTTP_APP_PORT` (<http://127.0.0.1:8080> with the defaults).
 
 
 ## Contributing
