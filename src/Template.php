@@ -346,7 +346,7 @@ class Template
             foreach ($this->getNodeList(self::TYPE_REPEAT) as $name => $nodes) {
                 foreach ($nodes as $repeat) {
                     $node = $repeat->getRepeatNode();
-                    if (!$node instanceof DOMElement || !isset($node->parentNode) || !$node->parentNode) {
+                    if (!$node instanceof DOMElement || !isset($node->parentNode)) {
                         continue;
                     }
                     $node->parentNode->removeChild($node);
@@ -357,7 +357,7 @@ class Template
             // Remove nodes marked hidden
             foreach ($this->getNodeList(self::TYPE_VAR) as $var => $nodes) {
                 foreach ($nodes as $node) {
-                    if (!$node instanceof DOMElement || !isset($node->parentNode) || !$node->parentNode) continue;
+                    if (!$node instanceof DOMElement || !isset($node->parentNode)) continue;
                     if ($node->hasAttribute(self::ATTR_DELETE)) {
                         $node->parentNode->removeChild($node);
                     }
@@ -367,7 +367,7 @@ class Template
             // Remove choice node marked hidden
             foreach ($this->getNodeList(self::TYPE_CHOICE) as $choice => $nodes) {
                 foreach ($nodes as $node) {
-                    if (!$node instanceof DOMElement || !isset($node->parentNode) || !$node->parentNode) continue;
+                    if (!$node instanceof DOMElement || !isset($node->parentNode)) continue;
                     if ($node->hasAttribute(self::ATTR_DELETE)) {
                         $node->parentNode->removeChild($node);
                     }

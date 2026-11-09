@@ -116,15 +116,15 @@ class Select extends Element
      */
     public function getValue(): string|array
     {
-        $selected = $this->findSelected($this->element);
-        if (count($selected) > 0) {
-            if ($this->isMultiple()) {
-                return array_map(fn($r) => $r->textContent, $selected);
-            } else {
-                return $selected[0]->textContent;
-            }
+        // Like a browser, an option without a value attribute submits its text
+        $values = array_map(
+            fn(\DOMElement $r) => $r->hasAttribute('value') ? $r->getAttribute('value') : $r->textContent,
+            $this->findSelected($this->element)
+        );
+        if ($this->isMultiple()) {
+            return $values;
         }
-        return '';
+        return $values[0] ?? '';
     }
 
     public function removeOptions(): self

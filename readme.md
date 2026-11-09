@@ -122,6 +122,18 @@ docker compose up -d --build
 Then open `http://APP_HOST:HTTP_APP_PORT` (<http://127.0.0.1:8080> with the defaults).
 
 
+## Development
+
+With the container running:
+
+```bash
+docker compose exec app composer check   # phpstan + PHPUnit
+```
+
+To release, add a `Ver X.Y.Z [unreleased]:` section to `changelog.md`, then run `bin/release X.Y.Z`.
+It runs the checks, stamps the version and date, tags, and asks before pushing.
+
+
 ## Contributing
 
 If you wish to contribute updates to the code or documentation, we are open to any requests.

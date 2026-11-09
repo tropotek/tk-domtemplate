@@ -6,6 +6,9 @@ Ver 9.0.0 [unreleased]:
   - BREAKING: requires PHP 8.4+
   - Source moved from `Dom/` to `src/`
   - 8.x maintenance continues on the `8.1` branch
+  - Fix: `Select::getValue()` returned option labels instead of values
+  - Fix: `FormParser` never found a form by its `name` attribute
+  - Added PHPUnit tests and a CI workflow
 
 Ver 8.1.0 [2026-07-17]:
 -------------------------------

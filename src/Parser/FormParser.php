@@ -30,7 +30,7 @@ class FormParser extends ParserInterface
 
         // Store all Form nodes
         if ($node->nodeName == 'form') {
-            $this->currFormId = strval($node->getAttribute('id') ?? $node->getAttribute('name') ?? '');
+            $this->currFormId = $node->getAttribute('id') ?: $node->getAttribute('name');
             if (!$this->currFormId) {
                 $this->currFormId = 'form-' . count($this->form);
             }

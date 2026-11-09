@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Release a version from main: run the checks, stamp version.md and the changelog,
+# commit, tag, and ask before pushing. Packagist picks up the tag on push.
+#
+#   bin/release 9.0.0
+#
+# The changelog needs a "Ver X.Y.Z [unreleased]:" heading for the version first.
+set -euo pipefail
+
+version="${1:-}"
+if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+    echo "Usage: bin/release MAJOR.MINOR.PATCH[-pre]" >&2
+    exit 1
+fi
+
+cd "$(dirname "$0")/.."
+
+if [[ "$(git rev-parse --abbrev-ref HEAD)" != "main" ]]; then
+    echo "Release from main. 8.x releases are made on the 8.1 branch." >&2
+    exit 1
+fi
+if [[ -n "$(git status --porcelain)" ]]; then
+    echo "Commit or stash your changes first." >&2
+    exit 1
+fi
+if git rev-parse -q --verify "refs/tags/$version" >/dev/null; then
+    echo "Tag $version already exists." >&2
+    exit 1
+fi
+
+# main is aliased to one major version (e.g. 9.0.x-dev); don't tag outside it
+alias_major="$(grep -oE '"dev-main": "[0-9]+' composer.json | grep -oE '[0-9]+$')"
+if [[ "${version%%.*}" != "$alias_major" ]]; then
+    echo "main is the $alias_major.x line (composer.json branch-alias); $version doesn't belong here." >&2
+    exit 1
+fi
+
+heading="Ver $version [unreleased]:"
+if ! grep -qF "$heading" changelog.md; then
+    echo "changelog.md has no '$heading' section." >&2
+    exit 1
+fi
+
+echo "==> phpstan and tests"
+# One-off container, so the example site needn't be running.
+# Without </dev/null, docker reads the terminal's input and takes the answer to the question below.
+docker compose run --rm --no-deps -T app composer check </dev/null
+
+today="$(date +%F)"
+sed -i "s/^Ver $version \[unreleased\]:/Ver $version [$today]:/" changelog.md
+printf '%s' "$version" > version.md
+
+git add changelog.md version.md
+git commit -q -m "Release $version"
+git tag -a "$version" -m "Release $version"
+echo "Committed and tagged $version."
+
+read -r -p "Push main and $version to origin now (publishes it on Packagist)? [y/N] " answer
+if [[ "$answer" =~ ^[Yy]$ ]]; then
+    git push origin main "$version"
+else
+    echo "Push later with: git push origin main $version"
+fi

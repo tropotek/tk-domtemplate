@@ -1,0 +1,33 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - docs/**
+      - mkdocs.yml
+      - "*.md"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ["8.4", "8.5"]
+    name: PHP ${{ matrix.php }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, libxml, mbstring, tidy
+          coverage: none
+      - run: composer install --no-interaction --no-progress
+      - run: composer stan
+      - run: composer test

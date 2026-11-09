@@ -2,7 +2,14 @@
   "name": "ttek/tk-domtemplate",
   "type": "library",
   "description": "PHP DomTemplate library",
-  "keywords": ["tropotek", "DomTemplate", "DOM", "HTML", "XML", "scss"],
+  "keywords": [
+    "tropotek",
+    "DomTemplate",
+    "DOM",
+    "HTML",
+    "XML",
+    "scss"
+  ],
   "time": "2025-07-12",
   "license": "MIT",
   "authors": [
@@ -22,6 +29,11 @@
       "Tk\\DomTemplate\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Tk\\DomTemplate\\Tests\\": "tests/"
+    }
+  },
   "require": {
     "php": "^8.4",
     "ext-libxml": "*",
@@ -29,9 +41,21 @@
     "ext-mbstring": "*",
     "ext-tidy": "*"
   },
+  "require-dev": {
+    "phpunit/phpunit": "^12.0",
+    "phpstan/phpstan": "^2.1"
+  },
   "extra": {
     "branch-alias": {
       "dev-main": "9.0.x-dev"
     }
+  },
+  "scripts": {
+    "test": "phpunit",
+    "stan": "phpstan analyse --no-progress --memory-limit=512M",
+    "check": [
+      "@stan",
+      "@test"
+    ]
   }
 }
