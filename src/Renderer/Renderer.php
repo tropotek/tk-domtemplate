@@ -1,10 +1,10 @@
 <?php
-namespace Dom\Renderer;
+namespace Tk\DomTemplate\Renderer;
 
-use Dom\Renderer\Traits\RendererTrait;
+use Tk\DomTemplate\Renderer\Traits\RendererTrait;
 
 /**
- * For classes that render \Dom\Templates.
+ * For classes that render \Tk\DomTemplate\Templates.
  *
  * If you extend this class, you can create a renderable template object.
  *

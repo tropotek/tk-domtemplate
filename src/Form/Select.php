@@ -1,5 +1,5 @@
 <?php
-namespace Dom\Form;
+namespace Tk\DomTemplate\Form;
 
 /**
  * Handle rendering of a form select element.

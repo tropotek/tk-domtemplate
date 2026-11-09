@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The PHP \Dom\Template wraps the DOMDocument and provides a fast, attribute-driven way to render 
+The PHP \Tk\DomTemplate\Template wraps the DOMDocument and provides a fast, attribute-driven way to render 
 HTML templates. We did not want another template language within a language, but a way to use PHP
 to render HTML templates keeping the render logic within PHP and the style and layout logic in HTML.
 
@@ -10,7 +10,7 @@ An important feature for us was the template layout and design were kept in the 
 edited by designers and not be affected by what the developers in the team are doing. Making communication 
 between developers and designers relatively easy for most tasks. 
 
-The \Dom\Template system enables developers to develop and share a basic markup structure, designers can then 
+The \Tk\DomTemplate\Template system enables developers to develop and share a basic markup structure, designers can then 
 see visually and understand what the minimum markup requirements are. 
 Saving on communication time and allowing designers to focus on making the project look great.
 
@@ -84,7 +84,7 @@ include_once $basepath . '/vendor/autoload.php';
 
 // Create a template from the html in the buffer
 $html = trim(ob_get_clean());
-$template = \Dom\Template::load($buff);
+$template = \Tk\DomTemplate\Template::load($buff);
 
 // Add some style
 $template->appendCssUrl('stylesheet.css');

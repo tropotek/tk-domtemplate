@@ -1,7 +1,7 @@
 <?php
-namespace Dom\Renderer;
+namespace Tk\DomTemplate\Renderer;
 
-use Dom\Template;
+use Tk\DomTemplate\Template;
 
 /**
  * @author Template <http://www.tropotek.com/>

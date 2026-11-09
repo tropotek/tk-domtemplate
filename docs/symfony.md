@@ -11,9 +11,9 @@ and apply any required final formatting to the final output.
 
 ```php
 <?php
-use Dom\Modifier;
-use Dom\Renderer\DisplayInterface;
-use Dom\Template;
+use Tk\DomTemplate\Modifier;
+use Tk\DomTemplate\Renderer\DisplayInterface;
+use Tk\DomTemplate\Template;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;

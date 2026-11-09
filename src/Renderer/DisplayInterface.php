@@ -1,7 +1,7 @@
 <?php
-namespace Dom\Renderer;
+namespace Tk\DomTemplate\Renderer;
 
-use Dom\Template;
+use Tk\DomTemplate\Template;
 
 /**
  * use this on objects that use a show() method and return a template.

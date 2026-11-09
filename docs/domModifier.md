@@ -29,7 +29,7 @@ $html = <<<HTML
 </div>
 HTML;
 
-$template = \Dom\Template::load($html);
+$template = \Tk\DomTemplate\Template::load($html);
 
 // This will remove the comments from the DOM
 echo $dm->execute($template->getDocument());

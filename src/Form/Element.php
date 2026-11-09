@@ -1,7 +1,7 @@
 <?php
-namespace Dom\Form;
+namespace Tk\DomTemplate\Form;
 
-use Dom\Template;
+use Tk\DomTemplate\Template;
 
 /**
  * Base element for all form elements.

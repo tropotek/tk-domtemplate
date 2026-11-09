@@ -1,5 +1,5 @@
 <?php
-namespace Dom;
+namespace Tk\DomTemplate;
 
 /**
  * @author Tropotek <http://www.tropotek.com/>

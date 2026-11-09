@@ -1,5 +1,5 @@
 <?php
-namespace Dom;
+namespace Tk\DomTemplate;
 
 /**
  * A repeat region is a sub template of its parent template.

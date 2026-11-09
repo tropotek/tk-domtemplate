@@ -1,5 +1,5 @@
 <?php
-namespace Dom;
+namespace Tk\DomTemplate;
 
 /**
  * A class uses HTML `id` attributes as hooks to create DomTemplate's from.

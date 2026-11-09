@@ -1,5 +1,12 @@
 #CHANGELOG#
 
+Ver 9.0.0 [unreleased]:
+-------------------------------
+  - BREAKING: namespace `Dom\` renamed to `Tk\DomTemplate\` (PHP 8.4 owns `Dom\`)
+  - BREAKING: requires PHP 8.4+
+  - Source moved from `Dom/` to `src/`
+  - 8.x maintenance continues on the `8.1` branch
+
 Ver 8.1.0 [2026-07-17]:
 -------------------------------
   - updates

@@ -1,5 +1,5 @@
 <?php
-namespace Dom\Modifier;
+namespace Tk\DomTemplate\Modifier;
 
 
 /**

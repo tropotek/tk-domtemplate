@@ -1,7 +1,7 @@
 <?php
-namespace Dom\Modifier;
+namespace Tk\DomTemplate\Modifier;
 
-use Dom\Modifier;
+use Tk\DomTemplate\Modifier;
 
 /**
  * The interface for all Modifier objects

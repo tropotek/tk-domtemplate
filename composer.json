@@ -19,11 +19,11 @@
   ],
   "autoload": {
     "psr-4": {
-      "Dom\\": "Dom/"
+      "Tk\\DomTemplate\\": "src/"
     }
   },
   "require": {
-    "php": "^8.3",
+    "php": "^8.4",
     "ext-libxml": "*",
     "ext-dom": "*",
     "ext-mbstring": "*",
@@ -31,7 +31,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-main": "8.1.x-dev"
+      "dev-main": "9.0.x-dev"
     }
   }
 }

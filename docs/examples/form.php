@@ -1,6 +1,6 @@
 <?php
 // Start the output buffer
-use Dom\Parser\FormParser;
+use Tk\DomTemplate\Parser\FormParser;
 
 ob_start();
 ?>
@@ -82,12 +82,12 @@ $html = ob_get_clean();
 
 // register the form parser to access form nodes
 $formParser = new FormParser();
-\Dom\Parser::instance()->registerParser($formParser);
+\Tk\DomTemplate\Parser::instance()->registerParser($formParser);
 
-$template = \Dom\Template::load($html);
+$template = \Tk\DomTemplate\Template::load($html);
 
 // optional: remove the registered form parsers, do not do this if you want to create more templates implementing the same parsers.
-// \Dom\Parser::instance()->clear();
+// \Tk\DomTemplate\Parser::instance()->clear();
 
 // Set the pageTitle tag  --> <h1 var="pageTitle">Default Text</h1>
 $template->setText('pageTitle', 'Dynamic Form Example');
@@ -96,7 +96,7 @@ $domForm = $formParser->getForm('contactForm');
 
 // Init any form elements to a default status
 $select = $domForm->getFormElement('country');
-/* @var $select \Dom\Form\Select */
+/* @var $select \Tk\DomTemplate\Form\Select */
 $select->appendOption('-- Select --', '');
 $select->appendOption('New Zealand', 'NZ');
 $select->appendOption('England', 'UK');

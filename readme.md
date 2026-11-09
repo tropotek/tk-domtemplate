@@ -6,9 +6,13 @@ __Documentation:__ <http://domtemplate.tropotek.com/>
 
 
 
+> [!WARNING]
+> `main` is the **v9** rewrite and is not backward compatible with 8.x (new `Tk\DomTemplate\` namespace, PHP 8.4+).
+> Existing projects should stay on `^8.1` (branch [`8.1`](https://github.com/tropotek/tk-domtemplate/tree/8.1)). Upgrading requires a refactor.
+
 ## Introduction
 
-The PHP [\Dom\Template](http://domtemplate.tropotek.com/) wraps the DOMDocument and provides a fast, attribute-driven way to render
+The PHP [\Tk\DomTemplate\Template](http://domtemplate.tropotek.com/) wraps the DOMDocument and provides a fast, attribute-driven way to render
 HTML templates. We did not want another template language within a language, but a way to use PHP
 to render HTML templates keeping the render logic within PHP and the style and layout logic in HTML.
 
@@ -16,7 +20,7 @@ An important feature for us was the template layout and design were kept in the 
 edited by designers and not be affected by what the developers in the team are doing. Making communication
 between developers and designers relatively easy for most tasks.
 
-The \Dom\Template system enables developers to develop and share a basic markup structure, designers can then
+The \Tk\DomTemplate\Template system enables developers to develop and share a basic markup structure, designers can then
 see visually and understand what the minimum markup requirements are.
 Saving on communication time and allowing designers to focus on making the project look great.
 
@@ -53,7 +57,7 @@ Or add the following to your composer.json file:
 ```json
 {
   "require": {
-    "ttek/tk-domtemplate": "~8.1"
+    "ttek/tk-domtemplate": "^9.0"
   }
 }
 ```
@@ -90,7 +94,7 @@ include_once $basepath . '/vendor/autoload.php';
 
 // Create a template from the html in the buffer
 $html = trim(ob_get_clean());
-$template = \Dom\Template::load($buff);
+$template = \Tk\DomTemplate\Template::load($buff);
 
 // Add some style
 $template->appendCssUrl('stylesheet.css');

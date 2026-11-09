@@ -34,7 +34,7 @@ include_once $basepath . '/vendor/autoload.php';
 // Create a template from the HTML in the buffer
 $buff = trim(ob_get_clean());
 
-$template = \Dom\Template::load($buff);
+$template = \Tk\DomTemplate\Template::load($buff);
 
 $template->appendCssUrl('stylesheet.css');
 //$template->appendJs('alert();');

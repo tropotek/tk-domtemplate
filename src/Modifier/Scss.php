@@ -1,7 +1,7 @@
 <?php
-namespace Dom\Modifier;
+namespace Tk\DomTemplate\Modifier;
 
-use Dom\Exception;
+use Tk\DomTemplate\Exception;
 use ScssPhp\ScssPhp\OutputStyle;
 use ScssPhp\ScssPhp\ValueConverter;
 use Tk\Cache\FileCache;

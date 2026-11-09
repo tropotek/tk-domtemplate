@@ -1,7 +1,7 @@
 <?php
-namespace Dom\Form;
+namespace Tk\DomTemplate\Form;
 
-use Dom\Template;
+use Tk\DomTemplate\Template;
 
 /**
  * Basic form and form element management class.
@@ -10,7 +10,7 @@ use Dom\Template;
  * You may have to create your own form classes to support this.
  *
  * @author Tropotek <http://www.tropotek.com/>
- * @requires \Dom\Parser\FormParser
+ * @requires \Tk\DomTemplate\Parser\FormParser
  */
 class Form
 {

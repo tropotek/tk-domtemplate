@@ -1,5 +1,5 @@
 <?php
-namespace Dom\Modifier;
+namespace Tk\DomTemplate\Modifier;
 
 /**
  * Convert Urls to Template relative and Project relative urls

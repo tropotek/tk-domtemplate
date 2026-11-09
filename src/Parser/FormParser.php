@@ -1,8 +1,8 @@
 <?php
 
-namespace Dom\Parser;
+namespace Tk\DomTemplate\Parser;
 
-use Dom\Form\Form;
+use Tk\DomTemplate\Form\Form;
 
 class FormParser extends ParserInterface
 {

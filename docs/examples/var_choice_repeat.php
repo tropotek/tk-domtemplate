@@ -43,7 +43,7 @@ include_once $basepath . '/vendor/autoload.php';
 
 // Create a template from the HTML in the buffer
 $buff = ob_get_clean();
-$template = \Dom\Template::load($buff);
+$template = \Tk\DomTemplate\Template::load($buff);
 
 // Set the pageTitle tag  --> <h1 var="pageTitle">Default Text</h1>
 $template->setText('pageTitle', 'Dynamic Page Title');

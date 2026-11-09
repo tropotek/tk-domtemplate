@@ -8,9 +8,9 @@ parameters:
   excludePaths:
     - _notes
     - docs
-    - site
+    - site (?)
   paths:
-    - Dom
+    - src
   ignoreErrors:
     - identifier: class.notFound
 #    - identifier: missingType.iterableValue

@@ -1,9 +1,9 @@
 <?php
 
-namespace Dom\Parser;
+namespace Tk\DomTemplate\Parser;
 
-use Dom\Parser;
-use Dom\Template;
+use Tk\DomTemplate\Parser;
+use Tk\DomTemplate\Template;
 
 /**
  * The interface for all DomTemplate Parser objects

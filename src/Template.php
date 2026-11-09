@@ -1,7 +1,7 @@
 <?php
-namespace Dom;
+namespace Tk\DomTemplate;
 
-use Dom\Parser\ParserInterface;
+use Tk\DomTemplate\Parser\ParserInterface;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
@@ -598,7 +598,7 @@ class Template
     /**
      * An internal function for the template and Parsers to add nodes to the Template
      * Not for external Template use.
-     * The node can really be anything, but the template uses it for `\DOMElement` and `Dom\Repeat` objects
+     * The node can really be anything, but the template uses it for `\DOMElement` and `Tk\DomTemplate\Repeat` objects
      */
     public function addNode(string $type, string $name, mixed $node): self
     {

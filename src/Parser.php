@@ -1,8 +1,8 @@
 <?php
 
-namespace Dom;
+namespace Tk\DomTemplate;
 
-use Dom\Parser\ParserInterface;
+use Tk\DomTemplate\Parser\ParserInterface;
 
 class Parser
 {

@@ -3,7 +3,7 @@
 
 ## Using a Template Renderer
 
-The template Dom\Renderer is a utility to create self-contained Template Renderer Objects.
+The template Tk\DomTemplate\Renderer is a utility to create self-contained Template Renderer Objects.
 
 This is useful for creating controllers within a MVC (Model View Controller) frameworks, like Symfony for example.
 
@@ -60,8 +60,8 @@ HTML;
 ```
 
 !!! Note
-    If you cannot extend your class, look at the implementation of the \Dom\Renderer\Renderer class.
-    You can use the \Dom\Renderer interfaces and traits to create your own renderer objects.
+    If you cannot extend your class, look at the implementation of the \Tk\DomTemplate\Renderer\Renderer class.
+    You can use the \Tk\DomTemplate\Renderer interfaces and traits to create your own renderer objects.
 
 
 

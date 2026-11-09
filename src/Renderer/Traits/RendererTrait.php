@@ -1,7 +1,7 @@
 <?php
-namespace Dom\Renderer\Traits;
+namespace Tk\DomTemplate\Renderer\Traits;
 
-use Dom\Template;
+use Tk\DomTemplate\Template;
 
 /**
  * Add the get/set template methods to your renderer object

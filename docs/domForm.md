@@ -1,12 +1,12 @@
 
-# Getting Started with Dom\Form
+# Getting Started with Tk\DomTemplate\Form
 
-This guide introduces the Dom\Form API and its element wrappers to help you read and 
-manipulate form markup from a Dom\Template.
+This guide introduces the Tk\DomTemplate\Form API and its element wrappers to help you read and 
+manipulate form markup from a Tk\DomTemplate\Template.
 
 ## Overview
 
-- Dom\Form wraps a single form element and provides helpers to:
+- Tk\DomTemplate\Form wraps a single form element and provides helpers to:
     - Check submit state
     - Configure action/method/target
     - Access and mutate form controls by name
@@ -15,16 +15,16 @@ manipulate form markup from a Dom\Template.
 
 Typical flow:
 
-- Load a Dom\Template that contains a form
-- Get a Dom\Form instance using the `\Dom\Parser\FormParser`
+- Load a Tk\DomTemplate\Template that contains a form
+- Get a Tk\DomTemplate\Form instance using the `\Tk\DomTemplate\Parser\FormParser`
 - Read and update fields, add hidden inputs, set action/method
 - Validate and process form submission
 - Render the template
 
 ## Get A Form Object
 
-Forms and elements are not natively available in Dom\Template. 
-To enable the \Dom\Form lib, you must register the [\Dom\Parser\FormParser](domParser.md):
+Forms and elements are not natively available in Tk\DomTemplate\Template. 
+To enable the \Tk\DomTemplate\Form lib, you must register the [\Tk\DomTemplate\Parser\FormParser](domParser.md):
 
 ```php
 <?php
@@ -34,13 +34,13 @@ To enable the \Dom\Form lib, you must register the [\Dom\Parser\FormParser](domP
 
 // register the form parser to access form nodes
 $formParser = new FormParser();
-\Dom\Parser::instance()->registerParser($formParser);
+\Tk\DomTemplate\Parser::instance()->registerParser($formParser);
 
-$template = \Dom\Template::load($html);
+$template = \Tk\DomTemplate\Template::load($html);
 
 // optional: remove the registered form parsers,
 // do not do this if you want to create more templates implementing the same parsers.
-\Dom\Parser::instance()->clear();
+\Tk\DomTemplate\Parser::instance()->clear();
 
 // Get the DOM form object.
 $domForm = $formParser->getForm('contactForm');
@@ -61,7 +61,7 @@ $select = $domForm->getFormElement('country');
 - Single element by name (and optional index):
 ```php
 <?php
-$el = $form->getFormElement('email');       // Dom\Form\Input|Textarea|Select|null
+$el = $form->getFormElement('email');       // Tk\DomTemplate\Form\Input|Textarea|Select|null
 $el2 = $form->getFormElement('choice[]', 1);  // second input named "choice[]"
 ```
 
@@ -103,7 +103,7 @@ $form->appendHiddenElement('csrf', $token);
 - Get all hidden inputs:
 ```php
 <?php
-$hidden = $form->getHiddenElements(); // array of Dom\Form\Input
+$hidden = $form->getHiddenElements(); // array of Tk\DomTemplate\Form\Input
 ```
 
 
@@ -123,7 +123,7 @@ $form->setCheckedByValue('color', 'blue'); // checks input[name=color][value=blu
 $form->getName();      // string (name attribute)
 $form->getId();        // string (id attribute)
 $form->getNode();      // \DOMElement (<form>)
-$form->getTemplate();  // Dom\Template (owning template)
+$form->getTemplate();  // Tk\DomTemplate\Template (owning template)
 ```
 
 
@@ -166,10 +166,10 @@ if ($country = $form->getFormElement('country')) {
 ```
 
 
-## Integration with Dom\Template
+## Integration with Tk\DomTemplate\Template
 
 - Build your form in HTML within a template.
-- Obtain Dom\Form from your integration point, then:
+- Obtain Tk\DomTemplate\Form from your integration point, then:
     - Pre-fill defaults (values, checked/selected states)
     - Add hidden fields (e.g., CSRF)
     - Configure action/method/target
@@ -228,9 +228,9 @@ include_once $basepath . '/vendor/autoload.php';
 // Create a template from the html in the buffer
 $html = ob_get_clean();
 
-\Dom\Template::registerParser(\Dom\Parser\FormParser::class);
-$template = \Dom\Template::load($html);
-$formParser = $template->getParser(\Dom\Parser\FormParser::class);
+\Tk\DomTemplate\Template::registerParser(\Tk\DomTemplate\Parser\FormParser::class);
+$template = \Tk\DomTemplate\Template::load($html);
+$formParser = $template->getParser(\Tk\DomTemplate\Parser\FormParser::class);
 
 $domForm = $formParser->getForm('contactForm');
 $domForm->setMethod('post');

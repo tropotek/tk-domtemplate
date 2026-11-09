@@ -1,6 +1,6 @@
-# Getting Started with Dom\Template
+# Getting Started with Tk\DomTemplate\Template
 
-This guide shows how to load, modify, and render HTML using the Dom\Template class. It assumes you’re familiar with PHP and the DOM extension.
+This guide shows how to load, modify, and render HTML using the Tk\DomTemplate\Template class. It assumes you’re familiar with PHP and the DOM extension.
 
 ## Basic Workflow
 
@@ -9,14 +9,14 @@ This guide shows how to load, modify, and render HTML using the Dom\Template cla
    - From a string:
 ```php
 <?php
-use Dom\Template;
+use Tk\DomTemplate\Template;
 
 $template = Template::load('<!doctype html><html><head><title></title></head><body><h1 var="heading"></h1></body></html>');
 ```
    - From a file:
 ```php
 <?php
-use Dom\Template;
+use Tk\DomTemplate\Template;
 
 $template = Template::loadFile(__DIR__ . '/template.html');
 ```
@@ -251,7 +251,7 @@ if ($template->isHtml5()) {
 - Enable tracing to tag injected JS/CSS with the attribute `data-dt-trace` showing callback location:
 ```php
 <?php
-Dom\Template::$ENABLE_TRACER = true;
+Tk\DomTemplate\Template::$ENABLE_TRACER = true;
 $template->appendJsUrl('/app.js'); // will include data-dt-trace
 ```
 
@@ -268,7 +268,7 @@ $template->appendJsUrl('/app.js'); // will include data-dt-trace
 
 ```php
 <?php
-use Dom\Template;
+use Tk\DomTemplate\Template;
 
 $html = '<!doctype html><html><head><title var="pageTitle"></title></head><body><h1 var="heading"></h1><div var="content"></div></body></html>';
 

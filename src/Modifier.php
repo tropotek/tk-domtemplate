@@ -1,7 +1,7 @@
 <?php
-namespace Dom;
+namespace Tk\DomTemplate;
 
-use Dom\Modifier\ModifierInterface;
+use Tk\DomTemplate\Modifier\ModifierInterface;
 use DOMComment;
 
 /**
@@ -21,8 +21,8 @@ use DOMComment;
  *
  * Example:
  * <code>
- *      $dm = new \Tk\Dom\Modifier();
- *      $dm->add(new \Tk\Dom\Modifier\Path($apUrl, $templateUrl));
+ *      $dm = new \Tk\DomTemplate\Modifier();
+ *      $dm->add(new \Tk\DomTemplate\Modifier\Path($apUrl, $templateUrl));
  *      $dm->execute($template->getDocument());
  * </code>
  *

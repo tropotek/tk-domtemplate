@@ -1,7 +1,7 @@
 # Template Parsers
 
 Template Parsers should be used sparingly and only when you need to 
-extend the functionality of the `\Dom\Template` class.
+extend the functionality of the `\Tk\DomTemplate\Template` class.
 
 To modify the final Template parsed DOM it is recommended to use a 
 [Template Modifier](domModifier.md).
@@ -11,7 +11,7 @@ To modify the final Template parsed DOM it is recommended to use a
 
 ## Registering a Parser
 
-Parsers are registered with the `\Dom\Template` object statically so that you can register them once for multiple 
+Parsers are registered with the `\Tk\DomTemplate\Template` object statically so that you can register them once for multiple 
 Template instances.
 
 ```php
@@ -21,12 +21,12 @@ Template instances.
 
 // register the form parser to access form nodes
 $formParser = new FormParser();
-\Dom\Parser::instance()->registerParser($formParser);
+\Tk\DomTemplate\Parser::instance()->registerParser($formParser);
 
-$template = \Dom\Template::load($html);
+$template = \Tk\DomTemplate\Template::load($html);
 
 // optional: remove the registered form parsers, do not do this if you want to create more templates implementing the same parsers.
-// \Dom\Parser::instance()->clear();
+// \Tk\DomTemplate\Parser::instance()->clear();
 
 $domForm = $formParser->getForm();
 
@@ -37,4 +37,4 @@ $domForm = $formParser->getForm();
 
 ## Create a Parser?
 
-View the existing `\Dom\Parser\FormParser` class for an example of how to create a parser.
+View the existing `\Tk\DomTemplate\Parser\FormParser` class for an example of how to create a parser.

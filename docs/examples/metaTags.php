@@ -37,7 +37,7 @@ include_once $basepath . '/vendor/autoload.php';
 // Create a template from the HTML in the buffer
 $buff = ob_get_clean();
 
-$template = \Dom\Template::load($buff);
+$template = \Tk\DomTemplate\Template::load($buff);
 $template->setText('helloWorld', 'This is the `Hello World` Dynamic text.');
 // Create some CSS styles
 $css = <<<CSS
@@ -62,7 +62,7 @@ This is some sub template content.
  </pre>
 </div>
 HTML;
-$subTpl = \Dom\Template::load($html);
+$subTpl = \Tk\DomTemplate\Template::load($html);
 // Add some headers to the sub template
 $css = <<<CSS
 .subTemplate { background-color: #44C; }
