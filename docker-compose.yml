@@ -1,0 +1,24 @@
+name: tk-domtemplate
+
+services:
+  app:
+    build:
+      context: .
+      args:
+        UID: ${APP_UID:-1000}
+        GID: ${APP_GID:-1000}
+    volumes:
+      - ./:/app
+      - caddy_data:/data
+      - caddy_config:/config
+    ports:
+      - "${HTTP_APP_PORT:-8080}:80"
+    environment:
+      SERVER_NAME: ":80"
+      SERVER_ROOT: "example/"
+    tty: true
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

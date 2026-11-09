@@ -1,0 +1,8 @@
+pre code {
+  font-size: .8125rem;
+  white-space: pre;
+}
+.accordion-body {
+  max-height: 32rem;
+  overflow: auto;
+}

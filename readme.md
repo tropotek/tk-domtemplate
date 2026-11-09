@@ -109,6 +109,19 @@ echo $template->toString();
 ```
 
 
+## Running the examples
+
+The `example/` folder is a small Bootstrap site that shows each feature with its source.
+It runs in a FrankenPHP container:
+
+```bash
+docker compose up -d --build
+```
+
+Then open <http://localhost:8080>. Set `HTTP_APP_PORT` to use another port, and
+`APP_UID`/`APP_GID` if your host user isn't 1000.
+
+
 ## Contributing
 
 If you wish to contribute updates to the code or documentation, we are open to any requests.

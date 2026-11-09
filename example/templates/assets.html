@@ -1,0 +1,23 @@
+<div>
+  <p>
+    Any template can add head assets with <code>appendMetaTag()</code>, <code>appendHeadCss()</code>,
+    <code>appendHeadJs()</code>, <code>appendCssUrl()</code> and <code>appendJsUrl()</code>.
+    When it is inserted into another template they move up with it, so the page <code>&lt;head&gt;</code> collects them all.
+  </p>
+  <p>
+    <code>appendCss()</code> and <code>appendJs()</code> instead write an inline
+    <code>&lt;style&gt;</code> or <code>&lt;script&gt;</code> into the template itself, so it travels with that markup.
+    View the page source to see both.
+  </p>
+
+  <div class="demo-box ps-3 my-4">
+    <p class="mb-1">This box is styled by CSS added to the page head with <code>appendHeadCss()</code>.</p>
+    <p class="mb-0 text-body-secondary" id="jsTarget">Waiting for JavaScript...</p>
+  </div>
+
+  <div class="my-4" var="widget"></div>
+
+  <h2 class="h5">Standalone output</h2>
+  <p>A small template with a meta tag, a stylesheet and a deferred script, rendered with <code>toString()</code>:</p>
+  <pre class="bg-body-tertiary p-3 rounded"><code var="rendered"></code></pre>
+</div>
