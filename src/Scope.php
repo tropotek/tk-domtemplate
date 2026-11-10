@@ -23,6 +23,9 @@ final class Scope
     /** @var list<\Dom\Element> */
     private array $rejected = [];
 
+    /** @var array<string, bool> names whose visibility was set explicitly */
+    private array $visible = [];
+
     private function __construct() {}
 
     /**
@@ -97,6 +100,19 @@ final class Scope
     public function names(): array
     {
         return array_keys($this->kinds);
+    }
+
+    /**
+     * Plain vars start visible and optional nodes start hidden, until set
+     */
+    public function isVisible(string $name): bool
+    {
+        return $this->visible[$name] ?? ($this->kind($name) !== Kind::Optional);
+    }
+
+    public function setVisible(string $name, bool $visible): void
+    {
+        $this->visible[$name] = $visible;
     }
 
     public function sample(string $name): ?\Dom\Element

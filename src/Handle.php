@@ -132,6 +132,26 @@ final class Handle
     }
 
     /**
+     * Keep the nodes in the output (true) or remove them at render (false)
+     */
+    public function show(bool $visible = true): static
+    {
+        $this->owner->assertMutable();
+        if ($this->nodes) {
+            $this->owner->setVisible($this->name, $visible);
+        }
+        return $this;
+    }
+
+    /**
+     * Remove the nodes at render
+     */
+    public function hide(): static
+    {
+        return $this->show(false);
+    }
+
+    /**
      * The first node's text, or '' when there are no nodes
      */
     public function getText(): string

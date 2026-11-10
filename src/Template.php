@@ -134,6 +134,32 @@ class Template
     }
 
     /**
+     * Keep the nodes in the output (true) or remove them at render (false)
+     */
+    public function show(string $name, bool $visible = true): static
+    {
+        $this->var($name)->show($visible);
+        return $this;
+    }
+
+    /**
+     * Remove the nodes at render
+     */
+    public function hide(string $name): static
+    {
+        $this->var($name)->hide();
+        return $this;
+    }
+
+    /**
+     * @internal used by Handle
+     */
+    public function setVisible(string $name, bool $visible): void
+    {
+        $this->scope->setVisible($name, $visible);
+    }
+
+    /**
      * Called before every change
      *
      * @internal
@@ -186,12 +212,12 @@ class Template
     }
 
     /**
-     * Finish the tree: remove optional nodes and repeat samples, then strip the var markers
+     * Finish the tree: remove hidden nodes and repeat samples, then strip the var markers
      */
     protected function build(): void
     {
         foreach ($this->scope->names() as $name) {
-            if (in_array($this->scope->kind($name), [Kind::Optional, Kind::Repeat], true)) {
+            if ($this->scope->kind($name) === Kind::Repeat || !$this->scope->isVisible($name)) {
                 foreach ($this->scope->nodes($name) as $node) {
                     $node->remove();
                 }
