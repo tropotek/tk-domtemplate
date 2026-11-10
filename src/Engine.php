@@ -7,7 +7,7 @@ use Psr\Log\LoggerInterface;
  * Optional site-wide settings, configured once and used to load templates.
  *
  * Immutable, so one instance can be shared across requests in worker mode.
- * Templates loaded without an engine use the defaults: strict, no logger.
+ * Templates loaded without an engine use the defaults: strict, no logger, no nonce.
  */
 final readonly class Engine
 {
@@ -16,6 +16,8 @@ final readonly class Engine
         public bool $strict = true,
         /** Where template mistakes are logged when not strict; error_log() when null */
         public ?LoggerInterface $logger = null,
+        /** CSP nonce added to every inline <script> and <style> in the rendered output */
+        public ?string $nonce = null,
     ) {}
 
     public function load(string $html): Template

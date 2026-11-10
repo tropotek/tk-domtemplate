@@ -477,6 +477,7 @@ class Template
             $ctx = new BuildContext();
             $this->build($ctx);
             $this->placeAssets($this->bubbled, $ctx);
+            $this->applyNonce();
             $this->output = $this->root instanceof \Dom\Document ? $this->doc->saveHtml() : $this->root->innerHTML;
         }
         return $this->output;
@@ -635,6 +636,20 @@ class Template
             }
             $target = $asset->place === Place::End ? $body : $head;
             ($target ?? $end)?->append($el);
+        }
+    }
+
+    /**
+     * Add the engine's CSP nonce to every inline <script> and <style> that lacks one
+     */
+    private function applyNonce(): void
+    {
+        $nonce = $this->engine()->nonce;
+        if ($nonce === null) {
+            return;
+        }
+        foreach ($this->root->querySelectorAll('script:not([src]):not([nonce]), style:not([nonce])') as $el) {
+            $el->setAttribute('nonce', $nonce);
         }
     }
 

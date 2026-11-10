@@ -24,7 +24,7 @@ const PAGES = [
 function renderPage(string $title, Template $content, array $sources = []): void
 {
     $page = Template::file(__DIR__ . '/templates/layout.html');
-    $page->text('title', $title . ' - DomTemplate examples');
+    $page->title($title . ' - DomTemplate examples');
     $page->text('heading', $title);
 
     // Navigation: one row per page, the current one marked active
