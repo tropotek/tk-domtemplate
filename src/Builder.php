@@ -7,6 +7,8 @@ namespace Tk\DomTemplate;
  *
  * - Later files override earlier ones, component by component.
  * - A dotted name falls back to its parents: form.input.email → form.input → form.
+ *   Use exists() for an exact check and match() to see what a name resolves to.
+ * - A name defined twice in one file is a mistake (the first is kept).
  * - data-opt-* attributes on a component are settings for PHP, read with options().
  *
  * Each file is parsed once and never changed, so a Builder can be shared across requests.
@@ -41,8 +43,16 @@ final class Builder
                 $doc = \Dom\HTMLDocument::createEmpty();
                 $root = Html::parseFragment($doc, $html);
             }
+            $inFile = [];
             foreach ($root->querySelectorAll('[' . self::NAME_ATTR . ']') as $el) {
-                $this->components[trim((string)$el->getAttribute(self::NAME_ATTR))] = [$el, $file];
+                $name = trim((string)$el->getAttribute(self::NAME_ATTR));
+                if (isset($inFile[$name])) {
+                    // Keep the first, as v8's getElementById() did
+                    ($this->engine ?? new Engine())->fail(sprintf('Component `%s` is defined more than once in %s', $name, $file));
+                    continue;
+                }
+                $inFile[$name] = true;
+                $this->components[$name] = [$el, $file];
             }
         }
     }
@@ -80,6 +90,22 @@ final class Builder
     public function has(string $name): bool
     {
         return $this->find($name) !== null;
+    }
+
+    /**
+     * True only when a component with exactly this name exists (no fallback)
+     */
+    public function exists(string $name): bool
+    {
+        return isset($this->components[$name]);
+    }
+
+    /**
+     * The component name get() would use for $name after fallback, or null
+     */
+    public function match(string $name): ?string
+    {
+        return $this->find($name);
     }
 
     /**
