@@ -1,0 +1,25 @@
+<div>
+  <dl class="row">
+    <dt class="col-sm-3">text()</dt>
+    <dd class="col-sm-9" var="greeting">Default text</dd>
+
+    <dt class="col-sm-3">html()</dt>
+    <dd class="col-sm-9" var="markup">Default text</dd>
+
+    <dt class="col-sm-3">append / prepend</dt>
+    <dd class="col-sm-9" var="list">original</dd>
+
+    <dt class="col-sm-3">attr()</dt>
+    <dd class="col-sm-9"><a href="#" download var="link">Project on GitHub</a> (href and target set from PHP)</dd>
+  </dl>
+
+  <div class="alert alert-secondary" var="alert">Default alert</div>
+
+  <p>
+    Shared var names: the total is <span class="badge text-bg-primary" var="total">0</span>
+    and again here <span class="badge text-bg-info" var="total">0</span>.
+  </p>
+
+  <p class="text-danger" var="draft">This paragraph is a plain var hidden with hide(), so it isn't in the output.</p>
+  <p class="text-body-secondary" var="note?">This note is optional (<code>var="note?"</code>) and only appears because PHP called show().</p>
+</div>

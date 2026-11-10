@@ -1,0 +1,23 @@
+<div>
+  <p class="lead">
+    DomTemplate keeps layout in plain HTML and render logic in PHP.
+    Name the nodes PHP changes with a <code>var</code> attribute, then fill them in from PHP.
+  </p>
+  <ul>
+    <li><code>var="title"</code>: a node PHP changes.</li>
+    <li><code>var="admin?"</code>: removed unless PHP shows it.</li>
+    <li><code>var="users[]"</code>: a sample row, cloned once per item.</li>
+  </ul>
+  <p>
+    Every page on this site, including this one and the navigation above, is built that way.
+    Open <strong>Source</strong> at the bottom of a page to see its PHP and HTML.
+  </p>
+
+  <div class="row row-cols-1 row-cols-sm-2 g-3 mt-2">
+    <div class="col" var="card[]">
+      <a class="card h-100 text-decoration-none" href="#" var="card">
+        <div class="card-body"><h2 class="h5 card-title mb-0" var="title">Example</h2></div>
+      </a>
+    </div>
+  </div>
+</div>
