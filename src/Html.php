@@ -49,16 +49,33 @@ final class Html
     {
         $clone = $el->cloneNode(true);
         assert($clone instanceof \Dom\Element);
-        $from = iterator_to_array($el->querySelectorAll('template'), false);
-        $to = iterator_to_array($clone->querySelectorAll('template'), false);
-        if ($el->tagName === 'TEMPLATE') {
-            array_unshift($from, $el);
-            array_unshift($to, $clone);
-        }
-        foreach ($from as $i => $template) {
-            $to[$i]->innerHTML = $template->innerHTML;
-        }
+        self::copyTemplates($el, $clone);
         return $clone;
+    }
+
+    /**
+     * Import a node into another document, including <template> content
+     */
+    public static function import(\Dom\Document $doc, \Dom\Node $node): \Dom\Node
+    {
+        $copy = $doc->importNode($node, true);
+        if ($node instanceof \Dom\Element && $copy instanceof \Dom\Element) {
+            self::copyTemplates($node, $copy);
+        }
+        return $copy;
+    }
+
+    private static function copyTemplates(\Dom\Element $from, \Dom\Element $to): void
+    {
+        $src = iterator_to_array($from->querySelectorAll('template'), false);
+        $dst = iterator_to_array($to->querySelectorAll('template'), false);
+        if ($from->tagName === 'TEMPLATE') {
+            array_unshift($src, $from);
+            array_unshift($dst, $to);
+        }
+        foreach ($src as $i => $template) {
+            $dst[$i]->innerHTML = $template->innerHTML;
+        }
     }
 
     /**

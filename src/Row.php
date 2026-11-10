@@ -40,9 +40,12 @@ final class Row extends Template
     /**
      * Add the row where the sample is, after any rows already added from it
      */
-    public function append(string $name = '', string $html = ''): static
+    public function append(string $name = '', string|Template $html = ''): static
     {
-        if (func_num_args() > 0) {
+        if (func_num_args() === 1) {
+            throw new \ArgumentCountError('Row::append() takes no arguments to add the row, or a var name and HTML');
+        }
+        if (func_num_args() === 2) {
             parent::append($name, $html);
             return $this;
         }
@@ -53,9 +56,12 @@ final class Row extends Template
     /**
      * Add the row before all rows already added from the same sample
      */
-    public function prepend(string $name = '', string $html = ''): static
+    public function prepend(string $name = '', string|Template $html = ''): static
     {
-        if (func_num_args() > 0) {
+        if (func_num_args() === 1) {
+            throw new \ArgumentCountError('Row::prepend() takes no arguments to add the row, or a var name and HTML');
+        }
+        if (func_num_args() === 2) {
             parent::prepend($name, $html);
             return $this;
         }
@@ -119,7 +125,7 @@ final class Row extends Template
     private function finish(): ?\Dom\Element
     {
         $this->assertMutable();
-        $this->build();
+        $this->cleanup(false);
         $this->added = true;
         $node = $this->root;
         assert($node instanceof \Dom\Element);
@@ -149,11 +155,31 @@ final class Row extends Template
         $node = $this->finish();
         if ($node !== null) {
             foreach ($targets as $i => $target) {
-                $insert = $i === 0 ? $node : Html::cloneDeep($node);
+                $insert = $i === 0 ? $node : $this->cloneWithInserts($node);
                 $prepend ? $target->prepend($insert) : $target->append($insert);
             }
         }
         $this->parentTemplate->adopt($this);
+    }
+
+    /**
+     * Clone a finished row for another target. Its template placeholders get their own
+     * pending inserts, so the same child templates are rendered into the copy too.
+     */
+    private function cloneWithInserts(\Dom\Element $node): \Dom\Element
+    {
+        $clone = Html::cloneDeep($node);
+        $children = new \WeakMap();
+        foreach ($this->pending as [$slot, $child]) {
+            $children[$slot] = $child;
+        }
+        $copies = iterator_to_array($clone->querySelectorAll(self::SLOT), false);
+        foreach (iterator_to_array($node->querySelectorAll(self::SLOT), false) as $i => $slot) {
+            if (isset($children[$slot], $copies[$i])) {
+                $this->pending[] = [$copies[$i], $children[$slot], null];
+            }
+        }
+        return $clone;
     }
 
     private function add(bool $prepend): void

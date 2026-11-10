@@ -10,9 +10,24 @@ class Template
 {
     protected Scope $scope;
 
+    /** Tag of the placeholder a template insert leaves until the page is built */
+    protected const string SLOT = 'tk-slot';
+
     private ?string $output = null;
 
+    private bool $built = false;
+
     private ?Engine $defaultEngine = null;
+
+    private ?Engine $inheritedEngine = null;
+
+    /**
+     * Template inserts waiting for the build: placeholder, child, and the var name to
+     * re-point when the insert replaced a named node
+     *
+     * @var list<array{\Dom\Element, Template, ?string}>
+     */
+    protected array $pending = [];
 
     /** @var \WeakMap<\Dom\Element, \Dom\Element> the first row added from each sample */
     private \WeakMap $firstRows;
@@ -135,6 +150,22 @@ class Template
      */
     protected function adopt(Row $row): void
     {
+        foreach ($row->pending as [$slot, $child]) {
+            $this->pending[] = [$slot, $child, null];
+        }
+        $row->pending = [];
+    }
+
+    /**
+     * A placeholder for a template insert, resolved when the page is built
+     *
+     * @internal used by Handle
+     */
+    public function slot(Template $child, ?string $replaces = null): \Dom\Element
+    {
+        $slot = $this->doc->createElement(self::SLOT);
+        $this->pending[] = [$slot, $child, $replaces];
+        return $slot;
     }
 
     /**
@@ -186,25 +217,25 @@ class Template
         return $this;
     }
 
-    public function html(string $name, string $html): static
+    public function html(string $name, string|Template $html): static
     {
         $this->var($name)->html($html);
         return $this;
     }
 
-    public function append(string $name, string $html): static
+    public function append(string $name, string|Template $html): static
     {
         $this->var($name)->append($html);
         return $this;
     }
 
-    public function prepend(string $name, string $html): static
+    public function prepend(string $name, string|Template $html): static
     {
         $this->var($name)->prepend($html);
         return $this;
     }
 
-    public function replace(string $name, string $html): static
+    public function replace(string $name, string|Template $html): static
     {
         $this->var($name)->replaceWith($html);
         return $this;
@@ -293,7 +324,7 @@ class Template
     public function render(): string
     {
         if ($this->output === null) {
-            $this->build();
+            $this->build(new BuildContext());
             $this->output = $this->root instanceof \Dom\Document ? $this->doc->saveHtml() : $this->root->innerHTML;
         }
         return $this->output;
@@ -304,9 +335,12 @@ class Template
         return $this->render();
     }
 
+    /**
+     * True once the template has been built, by render() or as part of the page it was inserted into
+     */
     public function isRendered(): bool
     {
-        return $this->output !== null;
+        return $this->built;
     }
 
     public function isFragment(): bool
@@ -323,17 +357,70 @@ class Template
     }
 
     /**
-     * The engine this template uses: its own, or the strict default
+     * The engine this template uses: its own, else that of the template it was inserted
+     * into (set when that one is built), else the strict default
      */
     public function engine(): Engine
     {
-        return $this->engine ?? ($this->defaultEngine ??= new Engine());
+        return $this->engine ?? $this->inheritedEngine ?? ($this->defaultEngine ??= new Engine());
     }
 
     /**
-     * Finish the tree: remove hidden nodes and repeat samples, then strip the var markers
+     * Build the tree once: resolve template inserts, then clean up. Locks the template.
      */
-    protected function build(): void
+    protected function build(BuildContext $ctx): void
+    {
+        if ($this->built) {
+            return;
+        }
+        $ctx->enter($this);
+        try {
+            $this->resolvePending($ctx);
+            $this->cleanup();
+            $this->built = true;
+        } finally {
+            $ctx->leave();
+        }
+    }
+
+    /**
+     * Replace each placeholder with the built nodes of its child template
+     */
+    private function resolvePending(BuildContext $ctx): void
+    {
+        foreach ($this->pending as [$slot, $child, $replaces]) {
+            if ($slot->parentNode === null) {
+                continue;
+            }
+            if ($child->engine === null && $child->inheritedEngine === null) {
+                $child->inheritedEngine = $this->engine();
+            }
+            $child->build($ctx);
+            $nodes = array_map(fn(\Dom\Node $n) => Html::import($this->doc, $n), $child->contentNodes());
+            $slot->replaceWith(...$nodes);
+            if ($replaces !== null) {
+                $this->scope->replaceNode($replaces, $slot, array_values(array_filter($nodes, fn($n) => $n instanceof \Dom\Element)));
+            }
+        }
+        $this->pending = [];
+    }
+
+    /**
+     * The nodes a parent imports: a fragment's top-level nodes, or a full page's <body> children
+     *
+     * @return list<\Dom\Node>
+     */
+    private function contentNodes(): array
+    {
+        $parent = $this->root instanceof \Dom\Document ? ($this->doc->body ?? $this->doc->documentElement) : $this->root;
+        return $parent ? iterator_to_array($parent->childNodes, false) : [];
+    }
+
+    /**
+     * Finish the tree: remove hidden nodes, repeat samples and stray placeholders, then strip the var markers.
+     * Rows keep their placeholders ($dropSlots false); the page resolves them.
+     */
+    protected function cleanup(bool $dropSlots = true): void
     {
         foreach ($this->scope->names() as $name) {
             if ($this->scope->kind($name) === Kind::Repeat || !$this->scope->isVisible($name)) {
@@ -347,6 +434,11 @@ class Template
         foreach ($this->scope->rejected() as $node) {
             if ($node->parentNode !== null) {
                 $node->remove();
+            }
+        }
+        if ($dropSlots) {
+            foreach ($this->root->querySelectorAll(self::SLOT) as $slot) {
+                $slot->remove();
             }
         }
         foreach ($this->root->querySelectorAll('[var]') as $el) {

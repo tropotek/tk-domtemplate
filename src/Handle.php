@@ -38,23 +38,34 @@ final class Handle
     }
 
     /**
-     * Replace the contents with HTML, parsed in the context of each node
+     * Replace the contents with HTML (parsed in the context of each node) or a template.
+     * A template is kept as a reference and rendered when the page is built.
      */
-    public function html(string $html): static
+    public function html(string|Template $html): static
     {
         $this->owner->assertMutable();
         foreach ($this->nodes as $node) {
-            $node->innerHTML = $html;
+            if ($html instanceof Template) {
+                $node->replaceChildren($this->owner->slot($html));
+            } else {
+                $node->innerHTML = $html;
+            }
         }
         return $this;
     }
 
-    public function append(string $html): static
+    /**
+     * Add HTML or a template at the end of each node
+     */
+    public function append(string|Template $html): static
     {
         return $this->adjacent(\Dom\AdjacentPosition::BeforeEnd, $html);
     }
 
-    public function prepend(string $html): static
+    /**
+     * Add HTML or a template at the start of each node
+     */
+    public function prepend(string|Template $html): static
     {
         return $this->adjacent(\Dom\AdjacentPosition::AfterBegin, $html);
     }
@@ -63,7 +74,7 @@ final class Handle
      * Replace each node itself with HTML. The name (and this handle) then refer to the
      * replacement elements, so show()/hide() and later changes apply to them.
      */
-    public function replaceWith(string $html): static
+    public function replaceWith(string|Template $html): static
     {
         $this->owner->assertMutable();
         $replaced = [];
@@ -71,6 +82,13 @@ final class Handle
             $parent = $node->parentNode;
             if ($parent === null) {
                 throw new \LogicException(sprintf("Can't replace `%s`: a row can't replace its own element", $this->name));
+            }
+            if ($html instanceof Template) {
+                $slot = $this->owner->slot($html, $this->name);
+                $node->replaceWith($slot);
+                $this->owner->replaceNode($this->name, $node, [$slot]);
+                $replaced[] = $slot;
+                continue;
             }
             $before = $node->previousSibling;
             $after = $node->nextSibling;
@@ -193,11 +211,16 @@ final class Handle
         return count($this->nodes);
     }
 
-    private function adjacent(\Dom\AdjacentPosition $where, string $html): static
+    private function adjacent(\Dom\AdjacentPosition $where, string|Template $html): static
     {
         $this->owner->assertMutable();
         foreach ($this->nodes as $node) {
-            $node->insertAdjacentHTML($where, $html);
+            if ($html instanceof Template) {
+                $slot = $this->owner->slot($html);
+                $where === \Dom\AdjacentPosition::BeforeEnd ? $node->append($slot) : $node->prepend($slot);
+            } else {
+                $node->insertAdjacentHTML($where, $html);
+            }
         }
         return $this;
     }
