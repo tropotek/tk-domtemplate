@@ -54,8 +54,12 @@ class Template
             throw new \LogicException(sprintf('Template %s has been rendered and cannot be cloned', $this->label));
         }
         if ($this->root instanceof \Dom\Document) {
-            $doc = $this->doc->cloneNode(true);
-            assert($doc instanceof \Dom\HTMLDocument);
+            // Import into an empty document: cloneNode() on a whole HTMLDocument crashes
+            // PHP 8.5 once <template> content is copied into it
+            $doc = \Dom\HTMLDocument::createEmpty();
+            foreach ($this->doc->childNodes as $node) {
+                $doc->append($doc->importNode($node, true));
+            }
             Html::copyTemplates($this->doc, $doc);
             $old = iterator_to_array($this->doc->getElementsByTagName('*'), false);
             $new = iterator_to_array($doc->getElementsByTagName('*'), false);
@@ -424,8 +428,10 @@ class Template
         }
         $ctx->enter($this);
         try {
+            // Hidden content first, so templates inside it are never built
+            $this->removeHidden();
             $this->resolvePending($ctx);
-            $this->cleanup();
+            $this->stripMarkers(true);
             $this->built = true;
         } finally {
             $ctx->leave();
@@ -438,7 +444,7 @@ class Template
     private function resolvePending(BuildContext $ctx): void
     {
         foreach ($this->pending as [$slot, $child, $replaces]) {
-            if ($slot->parentNode === null) {
+            if (!$this->root->contains($slot)) {
                 continue;
             }
             if ($child->engine === null && $child->inheritedEngine === null) {
@@ -446,12 +452,40 @@ class Template
             }
             $child->build($ctx);
             $nodes = array_map(fn(\Dom\Node $n) => Html::import($this->doc, $n), $child->contentNodes());
+            self::carryAttributes($slot, $nodes);
             $slot->replaceWith(...$nodes);
             if ($replaces !== null) {
                 $this->scope->replaceNode($replaces, $slot, array_values(array_filter($nodes, fn($n) => $n instanceof \Dom\Element)));
             }
         }
         $this->pending = [];
+    }
+
+    /**
+     * Attributes and classes set on a placeholder (after replace() with a template)
+     * are applied to the replacement's top-level elements
+     *
+     * @param list<\Dom\Node> $nodes
+     */
+    private static function carryAttributes(\Dom\Element $slot, array $nodes): void
+    {
+        foreach ($nodes as $node) {
+            if (!$node instanceof \Dom\Element) {
+                continue;
+            }
+            foreach ($slot->attributes as $attr) {
+                if ($attr->name === 'class') {
+                    $tokens = preg_split('/\s+/', trim($attr->value), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+                    if ($tokens) {
+                        $node->classList->add(...$tokens);
+                    }
+                } else {
+                    $copy = $attr->cloneNode();
+                    assert($copy instanceof \Dom\Attr);
+                    $node->setAttributeNode($copy);
+                }
+            }
+        }
     }
 
     /**
@@ -466,10 +500,19 @@ class Template
     }
 
     /**
-     * Finish the tree: remove hidden nodes, repeat samples and stray placeholders, then strip the var markers.
+     * Finish the tree: remove hidden nodes and repeat samples, then strip the markers.
      * Rows keep their placeholders ($dropSlots false); the page resolves them.
      */
     protected function cleanup(bool $dropSlots = true): void
+    {
+        $this->removeHidden();
+        $this->stripMarkers($dropSlots);
+    }
+
+    /**
+     * Remove hidden nodes, repeat samples and rejected optional/repeat nodes
+     */
+    private function removeHidden(): void
     {
         foreach ($this->scope->names() as $name) {
             if ($this->scope->kind($name) === Kind::Repeat || !$this->scope->isVisible($name)) {
@@ -485,6 +528,13 @@ class Template
                 $node->remove();
             }
         }
+    }
+
+    /**
+     * Strip var attributes and, at the top level, any placeholder that was never resolved
+     */
+    private function stripMarkers(bool $dropSlots): void
+    {
         if ($dropSlots) {
             foreach ($this->root->querySelectorAll(self::SLOT) as $slot) {
                 $slot->remove();
