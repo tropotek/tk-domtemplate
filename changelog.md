@@ -2,13 +2,22 @@
 
 Ver 9.0.0 [unreleased]:
 -------------------------------
-  - BREAKING: namespace `Dom\` renamed to `Tk\DomTemplate\` (PHP 8.4 owns `Dom\`)
-  - BREAKING: requires PHP 8.4+
-  - Source moved from `Dom/` to `src/`
+  - Rewrite on PHP 8.5's HTML5 parser (`Dom\HTMLDocument`); not backward compatible with 8.x
+  - BREAKING: namespace `Tk\DomTemplate\`, source in `src/`, PHP 8.5+, `ext-dom` and `psr/log` only
+  - BREAKING: one `var` attribute replaces `var`/`choice`/`repeat`: `name`, `name?` (optional), `name[]` (repeat)
+  - New API: handles (`var()`) and shortcuts (`text()`, `html()`, `attr()`, `addClass()`, `show()`, `hide()` ...)
+  - Repeats: `repeat()`, `each()`, `Row::append()`, `prepend()`, `appendTo()`, `prependTo()`; nesting
+  - Templates inserted into templates render lazily with the page; templates can be cloned
+  - Assets: `js()`, `css()` with `Place`, `jsUrl()`, `cssUrl()`, `meta()`, `title()`; keyed de-duplication; CSP nonce
+  - Optional `Engine`: strict (throw) or lenient (log) template mistakes, PSR-3 logger, nonce, modifiers
+  - Modifiers: selector-based `ModifierInterface` list; `ClearComments`
+  - `Builder` component library: `data-tpl` names, layered files, dotted fallback, `data-opt-*` options
+  - Renderer base types kept; `__makeTemplate()` is now `makeTemplate()`
+  - Alpine.js and HTMX markup (`@click`, `:class`, `hx-*`, `<template x-for>`) passes through untouched
+  - Removed: `Parser`, `FormParser`, `Form\*`, `JsLast`, `Scss`, `UrlPath`, `PageBytes`
+  - Example site (FrankenPHP, `docker compose up`) and MkDocs site on GitHub Pages
   - 8.x maintenance continues on the `8.1` branch
-  - Fix: `Select::getValue()` returned option labels instead of values
-  - Fix: `FormParser` never found a form by its `name` attribute
-  - Added PHPUnit tests and a CI workflow
+
 
 Ver 8.1.0 [2026-07-17]:
 -------------------------------

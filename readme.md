@@ -7,106 +7,72 @@ __Documentation:__ <https://tropotek.github.io/tk-domtemplate/>
 
 
 > [!WARNING]
-> `main` is the **v9** rewrite and is not backward compatible with 8.x (new `Tk\DomTemplate\` namespace, PHP 8.4+).
-> Existing projects should stay on `^8.1` (branch [`8.1`](https://github.com/tropotek/tk-domtemplate/tree/8.1)). Upgrading requires a refactor.
+> `main` is **v9 (unreleased)**, a rewrite that is not backward compatible with 8.x.
+> Existing projects should stay on `^8.1` (branch [`8.1`](https://github.com/tropotek/tk-domtemplate/tree/8.1)).
+> See [Upgrading from 8.x](https://tropotek.github.io/tk-domtemplate/upgrading/).
 
-## Introduction
+DomTemplate renders HTML templates from PHP without a template language. Layout and design stay in plain
+HTML that designers can open and edit. Render logic stays in PHP, which finds named nodes and fills them in.
 
-The PHP [\Tk\DomTemplate\Template](http://domtemplate.tropotek.com/) wraps the DOMDocument and provides a fast, attribute-driven way to render
-HTML templates. We did not want another template language within a language, but a way to use PHP
-to render HTML templates keeping the render logic within PHP and the style and layout logic in HTML.
+- One `var` attribute: `var="name"`, `var="name?"` (removed unless shown), `var="name[]"` (a repeating row)
+- Chainable handles and one-line shortcuts
+- Templates inserted into templates, rendered lazily with the page
+- Scripts, styles, meta and title from any template, placed in `<head>`, at the end of `<body>` or inline
+- Alpine.js and HTMX markup passes through untouched; HTMX fragments carry their own assets
+- Selector-based modifiers, a component `Builder`, and errors that throw in development and log in production
 
-An important feature for us was the template layout and design were kept in the HTML so that it could be easily
-edited by designers and not be affected by what the developers in the team are doing. Making communication
-between developers and designers relatively easy for most tasks.
 
-The \Tk\DomTemplate\Template system enables developers to develop and share a basic markup structure, designers can then
-see visually and understand what the minimum markup requirements are.
-Saving on communication time and allowing designers to focus on making the project look great.
+## Requirements
 
-Features:
-
-- Mark “variables” and “choices” in your HTML and set their content or visibility
-- Manage repeating regions for table row insertion
-- Insert/append/replace HTML fragments
-- Add CSS/JS (inline or external) and meta/head elements
-- Compose pages by merging templates, other DOMDocument's, or HTML strings
-
-Key ideas:
-
-- Use attributes in your HTML to mark nodes:
- - var: mark nodes whose content/attributes you’ll set
- - choice: mark nodes hidden that you can show in your renderer
- - repeat: define repeating regions
-- Work with the template (set text/HTML, attributes, headers) before parsing.
-- Call `toString()` or `getDocument()` to parse the template and return a renderable DOMDocument or HTML string.
-
+- PHP 8.5+
+- `ext-dom`
 
 
 ## Installation
 
-Available on Packagist ([ttek/tk-domtemplate](http://packagist.org/packages/ttek/tk-domtemplate))
-and as such installable via [Composer](http://getcomposer.org/).
-
 ```bash
-$ composer require ttek/tk-domtemplate
-```
-
-Or add the following to your composer.json file:
-
-```json
-{
-  "require": {
-    "ttek/tk-domtemplate": "^9.0"
-  }
-}
+composer require ttek/tk-domtemplate:9.0.x-dev
 ```
 
 
-## Basic Template Usage
+## Basic usage
+
+```html
+<!-- page.html -->
+<!doctype html>
+<html lang="en">
+<head><title>Hello</title></head>
+<body>
+  <h1 var="heading">Default heading</h1>
+  <p var="admin?">Only admins see this.</p>
+  <ul>
+    <li var="item[]"><a var="link" href="#">Item</a></li>
+  </ul>
+</body>
+</html>
+```
 
 ```php
 <?php
-ob_start();
-?>
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PHP Dom Template (PDT) Library</title>
-</head>
-<body>
-  <div id="content">
-    <h1>Hello World</h1>
-    <p var="helloWorld">Default Text</p>
+require __DIR__ . '/vendor/autoload.php';
 
-    <p>&nbsp;</p>
-  </div>
-</body>
-</html>
-<?php
-// Include lib, you should use use composer if available.
-$basepath = dirname(__FILE__, 3);
-include_once $basepath . '/vendor/autoload.php';
+use Tk\DomTemplate\Row;
+use Tk\DomTemplate\Template;
 
+$t = Template::file(__DIR__ . '/page.html');
 
-// Create a template from the html in the buffer
-$html = trim(ob_get_clean());
-$template = \Tk\DomTemplate\Template::load($buff);
+$t->title('Hello World');
+$t->text('heading', 'Hello World');
+$t->show('admin', $user->isAdmin());
+$t->each('item', $links, fn(Row $row, array $link) =>
+    $row->var('link')->text($link['label'])->attr('href', $link['url'])
+);
+$t->cssUrl('/css/site.css');
 
-// Add some style
-$template->appendCssUrl('stylesheet.css');
-
-// Add some javascript
-$template->appendJs('alert();');
-
-// Set some dynamic text
-$template->setText('helloWorld', 'This is the `Hello World` Dynamic text.');
-
-echo $template->toString();
+echo $t->render();
 ```
+
+Full documentation: <https://tropotek.github.io/tk-domtemplate/>
 
 
 ## Running the examples
