@@ -12,6 +12,9 @@ trait RendererTrait
 {
     protected ?Template $template = null;
 
+    /** makeTemplate() has been called, so a null result isn't retried */
+    private bool $templateMade = false;
+
     public function setTemplate(Template $template): void
     {
         $this->template = $template;
@@ -22,7 +25,11 @@ trait RendererTrait
      */
     public function getTemplate(): ?Template
     {
-        return $this->template ??= $this->makeTemplate();
+        if ($this->template === null && !$this->templateMade) {
+            $this->templateMade = true;
+            $this->template = $this->makeTemplate();
+        }
+        return $this->template;
     }
 
     /**

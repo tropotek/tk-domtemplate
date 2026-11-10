@@ -17,6 +17,7 @@ Ver 9.0.0 [unreleased]:
   - Removed: `Parser`, `FormParser`, `Form\*`, `JsLast`, `Scss`, `UrlPath`, `PageBytes`
   - Removed: `toString()` (use `render()`), `reset()`, direct DOM access (`getDocument()`, `getElementById()` ...)
   - Changes after render now throw `LogicException` instead of being ignored
+  - Inserting a template that was rendered on its own throws `LogicException`
   - Example site (FrankenPHP, `docker compose up`) and MkDocs site on GitHub Pages
   - 8.x maintenance continues on the `8.1` branch
 

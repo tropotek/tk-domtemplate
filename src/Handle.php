@@ -108,14 +108,14 @@ final class Handle
 
     /**
      * Set one attribute, or several from an array.
-     * true sets an empty attribute; false and null remove it.
+     * true, or no value, sets a bare attribute (disabled=""); false and null remove it.
      *
      * @param string|array<string, string|int|float|bool|null> $name
      */
     public function attr(string|array $name, string|int|float|bool|null $value = null): static
     {
         $this->owner->assertMutable();
-        $attrs = is_array($name) ? $name : [$name => $value];
+        $attrs = is_array($name) ? $name : [$name => func_num_args() === 1 ? true : $value];
         foreach (array_keys($attrs) as $attr) {
             if (!is_string($attr) || !preg_match(self::ATTR_NAME, $attr)) {
                 throw new TemplateException(sprintf('Invalid attribute name `%s` for var `%s`', $attr, $this->name));

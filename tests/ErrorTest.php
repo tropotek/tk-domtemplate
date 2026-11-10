@@ -85,7 +85,7 @@ class ErrorTest extends TestCase
 
     public function testUnknownNameAfterRenderStillThrowsLogicException(): void
     {
-        $t = (new Engine(strict: false))->load('<p>a</p>');
+        $t = (new Engine(strict: false, logger: new SpyLogger()))->load('<p>a</p>');
         $t->render();
         $this->expectException(\LogicException::class);
         $t->text('nope', 'x');

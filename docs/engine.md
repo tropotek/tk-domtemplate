@@ -25,6 +25,6 @@ $part = $engine->load('<p var="msg"></p>');
 | | `strict: true` (default) | `strict: false` |
 |---|---|---|
 | Unknown name, wrong kind, bad markup | throws `TemplateException` | logs a warning; the call does nothing |
-| Change after render, circular insert | throws `LogicException` | throws `LogicException` |
+| Change after render, circular insert, inserting a rendered template | throws `LogicException` | throws `LogicException` |
 
-In lenient mode a failed lookup never shows hidden content: an optional node that couldn't be resolved stays removed.
+In lenient mode a failed lookup never shows hidden content: an optional node that couldn't be resolved stays removed. Var markers inside `<template>` content are logged and left in the output as written.

@@ -9,7 +9,7 @@ use Tk\DomTemplate\Modifier\Context;
  *
  * Keep per-render data in $ctx->store($this), not in properties: one instance serves
  * every render of an Engine. Modifiers run on the top-level render only; a template
- * rendered on its own and then inserted into a page is processed again with the page.
+ * rendered on its own can't be inserted into a page afterwards.
  * To render sub-templates inside a modifier without re-running the modifiers, load
  * them without an engine.
  */

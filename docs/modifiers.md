@@ -30,11 +30,11 @@ $engine = new Engine(modifier: new Modifier([new WikiLinks(), new ClearComments(
 - Modifiers run once per render of a top-level template, after assets are placed and before the CSP nonce is added. Inserted child templates are not processed separately.
 - They run one after another; each sees the previous one's output.
 - `element()` receives the nodes matching the modifier's `selector()`. The default `null` means **every** element, so set a selector when you can; comment-only modifiers can use `':not(*)'`.
-- `comment()` receives every comment, then `done()` is called once.
-- Nodes can be removed or replaced directly; the lists are fixed before the modifier starts.
-- Content inside `<template>` elements is not visited, so Alpine templates are left as they are.
+- `comment()` receives every comment, then `done()` is called once. A `BaseModifier` that doesn't override `comment()` skips the comment search.
+- Nodes can be removed or replaced directly; the lists are fixed before the modifier starts. Nodes removed earlier in the pass, along with an ancestor, are skipped.
+- Content inside `<template>` elements is not visited, so Alpine templates are left as they are. `ClearComments` keeps comments inside them.
 
-Selector queries run inside PHP's DOM, which makes this much faster than one PHP walk over every node: six modifiers over 20,000 elements take about 6 ms.
+Selector queries run inside PHP's DOM, which makes this much faster than one PHP walk over every node: six modifiers over 20,000 elements take about 6 ms. Each modifier that handles comments adds one search over the page for them.
 
 ## State
 
@@ -55,7 +55,8 @@ public function done(Context $ctx): void
 
 ## Caveats
 
-- A template rendered on its own and then inserted into a page is processed again with the page.
+- A template rendered on its own can't then be inserted into a page (it throws), so modifiers never run on it twice.
+- If a modifier throws, the template can't be rendered again; load it again instead.
 - A modifier that renders sub-templates should load them without an engine (the default engine has no modifiers), so the list doesn't run on them twice.
 
 `ClearComments` is the only modifier the library ships.

@@ -16,7 +16,9 @@ echo $page->render();
 - A template inserted in several places is built once and copied into each place.
 - Inserting a full page inserts its `<body>` contents.
 - A template inside hidden or overwritten content is never built.
-- Inserting a template into itself, directly or through other templates, throws a `LogicException`.
+- Inserting a template into itself, directly or through other templates, throws a `LogicException` before anything is built, so every template involved is unchanged.
+- Insert templates before rendering them. A template rendered on its own has its assets and modifiers in its output already, so inserting it throws a `LogicException`, and so does rendering a page whose child was rendered on its own after it was inserted. A child built as part of one page can be inserted into another.
+- Rows can't be inserted as templates; add them with `append()` or `appendTo()`.
 - After the page renders, the inserted templates are locked too.
 - A child without its own [engine](engine.md) uses the page's engine from the moment it is inserted.
 

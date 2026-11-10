@@ -17,6 +17,12 @@ class Template
 
     private bool $built = false;
 
+    /** Set once a render has started changing the tree, so a failed render isn't re-run */
+    private bool $rendering = false;
+
+    /** @var ?\WeakMap<\Dom\Element, true> placeholders made by slot(), so user-written <tk-slot> elements are left alone */
+    private static ?\WeakMap $slots = null;
+
     private ?Engine $defaultEngine = null;
 
     private ?Engine $inheritedEngine = null;
@@ -93,6 +99,7 @@ class Template
         foreach ($old as $i => $el) {
             $map[$el] = $new[$i];
         }
+        self::copySlotMarks($map);
         $this->scope = $this->scope->remap($map);
         $pending = [];
         foreach ($this->pending as [$slot, $child, $replaces]) {
@@ -193,7 +200,34 @@ class Template
             $this->engine()->fail(sprintf('`%s` is a repeat in %s, use repeat()', $name, $this->label));
             return new Handle($this, $name, []);
         }
-        return new Handle($this, $name, $this->scope->nodes($name));
+        return new Handle($this, $name, $this->liveNodes($name, $this->scope->nodes($name)));
+    }
+
+    /**
+     * The nodes still in the tree. Nodes inside content replaced with html() or
+     * replaceWith() are gone, so changing them is reported instead of doing nothing.
+     *
+     * @param list<\Dom\Element> $nodes
+     * @return list<\Dom\Element>
+     */
+    private function liveNodes(string $name, array $nodes): array
+    {
+        if ($this->isFinished()) {
+            return $nodes;
+        }
+        $live = array_values(array_filter($nodes, fn(\Dom\Element $n) => $this->root->contains($n)));
+        if (count($live) < count($nodes)) {
+            $this->engine()->fail(sprintf('`%s` in %s was inside content that has been replaced', $name, $this->label));
+        }
+        return $live;
+    }
+
+    /**
+     * True once the tree is final: hidden nodes may already have been removed
+     */
+    protected function isFinished(): bool
+    {
+        return $this->built;
     }
 
     /**
@@ -253,9 +287,19 @@ class Template
         return $this->addAsset(new Asset('title', $title));
     }
 
+    /**
+     * @throws TemplateException when an attribute name is invalid
+     */
     private function addAsset(Asset $asset): static
     {
         $this->assertMutable();
+        foreach (array_keys($asset->attrs) as $attr) {
+            try {
+                $this->doc->createElement('i')->setAttribute((string)$attr, '');
+            } catch (\DOMException) {
+                throw new TemplateException(sprintf('Invalid attribute name `%s` for %s() in %s', $attr, $asset->type, $this->label));
+            }
+        }
         $this->assets[] = new Asset($asset->type, $asset->value, $asset->place, $asset->key, $asset->attrs, $asset->name, hrtime(true));
         return $this;
     }
@@ -271,6 +315,8 @@ class Template
             $this->engine()->fail(sprintf('No repeat `%s` in %s.%s', $name, $this->label, $this->suggest($name)));
         } elseif ($sample === null) {
             $this->engine()->fail(sprintf('`%s` is not a repeat in %s, use var()', $name, $this->label));
+        } elseif (!$this->liveNodes($name, [$sample])) {
+            $sample = null;
         }
         // In lenient mode a detached stand-in sample gives a row that is never inserted
         return new Row($this, $sample ?? $this->doc->createElement('template'), $name);
@@ -339,13 +385,47 @@ class Template
      */
     public function slot(Template $child, ?string $replaces = null): \Dom\Element
     {
+        if ($child instanceof Row) {
+            throw new \LogicException('A row cannot be inserted as a template; add it with append()');
+        }
+        $child->assertInsertable();
         // The child uses this template's engine from now on, unless it has its own
         if ($child->engine === null && $child->inheritedEngine === null && $child !== $this) {
             $child->inheritedEngine = $this->engine();
         }
         $slot = $this->doc->createElement(self::SLOT);
+        self::$slots ??= new \WeakMap();
+        self::$slots[$slot] = true;
         $this->pending[] = [$slot, $child, $replaces];
         return $slot;
+    }
+
+    /**
+     * @throws \LogicException when the template was rendered on its own: its assets and
+     *     modifiers are already in its output and would be applied again
+     */
+    private function assertInsertable(): void
+    {
+        if ($this->output !== null || ($this->rendering && !$this->built)) {
+            throw new \LogicException(sprintf('Template %s was rendered on its own; insert it before rendering', $this->label));
+        }
+    }
+
+    /**
+     * Placeholders copied along with a tree are placeholders too
+     *
+     * @param \WeakMap<\Dom\Element, \Dom\Element> $map original element => copy
+     */
+    protected static function copySlotMarks(\WeakMap $map): void
+    {
+        if (self::$slots === null) {
+            return;
+        }
+        foreach ($map as $old => $new) {
+            if (isset(self::$slots[$old])) {
+                self::$slots[$new] = true;
+            }
+        }
     }
 
     /**
@@ -367,12 +447,18 @@ class Template
     }
 
     /**
-     * " Did you mean `x`?" for the closest known name within 2 edits, or ''
+     * " Did you mean `x`?" for the closest known name, or ''. Names of 1-2 characters get
+     * no suggestion, 3-4 characters allow 1 edit, longer names 2.
      */
     private function suggest(string $name): string
     {
+        $length = strlen($name);
+        $limit = $length <= 2 ? 0 : ($length <= 4 ? 1 : 2);
+        if ($limit === 0) {
+            return '';
+        }
         $best = null;
-        $bestDistance = 3;
+        $bestDistance = $limit + 1;
         foreach ($this->scope->names() as $known) {
             $distance = levenshtein($name, $known);
             if ($distance < $bestDistance) {
@@ -422,11 +508,14 @@ class Template
     }
 
     /**
+     * Set one attribute, or several from an array. With no value, a bare attribute
+     * (disabled="") is set; false and null remove it.
+     *
      * @param string|array<string, string|int|float|bool|null> $attr
      */
     public function attr(string $name, string|array $attr, string|int|float|bool|null $value = null): static
     {
-        $this->var($name)->attr($attr, $value);
+        $this->var($name)->attr($attr, func_num_args() < 3 ? true : $value);
         return $this;
     }
 
@@ -504,6 +593,14 @@ class Template
     public function render(): string
     {
         if ($this->output === null) {
+            if ($this->rendering) {
+                throw new \LogicException(sprintf('Template %s failed to render earlier; load it again', $this->label));
+            }
+            // Nothing is changed until every insert is known to be buildable
+            /** @var \WeakMap<Template, true> $checked */
+            $checked = new \WeakMap();
+            $this->checkInserts([], $checked);
+            $this->rendering = true;
             $ctx = new BuildContext();
             $this->build($ctx);
             $this->placeAssets($this->bubbled, $ctx);
@@ -584,6 +681,43 @@ class Template
         } finally {
             $ctx->leave();
         }
+    }
+
+    /**
+     * Walk the inserts that will be built and reject circular or already-rendered ones,
+     * before anything is built, so a failed render leaves every template unchanged.
+     * Inserts inside hidden content are skipped: they are never built.
+     *
+     * @param list<Template> $stack
+     * @param \WeakMap<Template, true> $checked
+     * @throws \LogicException
+     */
+    private function checkInserts(array $stack, \WeakMap $checked): void
+    {
+        if ($stack) {
+            $this->assertInsertable();
+        }
+        if ($this->built || isset($checked[$this])) {
+            return;
+        }
+        if (in_array($this, $stack, true)) {
+            $labels = array_map(fn(Template $t) => $t->label, [...$stack, $this]);
+            throw new \LogicException('Circular template insert: ' . implode(' → ', $labels));
+        }
+        $stack[] = $this;
+        $removed = $this->removedNodes();
+        foreach ($this->pending as [$slot, $child]) {
+            if (!$this->root->contains($slot)) {
+                continue;
+            }
+            foreach ($removed as $node) {
+                if ($node->contains($slot)) {
+                    continue 2;
+                }
+            }
+            $child->checkInserts($stack, $checked);
+        }
+        $checked[$this] = true;
     }
 
     /**
@@ -774,16 +908,7 @@ class Template
      */
     private function removeHidden(): void
     {
-        foreach ($this->scope->names() as $name) {
-            if ($this->scope->kind($name) === Kind::Repeat || !$this->scope->isVisible($name)) {
-                foreach ($this->scope->nodes($name) as $node) {
-                    if ($node->parentNode !== null) {
-                        $node->remove();
-                    }
-                }
-            }
-        }
-        foreach ($this->scope->rejected() as $node) {
+        foreach ($this->removedNodes() as $node) {
             if ($node->parentNode !== null) {
                 $node->remove();
             }
@@ -791,13 +916,32 @@ class Template
     }
 
     /**
-     * Strip var attributes and, at the top level, any placeholder that was never resolved
+     * The nodes removeHidden() removes
+     *
+     * @return list<\Dom\Element>
+     */
+    private function removedNodes(): array
+    {
+        $nodes = [];
+        foreach ($this->scope->names() as $name) {
+            if ($this->scope->kind($name) === Kind::Repeat || !$this->scope->isVisible($name)) {
+                array_push($nodes, ...$this->scope->nodes($name));
+            }
+        }
+        return [...$nodes, ...$this->scope->rejected()];
+    }
+
+    /**
+     * Strip var attributes and, at the top level, any placeholder that was never resolved.
+     * <tk-slot> elements written in the HTML are kept.
      */
     private function stripMarkers(bool $dropSlots): void
     {
-        if ($dropSlots) {
+        if ($dropSlots && self::$slots !== null) {
             foreach ($this->root->querySelectorAll(self::SLOT) as $slot) {
-                $slot->remove();
+                if (isset(self::$slots[$slot])) {
+                    $slot->remove();
+                }
             }
         }
         foreach ($this->root->querySelectorAll('[var]') as $el) {

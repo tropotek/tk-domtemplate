@@ -116,6 +116,11 @@ final class Row extends Template
         return $this->added;
     }
 
+    protected function isFinished(): bool
+    {
+        return $this->added || $this->parentTemplate->isFinished();
+    }
+
     public function assertMutable(): void
     {
         if ($this->added) {
@@ -199,6 +204,7 @@ final class Row extends Template
         foreach ($old as $i => $el) {
             $map[$el] = $new[$i];
         }
+        self::copySlotMarks($map);
         foreach ($this->inlineAt as [$anchor, $asset]) {
             if (isset($map[$anchor])) {
                 $this->inlineAt[] = [$map[$anchor], $asset];

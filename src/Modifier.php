@@ -1,6 +1,7 @@
 <?php
 namespace Tk\DomTemplate;
 
+use Tk\DomTemplate\Modifier\BaseModifier;
 use Tk\DomTemplate\Modifier\Context;
 
 /**
@@ -29,18 +30,33 @@ final readonly class Modifier
 
     public function process(Context $ctx): void
     {
-        $xpath = new \Dom\XPath($ctx->document);
+        $xpath = null;
         foreach ($this->modifiers as $modifier) {
-            // querySelectorAll returns a static list, so modifiers may remove nodes as they go
+            // The lists are static, so modifiers may remove nodes as they go;
+            // nodes removed earlier in the pass (with an ancestor) are skipped
             foreach ($ctx->root->querySelectorAll($modifier->selector() ?? '*') as $el) {
-                $modifier->element($el, $ctx);
+                if ($ctx->root->contains($el)) {
+                    $modifier->element($el, $ctx);
+                }
             }
-            foreach ($xpath->query('.//comment()', $ctx->root) as $comment) {
-                if ($comment instanceof \Dom\Comment) {
-                    $modifier->comment($comment, $ctx);
+            if (self::wantsComments($modifier)) {
+                $xpath ??= new \Dom\XPath($ctx->document);
+                foreach ($xpath->query('.//comment()', $ctx->root) as $comment) {
+                    if ($comment instanceof \Dom\Comment && $ctx->root->contains($comment)) {
+                        $modifier->comment($comment, $ctx);
+                    }
                 }
             }
             $modifier->done($ctx);
         }
+    }
+
+    /**
+     * False for a BaseModifier that doesn't override comment(): the comment search is skipped
+     */
+    private static function wantsComments(ModifierInterface $modifier): bool
+    {
+        return !$modifier instanceof BaseModifier
+            || (new \ReflectionMethod($modifier, 'comment'))->getDeclaringClass()->getName() !== BaseModifier::class;
     }
 }

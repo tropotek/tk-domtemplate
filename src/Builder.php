@@ -11,14 +11,15 @@ namespace Tk\DomTemplate;
  * - A name defined twice in one file is a mistake (the first is kept).
  * - data-opt-* attributes on a component are settings for PHP, read with options().
  *
- * Each file is parsed once and never changed, so a Builder can be shared across requests.
+ * Each component is parsed and checked once, at load, and get() returns a copy, so
+ * markup mistakes are reported at load and a Builder can be shared across requests.
  */
 final class Builder
 {
     private const string NAME_ATTR = 'data-tpl';
     private const string OPT_PREFIX = 'data-opt-';
 
-    /** @var array<string, array{\Dom\Element, string}> component name => [element, file name] */
+    /** @var array<string, array{Template, array<string, string>}> component name => [template, options] */
     private array $components = [];
 
     /** @var list<string> */
@@ -29,6 +30,9 @@ final class Builder
      */
     private function __construct(array $paths, private readonly ?Engine $engine)
     {
+        if (!$paths) {
+            throw new TemplateException('Builder::load() needs at least one file');
+        }
         foreach ($paths as $path) {
             $html = is_file($path) && is_readable($path) ? file_get_contents($path) : false;
             if ($html === false) {
@@ -52,7 +56,7 @@ final class Builder
                     continue;
                 }
                 $inFile[$name] = true;
-                $this->components[$name] = [$el, $file];
+                $this->components[$name] = [$this->prepare($el, $file . '#' . $name), self::optionsOf($el)];
             }
         }
     }
@@ -73,15 +77,23 @@ final class Builder
      */
     public function get(string $name): Template
     {
-        [$el, $file, $found] = $this->resolve($name);
+        return clone $this->resolve($name)[0];
+    }
+
+    /**
+     * The component as a template, without data-tpl and data-opt-* attributes
+     * (on nested components too)
+     */
+    private function prepare(\Dom\Element $el, string $label): Template
+    {
         $copy = Html::cloneDeep($el);
         foreach ([$copy, ...iterator_to_array($copy->querySelectorAll('[' . self::NAME_ATTR . ']'), false)] as $node) {
             $node->removeAttribute(self::NAME_ATTR);
+            foreach (array_keys(self::optionsOf($node)) as $opt) {
+                $node->removeAttribute(self::OPT_PREFIX . $opt);
+            }
         }
-        foreach (array_keys($this->optionsOf($copy)) as $opt) {
-            $copy->removeAttribute(self::OPT_PREFIX . $opt);
-        }
-        return Template::fromNode($copy, $this->engine, $file . '#' . $found);
+        return Template::fromNode($copy, $this->engine, $label);
     }
 
     /**
@@ -97,7 +109,7 @@ final class Builder
      */
     public function exists(string $name): bool
     {
-        return isset($this->components[$name]);
+        return isset($this->components[trim($name)]);
     }
 
     /**
@@ -115,11 +127,11 @@ final class Builder
      */
     public function options(string $name): array
     {
-        return $this->optionsOf($this->resolve($name)[0]);
+        return $this->resolve($name)[1];
     }
 
     /**
-     * @return array{\Dom\Element, string, string} element, file name, matched name
+     * @return array{Template, array<string, string>}
      */
     private function resolve(string $name): array
     {
@@ -127,12 +139,12 @@ final class Builder
         if ($found === null) {
             throw new TemplateException(sprintf('No component `%s` in %s', $name, implode(', ', $this->files)));
         }
-        return [...$this->components[$found], $found];
+        return $this->components[$found];
     }
 
     private function find(string $name): ?string
     {
-        for ($n = $name; $n !== ''; $n = (string)substr($n, 0, max(0, (int)strrpos($n, '.')))) {
+        for ($n = trim($name); $n !== ''; $n = (string)substr($n, 0, max(0, (int)strrpos($n, '.')))) {
             if (isset($this->components[$n])) {
                 return $n;
             }
@@ -146,7 +158,7 @@ final class Builder
     /**
      * @return array<string, string>
      */
-    private function optionsOf(\Dom\Element $el): array
+    private static function optionsOf(\Dom\Element $el): array
     {
         $opts = [];
         foreach ($el->attributes as $attr) {

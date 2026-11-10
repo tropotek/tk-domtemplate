@@ -59,7 +59,7 @@ For a single change, use the shortcut on the template:
 
 - `text()` is the only escaped path. Everything else inserts HTML.
 - HTML is parsed in the context of the target node, so `html('tbody', '<tr>…</tr>')` keeps the rows.
-- `attr()` values: `true` sets an empty attribute (`download=""`), `false` or `null` removes it. Alpine names such as `@click` and `:class` work.
+- `attr()` values: `true`, or no value (`attr('disabled')`), sets an empty attribute (`disabled=""`); `false` or `null` removes it. Alpine names such as `@click` and `:class` work.
 - `removeClass('btn')` removes only the `btn` class, not `btn-primary`.
 - `$t->has('x')` checks whether a name exists, for optional markup in components.
 - After `replace('x', …)`, the name refers to the replacement, so `show()`, `hide()` and attribute changes still apply.
@@ -82,9 +82,12 @@ Hidden nodes are **removed** from the output, not hidden with CSS. Optional node
 | Mistake | Result |
 |---|---|
 | Unknown name | ``No var `titel` in page.html. Did you mean `title`?`` |
+| A name inside content replaced by `html()` or `replace()` | ``"`msg` in page.html was inside content that has been replaced"`` |
 | Wrong kind (`var()` on a repeat) | ``"`users` is a repeat in page.html, use repeat()"`` |
 | A name used as two kinds, or malformed | Reported when the template loads |
 | A change after render | `LogicException`, always |
+
+Messages name the template by the path given to `Template::file()`, `(string)` for `load()`, or `file#name` for a [Builder](builder.md) component. A suggestion is offered for names of 3 or more characters: within 1 edit up to 4 characters, within 2 edits for longer names.
 
 By default these throw a `TemplateException`. An [Engine](engine.md) with `strict: false` logs them instead and carries on, which suits production.
 
@@ -97,4 +100,4 @@ Templates are parsed and written by PHP's HTML5 parser, `Dom\HTMLDocument`, so a
 - Attribute names are lowercased.
 - Broken HTML never throws; it is repaired the way browsers repair it.
 
-DomTemplate reserves the `<tk-slot>` element and the `data-tk-key` attribute for its own use.
+DomTemplate reserves the `data-tk-key` attribute for its own use. `<tk-slot>` elements written in your HTML are kept.

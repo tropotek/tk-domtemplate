@@ -26,7 +26,9 @@ $t->js('setupSelects();', key: 'select-init'); // written once per page
 
 ## De-duplication
 
-- `jsUrl()` and `cssUrl()` add each URL once per page, and skip URLs the page already links.
+- `jsUrl()` and `cssUrl()` add each URL once per page, and skip URLs the page already links with `<script src>` or `<link rel="stylesheet">` (a `rel="preload"` link doesn't count).
+- URLs are compared as written: `css/a.css` and `/css/a.css` count as two URLs.
+- Attribute names passed to `js()`, `css()`, `jsUrl()` and `cssUrl()` are checked at the call.
 - Code with a `key` is written once per page, however many components or rows add it.
 - Hidden components, and rows that are hidden or removed, contribute no assets.
 
