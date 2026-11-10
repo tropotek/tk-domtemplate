@@ -59,7 +59,7 @@ final class Scope
             if ($scope->insideNestedRepeat($tpl, $root)) {
                 continue;
             }
-            if (preg_match('/<[^>]*\svar\s*=/', $tpl->innerHTML)) {
+            if (self::templateHasVar($tpl)) {
                 $fail(sprintf('var markers inside <template> are not supported in %s', $label));
             }
         }
@@ -202,6 +202,30 @@ final class Scope
     {
         for ($p = $el->parentElement; $p !== null && $p !== $root; $p = $p->parentElement) {
             if (str_ends_with(trim((string)$p->getAttribute('var')), '[]')) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * True when <template> content (or a <template> nested in it) has a var attribute.
+     * The content can't be queried in place, so it is parsed into a scratch element.
+     */
+    private static function templateHasVar(\Dom\Element $tpl): bool
+    {
+        $html = $tpl->innerHTML;
+        if (!str_contains($html, 'var')) {
+            return false;
+        }
+        $doc = $tpl->ownerDocument;
+        assert($doc instanceof \Dom\HTMLDocument);
+        $scratch = Html::parseFragment($doc, $html);
+        if ($scratch->querySelector('[var]') !== null) {
+            return true;
+        }
+        foreach ($scratch->querySelectorAll('template') as $inner) {
+            if (self::templateHasVar($inner)) {
                 return true;
             }
         }

@@ -156,10 +156,12 @@ final class Row extends Template
     {
         $this->assertMutable();
         $targets = null;
+        $owner = $this->parentTemplate;
         for ($t = $this->parentTemplate; $t !== null; $t = $t->parent()) {
             $kind = $t->scope->kind($name);
             if ($kind !== null && $kind !== Kind::Repeat) {
                 $targets = $t->scope->nodes($name);
+                $owner = $t;
                 break;
             }
         }
@@ -176,7 +178,9 @@ final class Row extends Template
                 $inserted[] = $insert;
             }
         }
-        $this->parentTemplate->adopt($this, $inserted);
+        // The template holding the targets takes the inserts and assets, so they aren't
+        // lost when the row's own parent row is never added
+        $owner->adopt($this, $inserted);
     }
 
     /**

@@ -22,14 +22,14 @@ $t->js('setupSelects();', key: 'select-init'); // written once per page
 - **Head** and **End** go to the page's `<head>` or the end of its `<body>`, after the layout's own scripts.
 - URLs, meta and title always go to `<head>`.
 - A fragment has no `<head>` or `<body>`, so everything is written inline at its end and the title is dropped. That is how an HTMX response carries its assets.
-- Head assets follow call order across templates; `meta()` and `title()` keep the last value set.
+- Head assets follow call order across templates; `meta()` and `title()` keep the last value set. `meta()` replaces a layout's tag with the same name, ignoring case.
 
 ## De-duplication
 
 - `jsUrl()` and `cssUrl()` add each URL once per page, and skip URLs the page already links with `<script src>` or `<link rel="stylesheet">` (a `rel="preload"` link doesn't count).
 - URLs are compared as written: `css/a.css` and `/css/a.css` count as two URLs.
 - Attribute names passed to `js()`, `css()`, `jsUrl()` and `cssUrl()` are checked at the call.
-- Code with a `key` is written once per page, however many components or rows add it.
+- Code with a `key` is written once per page, however many components or rows add it. Keys are separate per type, so a component can use one key for its `css()` and its `js()`.
 - Hidden components, and rows that are hidden or removed, contribute no assets.
 
 ## Safety

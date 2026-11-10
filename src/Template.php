@@ -25,7 +25,8 @@ class Template
 
     private ?Engine $defaultEngine = null;
 
-    private ?Engine $inheritedEngine = null;
+    /** The template this one was first inserted into: its engine is used when this one has none */
+    private ?Template $insertedInto = null;
 
     /**
      * Template inserts waiting for the build: placeholder, child, and the var name to
@@ -393,10 +394,7 @@ class Template
             throw new \LogicException('A row cannot be inserted as a template; add it with append()');
         }
         $child->assertInsertable();
-        // The child uses this template's engine from now on, unless it has its own
-        if ($child->engine === null && $child->inheritedEngine === null && $child !== $this) {
-            $child->inheritedEngine = $this->engine();
-        }
+        $this->inherit($child);
         $slot = $this->doc->createElement(self::SLOT);
         self::$slots ??= new \WeakMap();
         self::$slots[$slot] = true;
@@ -648,7 +646,50 @@ class Template
      */
     public function engine(): Engine
     {
-        return $this->engine ?? $this->inheritedEngine ?? ($this->defaultEngine ??= new Engine());
+        return $this->engine ?? $this->insertedInto?->engine() ?? ($this->defaultEngine ??= new Engine());
+    }
+
+    /**
+     * A child without its own engine uses this template's, looked up when needed, so
+     * inserting this template into a page later reaches the child too. Skipped when it
+     * would make a loop (the child already holds this template, directly or not).
+     */
+    private function inherit(Template $child): void
+    {
+        if ($child->engine !== null || $child->insertedInto !== null) {
+            return;
+        }
+        for ($t = $this; $t !== null; $t = $t->insertedInto) {
+            if ($t === $child) {
+                return;
+            }
+        }
+        $child->insertedInto = $this;
+    }
+
+    /**
+     * True for a placeholder left by a template insert
+     *
+     * @internal used by Handle
+     */
+    public static function isSlot(\Dom\Element $el): bool
+    {
+        return self::$slots !== null && isset(self::$slots[$el]);
+    }
+
+    /**
+     * Forget this name's nodes that are no longer in the tree: a change to the name
+     * overwrote its own nested nodes of the same name
+     *
+     * @internal used by Handle
+     */
+    public function pruneDetached(string $name): void
+    {
+        foreach ($this->scope->nodes($name) as $node) {
+            if (!$this->root->contains($node)) {
+                $this->scope->replaceNode($name, $node, []);
+            }
+        }
     }
 
     /**
@@ -737,9 +778,7 @@ class Template
             if (!$this->root->contains($slot)) {
                 continue;
             }
-            if ($child->engine === null && $child->inheritedEngine === null) {
-                $child->inheritedEngine = $this->engine();
-            }
+            $this->inherit($child);
             $child->build($ctx);
             array_push($collected, ...$child->bubbled);
             $nodes = array_map(fn(\Dom\Node $n) => Html::import($this->doc, $n), $child->contentNodes());
@@ -815,7 +854,7 @@ class Template
             if ($asset->type === 'meta' && $head !== null) {
                 $existing = null;
                 foreach ($head->querySelectorAll('meta[name]') as $meta) {
-                    if ($meta->getAttribute('name') === $asset->name) {
+                    if (strcasecmp((string)$meta->getAttribute('name'), (string)$asset->name) === 0) {
                         $existing = $meta;
                         break;
                     }

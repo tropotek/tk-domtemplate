@@ -17,7 +17,7 @@ $part = $engine->load('<p var="msg"></p>');
 ```
 
 - The engine is optional. Without one, `Template::load()` and `Template::file()` are strict, with no logger, nonce or modifiers.
-- A template inserted into a page uses the page's engine from the moment it is inserted, unless it has its own. Rows always use their template's engine.
+- A template inserted into another uses that template's engine, unless it has its own, at any depth: a grandchild inserted before its parent joined the page still follows the page's engine. Rows always use their template's engine.
 - The engine never changes after construction, so one instance can be shared across requests in a worker runtime such as FrankenPHP.
 
 ## CSP nonce

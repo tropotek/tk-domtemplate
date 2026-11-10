@@ -32,7 +32,7 @@ final class Handle
     public function text(string $text): static
     {
         $this->owner->assertMutable();
-        foreach ($this->nodes as $node) {
+        foreach ($this->contentNodes() as $node) {
             $tag = strtolower($node->localName);
             if (in_array($tag, ['iframe', 'xmp', 'noembed', 'noframes', 'plaintext'], true)) {
                 $this->owner->engine()->fail(sprintf("text() can't escape content for <%s> `%s` in %s", $tag, $this->name, $this->owner->label()));
@@ -44,6 +44,7 @@ final class Handle
                 default => $text,
             };
         }
+        $this->owner->pruneDetached($this->name);
         return $this;
     }
 
@@ -54,13 +55,14 @@ final class Handle
     public function html(string|Template $html): static
     {
         $this->owner->assertMutable();
-        foreach ($this->nodes as $node) {
+        foreach ($this->contentNodes($html) as $node) {
             if ($html instanceof Template) {
                 $node->replaceChildren($this->owner->slot($html));
             } else {
                 $node->innerHTML = $html;
             }
         }
+        $this->owner->pruneDetached($this->name);
         return $this;
     }
 
@@ -88,7 +90,16 @@ final class Handle
     {
         $this->owner->assertMutable();
         $replaced = [];
+        $gone = [];
         foreach ($this->nodes as $node) {
+            foreach ($gone as $old) {
+                if ($old->contains($node)) {
+                    // Nested inside a node of the same name replaced earlier in this loop
+                    $this->owner->replaceNode($this->name, $node, []);
+                    continue 2;
+                }
+            }
+            $gone[] = $node;
             $parent = $node->parentNode;
             if ($parent === null) {
                 throw new \LogicException(sprintf("Can't replace `%s`: a row can't replace its own element", $this->name));
@@ -221,10 +232,32 @@ final class Handle
         return count($this->nodes);
     }
 
+    /**
+     * The nodes whose content can be changed. A placeholder left by replaceWith($template)
+     * is skipped (its content would be lost), and so is a <template> element when inserting
+     * a template (its content isn't part of the tree); both are reported.
+     *
+     * @return list<\Dom\Element>
+     */
+    private function contentNodes(string|Template $html = ''): array
+    {
+        $nodes = [];
+        foreach ($this->nodes as $node) {
+            if (Template::isSlot($node)) {
+                $this->owner->engine()->fail(sprintf('`%s` in %s was replaced by a template; change that template instead', $this->name, $this->owner->label()));
+            } elseif ($html instanceof Template && $node->localName === 'template') {
+                $this->owner->engine()->fail(sprintf("Can't insert a template into <template> `%s` in %s; insert its render() string instead", $this->name, $this->owner->label()));
+            } else {
+                $nodes[] = $node;
+            }
+        }
+        return $nodes;
+    }
+
     private function adjacent(\Dom\AdjacentPosition $where, string|Template $html): static
     {
         $this->owner->assertMutable();
-        foreach ($this->nodes as $node) {
+        foreach ($this->contentNodes($html) as $node) {
             if ($html instanceof Template) {
                 $slot = $this->owner->slot($html);
                 $where === \Dom\AdjacentPosition::BeforeEnd ? $node->append($slot) : $node->prepend($slot);

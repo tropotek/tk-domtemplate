@@ -20,7 +20,9 @@ echo $page->render();
 - Insert templates before rendering them. A template rendered on its own has its assets and modifiers in its output already, so inserting it throws a `LogicException`, and so does rendering a page whose child was rendered on its own after it was inserted. A child built as part of one page can be inserted into another.
 - Rows can't be inserted as templates; add them with `append()` or `appendTo()`.
 - After the page renders, the inserted templates are locked too.
-- A child without its own [engine](engine.md) uses the page's engine from the moment it is inserted.
+- A child without its own [engine](engine.md) uses the engine of the template it was inserted into, looked up when needed, so templates nested several levels deep follow the page's engine.
+- After `replace('x', $template)`, attributes and classes set on `x` carry over to the template's elements, but `text()` and `html()` on `x` are reported: change the inserted template instead.
+- A template can't be inserted into a `<template>` element; insert `$child->render()` as a string.
 
 ## Cloning
 
