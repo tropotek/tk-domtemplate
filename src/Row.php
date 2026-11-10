@@ -37,6 +37,11 @@ final class Row extends Template
         throw new \LogicException('Rows are created with Template::repeat()');
     }
 
+    public static function fromNode(\Dom\Element $node, ?Engine $engine = null, string $label = '(node)'): static
+    {
+        throw new \LogicException('Rows are created with Template::repeat()');
+    }
+
     public function render(): string
     {
         throw new \LogicException(sprintf('Row `%s` renders with its template; add it with append()', $this->name));

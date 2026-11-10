@@ -146,6 +146,18 @@ class Template
         return static::parse($html, $path, $engine);
     }
 
+    /**
+     * A fragment template from a copy of an element in another document.
+     * The node is copied, never re-parsed, so a bare <tr> or <option> keeps its structure.
+     */
+    public static function fromNode(\Dom\Element $node, ?Engine $engine = null, string $label = '(node)'): static
+    {
+        $doc = \Dom\HTMLDocument::createEmpty();
+        $root = $doc->createElement(Html::contextFor($node->tagName));
+        $root->append(Html::import($doc, $node));
+        return new static($doc, $root, $label, $engine); // @phpstan-ignore new.static (Row blocks it)
+    }
+
     protected static function parse(string $html, string $label, ?Engine $engine): static
     {
         if (str_starts_with($html, "\xEF\xBB\xBF")) {
