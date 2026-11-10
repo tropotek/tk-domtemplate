@@ -6,6 +6,12 @@ use Tk\DomTemplate\Modifier\Context;
 /**
  * A final pass over a rendered page or fragment, run by Modifier.
  * Extend Modifier\BaseModifier to implement only what you need.
+ *
+ * Keep per-render data in $ctx->store($this), not in properties: one instance serves
+ * every render of an Engine. Modifiers run on the top-level render only; a template
+ * rendered on its own and then inserted into a page is processed again with the page.
+ * To render sub-templates inside a modifier without re-running the modifiers, load
+ * them without an engine.
  */
 interface ModifierInterface
 {
