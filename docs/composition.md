@@ -14,7 +14,7 @@ echo $page->render();
 - An inserted template is kept as a reference and rendered when the page renders, so it can still be changed after it was inserted.
 - Calls keep their order, even when string and template inserts are mixed on one node.
 - A template inserted in several places is built once and copied into each place.
-- Inserting a full page inserts its `<body>` contents.
+- Inserting a full page inserts its `<body>` contents. Scripts, styles and links written in its `<head>` are dropped; add them with `jsUrl()`, `cssUrl()` or `js(…, Place::Head)` so they reach the page's `<head>`.
 - A template inside hidden or overwritten content is never built.
 - Inserting a template into itself, directly or through other templates, throws a `LogicException` before anything is built, so every template involved is unchanged.
 - Insert templates before rendering them. A template rendered on its own has its assets and modifiers in its output already, so inserting it throws a `LogicException`, and so does rendering a page whose child was rendered on its own after it was inserted. A child built as part of one page can be inserted into another.

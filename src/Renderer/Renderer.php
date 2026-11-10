@@ -13,7 +13,14 @@ abstract class Renderer implements RendererInterface
 
     public function __clone()
     {
-        if ($this->template !== null) {
+        if ($this->template === null) {
+            return;
+        }
+        if ($this->template->isRendered()) {
+            // A rendered template can't be copied: the clone makes a fresh one on first use
+            $this->template = null;
+            $this->templateMade = false;
+        } else {
             $this->template = clone $this->template;
         }
     }

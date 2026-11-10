@@ -79,6 +79,38 @@ final class Html
         return (string)preg_replace('#</(style)#i', '<\\/$1', $css);
     }
 
+    /** Characters HTML allows in an attribute name (Alpine's @click and :class included) */
+    private const string ATTR_NAME = '/^[^\s"\'>\/=\x00-\x1F\x7F]+$/';
+
+    public static function isAttrName(string $name): bool
+    {
+        return (bool)preg_match(self::ATTR_NAME, $name);
+    }
+
+    /**
+     * Set an attribute. setAttribute() rejects names the HTML parser accepts, such as
+     * Alpine's @click; those are created by parsing them, then attached as attribute nodes.
+     *
+     * @throws TemplateException when the name is invalid
+     */
+    public static function setAttribute(\Dom\Element $node, string $name, string $value): void
+    {
+        try {
+            $node->setAttribute($name, $value);
+        } catch (\DOMException) {
+            $scratch = ($node->ownerDocument ?? throw new TemplateException('Node has no document'))->createElement('div');
+            $scratch->innerHTML = '<i ' . $name . '=""></i>';
+            $holder = $scratch->firstElementChild;
+            $attr = $holder?->getAttributeNode($name);
+            if ($holder === null || $attr === null) {
+                throw new TemplateException(sprintf('Invalid attribute name `%s`', $name));
+            }
+            $holder->removeAttributeNode($attr);
+            $attr->value = $value;
+            $node->setAttributeNode($attr);
+        }
+    }
+
     /**
      * True when the markup is a whole page: it starts with a doctype or an <html> element,
      * ignoring leading whitespace and comments

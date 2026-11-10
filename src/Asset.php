@@ -22,6 +22,8 @@ final readonly class Asset
         public ?string $name = null,
         /** When the asset was asked for: placement follows call order across templates */
         public int $seq = 0,
+        /** The attribute a meta tag is named by: name, property, http-equiv or itemprop */
+        public string $metaAttr = 'name',
     ) {}
 
     /**
@@ -51,7 +53,7 @@ final readonly class Asset
                 break;
             case AssetType::Meta:
                 $el = $doc->createElement('meta');
-                $el->setAttribute('name', (string)$this->name);
+                $el->setAttribute($this->metaAttr, (string)$this->name);
                 $el->setAttribute('content', $this->value);
                 break;
             case AssetType::Js:
@@ -68,7 +70,7 @@ final readonly class Asset
         }
         foreach ($this->attrs as $attr => $value) {
             if ($value !== null && $value !== false) {
-                $el->setAttribute($attr, $value === true ? '' : $value);
+                Html::setAttribute($el, $attr, $value === true ? '' : $value);
             }
         }
         if ($this->key !== null) {

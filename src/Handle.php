@@ -8,9 +8,6 @@ namespace Tk\DomTemplate;
  */
 final class Handle
 {
-    /** Characters HTML allows in an attribute name (Alpine's @click and :class included) */
-    private const string ATTR_NAME = '/^[^\s"\'>\/=\x00-\x1F\x7F]+$/';
-
     /**
      * @param list<\Dom\Element> $nodes
      */
@@ -152,7 +149,7 @@ final class Handle
         $this->internal('assertMutable');
         $attrs = is_array($name) ? $name : [$name => func_num_args() === 1 ? true : $value];
         foreach (array_keys($attrs) as $attr) {
-            if (!is_string($attr) || !preg_match(self::ATTR_NAME, $attr)) {
+            if (!is_string($attr) || !Html::isAttrName($attr)) {
                 throw new TemplateException(sprintf('Invalid attribute name `%s` for var `%s`', $attr, $this->name));
             }
         }
@@ -161,7 +158,7 @@ final class Handle
                 if ($val === null || $val === false) {
                     $node->removeAttribute((string)$attr);
                 } else {
-                    self::setAttribute($node, (string)$attr, $val === true ? '' : (string)$val);
+                    Html::setAttribute($node, (string)$attr, $val === true ? '' : (string)$val);
                 }
             }
         }
@@ -280,28 +277,6 @@ final class Handle
             }
         }
         return $this;
-    }
-
-    /**
-     * setAttribute() rejects names the HTML parser accepts, such as Alpine's @click.
-     * Those are created by parsing them, then attached as attribute nodes.
-     */
-    private static function setAttribute(\Dom\Element $node, string $name, string $value): void
-    {
-        try {
-            $node->setAttribute($name, $value);
-        } catch (\DOMException) {
-            $scratch = ($node->ownerDocument ?? throw new TemplateException('Node has no document'))->createElement('div');
-            $scratch->innerHTML = '<i ' . $name . '=""></i>';
-            $holder = $scratch->firstElementChild;
-            $attr = $holder?->getAttributeNode($name);
-            if ($holder === null || $attr === null) {
-                throw new TemplateException(sprintf('Invalid attribute name `%s`', $name));
-            }
-            $holder->removeAttributeNode($attr);
-            $attr->value = $value;
-            $node->setAttributeNode($attr);
-        }
     }
 
     /**

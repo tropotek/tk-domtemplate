@@ -238,50 +238,56 @@ class Template
     /**
      * Add JavaScript. Inline (the default) writes it at the end of this template.
      *
-     * @param array<string, string|bool|null> $attrs
+     * @param array<int|string, string|bool|null> $attrs name => value, or a bare name ('defer')
      * @param ?string $key assets with the same key are written once per page
      */
     public function js(string $code, Place $place = Place::Inline, ?string $key = null, array $attrs = []): static
     {
-        return $this->addAsset(new Asset(AssetType::Js, $code, $place, $key, $attrs));
+        return $this->addAsset(AssetType::Js, $code, $place, $key, $attrs);
     }
 
     /**
      * Add CSS. Inline (the default) writes it at the end of this template.
      *
-     * @param array<string, string|bool|null> $attrs
+     * @param array<int|string, string|bool|null> $attrs
      */
     public function css(string $code, Place $place = Place::Inline, ?string $key = null, array $attrs = []): static
     {
-        return $this->addAsset(new Asset(AssetType::Css, $code, $place, $key, $attrs));
+        return $this->addAsset(AssetType::Css, $code, $place, $key, $attrs);
     }
 
     /**
      * Add a script URL to the page <head>, once per page
      *
-     * @param array<string, string|bool|null> $attrs
+     * @param array<int|string, string|bool|null> $attrs
      */
     public function jsUrl(string $url, array $attrs = []): static
     {
-        return $this->addAsset(new Asset(AssetType::JsUrl, $url, Place::Head, null, $attrs));
+        return $this->addAsset(AssetType::JsUrl, $url, Place::Head, null, $attrs);
     }
 
     /**
      * Add a stylesheet URL to the page <head>, once per page
      *
-     * @param array<string, string|bool|null> $attrs
+     * @param array<int|string, string|bool|null> $attrs
      */
     public function cssUrl(string $url, array $attrs = []): static
     {
-        return $this->addAsset(new Asset(AssetType::CssUrl, $url, Place::Head, null, $attrs));
+        return $this->addAsset(AssetType::CssUrl, $url, Place::Head, null, $attrs);
     }
 
     /**
-     * Set a <meta name> tag in the page <head>; the last value set wins
+     * Set a <meta> tag in the page <head>; the last value set wins. $attr names the tag
+     * by name (the default), property (Open Graph), http-equiv or itemprop.
+     *
+     * @throws TemplateException for any other $attr
      */
-    public function meta(string $name, string $content): static
+    public function meta(string $name, string $content, string $attr = 'name'): static
     {
-        return $this->addAsset(new Asset(AssetType::Meta, $content, Place::Head, null, [], $name));
+        if (!in_array($attr, ['name', 'property', 'http-equiv', 'itemprop'], true)) {
+            throw new TemplateException('meta() attr must be name, property, http-equiv or itemprop');
+        }
+        return $this->addAsset(AssetType::Meta, $content, Place::Head, null, [], $name, $attr);
     }
 
     /**
@@ -289,23 +295,27 @@ class Template
      */
     public function title(string $title): static
     {
-        return $this->addAsset(new Asset(AssetType::Title, $title));
+        return $this->addAsset(AssetType::Title, $title);
     }
 
     /**
+     * @param array<int|string, string|bool|null> $attrs
      * @throws TemplateException when an attribute name is invalid
      */
-    private function addAsset(Asset $asset): static
+    private function addAsset(AssetType $type, string $value, Place $place = Place::Head, ?string $key = null, array $attrs = [], ?string $name = null, string $metaAttr = 'name'): static
     {
         $this->assertMutable();
-        foreach (array_keys($asset->attrs) as $attr) {
-            try {
-                $this->doc->createElement('i')->setAttribute((string)$attr, '');
-            } catch (\DOMException) {
-                throw new TemplateException(sprintf('Invalid attribute name `%s` for %s() in %s', $attr, $asset->type->value, $this->label));
+        $named = [];
+        foreach ($attrs as $attr => $val) {
+            if (is_int($attr)) {
+                [$attr, $val] = [(string)$val, true];
             }
+            if (!Html::isAttrName($attr)) {
+                throw new TemplateException(sprintf('Invalid attribute name `%s` for %s() in %s', $attr, $type->value, $this->label));
+            }
+            $named[$attr] = $val;
         }
-        $this->assets[] = new Asset($asset->type, $asset->value, $asset->place, $asset->key, $asset->attrs, $asset->name, hrtime(true));
+        $this->assets[] = new Asset($type, $value, $place, $key, $named, $name, hrtime(true), $metaAttr);
         return $this;
     }
 
@@ -850,8 +860,8 @@ class Template
             $el = $asset->toElement($this->doc);
             if ($asset->type === AssetType::Meta && $head !== null) {
                 $existing = null;
-                foreach ($head->querySelectorAll('meta[name]') as $meta) {
-                    if (strcasecmp((string)$meta->getAttribute('name'), (string)$asset->name) === 0) {
+                foreach ($head->querySelectorAll('meta[' . $asset->metaAttr . ']') as $meta) {
+                    if (strcasecmp((string)$meta->getAttribute($asset->metaAttr), (string)$asset->name) === 0) {
                         $existing = $meta;
                         break;
                     }

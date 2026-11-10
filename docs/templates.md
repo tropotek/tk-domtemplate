@@ -77,6 +77,8 @@ $t->hide('price');                     // plain: removed when hidden
 
 Hidden nodes are **removed** from the output, not hidden with CSS. Optional nodes are mostly permission checks, so their content never reaches the browser.
 
+Filling an optional node doesn't show it: `text('msg', 'Saved')` on `var="msg?"` renders nothing until `show('msg')` is called too.
+
 ## Errors
 
 | Mistake | Result |

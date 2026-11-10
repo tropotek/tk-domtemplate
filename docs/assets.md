@@ -9,9 +9,10 @@ $t->js('initTable();');                        // inline: at the end of this tem
 $t->js('track();', Place::Head);               // end of the page <head>
 $t->js('boot();', Place::End);                 // end of the page <body>
 $t->css('.card { gap: 1rem; }');               // inline, or Place::Head
-$t->jsUrl('/js/app.js', ['defer' => true]);    // <head>, once per page
+$t->jsUrl('/js/app.js', ['defer', 'type' => 'module']); // <head>, once per page
 $t->cssUrl('/css/app.css');                    // <head>, once per page
 $t->meta('description', 'Page description');  // <head>; the last call wins
+$t->meta('og:title', 'Title', attr: 'property'); // also http-equiv and itemprop
 $t->title('Page title');                       // replaces or creates <title>
 $t->js('setupSelects();', key: 'select-init'); // written once per page
 ```
@@ -28,7 +29,7 @@ $t->js('setupSelects();', key: 'select-init'); // written once per page
 
 - `jsUrl()` and `cssUrl()` add each URL once per page, and skip URLs the page already links with `<script src>` or `<link rel="stylesheet">` (a `rel="preload"` link doesn't count).
 - URLs are compared as written: `css/a.css` and `/css/a.css` count as two URLs.
-- Attribute names passed to `js()`, `css()`, `jsUrl()` and `cssUrl()` are checked at the call.
+- Attributes passed to `js()`, `css()`, `jsUrl()` and `cssUrl()` take `name => value` pairs or bare names (`['defer']`), and accept the same names as `attr()`, Alpine's `@load` included. They are checked at the call.
 - Code with a `key` is written once per page, however many components or rows add it. Keys are separate per type, so a component can use one key for its `css()` and its `js()`.
 - Hidden components, and rows that are hidden or removed, contribute no assets.
 
