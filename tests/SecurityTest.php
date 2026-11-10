@@ -3,7 +3,7 @@ namespace Tk\DomTemplate\Tests;
 
 use Tk\DomTemplate\Builder;
 use Tk\DomTemplate\Engine;
-use Tk\DomTemplate\Modifier;
+use Tk\DomTemplate\ModifierList;
 use Tk\DomTemplate\Modifier\BaseModifier;
 use Tk\DomTemplate\Modifier\Context;
 use Tk\DomTemplate\Place;
@@ -42,7 +42,7 @@ class SecurityTest extends TestCase
     public function testNonceOnScriptsInRowsFromTheSource(): void
     {
         $t = (new Engine(nonce: 'N'))->load('<ul><li var="r[]"><script>r();</script></li></ul>');
-        $t->repeat('r')->append();
+        $t->repeat('r')->insert();
         $this->assertSame('<ul><li><script nonce="N">r();</script></li></ul>', $t->render());
     }
 
@@ -82,7 +82,7 @@ class SecurityTest extends TestCase
                 $el->append($copied);
             }
         };
-        $t = (new Engine(nonce: 'N', modifier: new Modifier([$mod])))->load('<main></main>');
+        $t = (new Engine(nonce: 'N', modifiers: new ModifierList([$mod])))->load('<main></main>');
         $this->assertSame('<main><script nonce="N">mine();</script><script>copied();</script></main>', $t->render());
     }
 

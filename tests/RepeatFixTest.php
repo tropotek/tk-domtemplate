@@ -13,7 +13,7 @@ class RepeatFixTest extends TestCase
     public function testTemplateContentSurvivesRowClone(): void
     {
         $t = Template::load('<ul><li var="r[]" x-data="{items:[1,2]}"><template x-for="i in items"><span x-text="i"></span></template></li></ul>');
-        $t->repeat('r')->append();
+        $t->repeat('r')->insert();
         $this->assertSame('<ul><li x-data="{items:[1,2]}"><template x-for="i in items"><span x-text="i"></span></template></li></ul>', $t->render());
     }
 
@@ -21,15 +21,15 @@ class RepeatFixTest extends TestCase
     {
         $t = Template::load('<div><section var="s[]"><p var="p[]"><template x-if="a"><template x-for="b in c"><i></i></template></template></p></section></div>');
         $s = $t->repeat('s');
-        $s->repeat('p')->append();
-        $s->append();
+        $s->repeat('p')->insert();
+        $s->insert();
         $this->assertSame('<div><section><p><template x-if="a"><template x-for="b in c"><i></i></template></template></p></section></div>', $t->render());
     }
 
     public function testTemplateContentSurvivesInEveryAppendToTarget(): void
     {
         $t = Template::load('<div><ul var="l"></ul><ul var="l"></ul><li var="r[]"><template x-if="o"><b>x</b></template></li></div>');
-        $t->repeat('r')->appendTo('l');
+        $t->repeat('r')->insertInto('l');
         $this->assertSame(2, substr_count($t->render(), '<template x-if="o"><b>x</b></template>'));
     }
 
@@ -51,7 +51,7 @@ class RepeatFixTest extends TestCase
         $log = new SpyLogger();
         $t = (new Engine(strict: false, logger: $log))->load('<ul><li var="r[]"><b var="bad name">x</b><i var="ok?">s</i></li></ul>');
         foreach ([1, 2, 3] as $i) {
-            $t->repeat('r')->append();
+            $t->repeat('r')->insert();
         }
         $this->assertSame('<ul><li><b>x</b></li><li><b>x</b></li><li><b>x</b></li></ul>', $t->render());
         $this->assertCount(1, $log->lines);

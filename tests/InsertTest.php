@@ -84,7 +84,7 @@ class InsertTest extends TestCase
         $page = Template::load('<ul><li var="r[]"><span var="cell"></span></li></ul>');
         $row = $page->repeat('r');
         $row->html('cell', Template::load('<em>e</em>'));
-        $row->append();
+        $row->insert();
         $this->assertSame('<ul><li><span><em>e</em></span></li></ul>', $page->render());
     }
 
@@ -93,7 +93,7 @@ class InsertTest extends TestCase
         $page = Template::load('<div><ul var="l"></ul><ul var="l"></ul><li var="r[]"><span var="c"></span></li></div>');
         $row = $page->repeat('r');
         $row->html('c', Template::load('<em>e</em>'));
-        $row->appendTo('l');
+        $row->insertInto('l');
         $this->assertSame('<div><ul><li><span><em>e</em></span></li></ul><ul><li><span><em>e</em></span></li></ul></div>', $page->render());
     }
 
@@ -103,8 +103,8 @@ class InsertTest extends TestCase
         $tr = $page->repeat('tr');
         $td = $tr->repeat('td');
         $td->html('td', Template::load('<b>x</b>'));
-        $td->append();
-        $tr->append();
+        $td->insert();
+        $tr->insert();
         $this->assertSame('<table><tbody><tr><td><b>x</b></td></tr></tbody></table>', $page->render());
     }
 
@@ -163,19 +163,12 @@ class InsertTest extends TestCase
         $this->assertSame($own, $child->engine());
     }
 
-    public function testRowAppendWithOneArgumentThrows(): void
-    {
-        $row = Template::load('<ul><li var="r[]"><b var="n"></b></li></ul>')->repeat('r');
-        $this->expectException(\ArgumentCountError::class);
-        $row->append('n');
-    }
-
     public function testRowAppendShortcutWithTemplate(): void
     {
         $page = Template::load('<ul><li var="r[]"><b var="n"></b></li></ul>');
         $row = $page->repeat('r');
         $row->append('n', Template::load('<i>t</i>'));
-        $row->append();
+        $row->insert();
         $this->assertSame('<ul><li><b><i>t</i></b></li></ul>', $page->render());
     }
 

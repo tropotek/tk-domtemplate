@@ -4,12 +4,12 @@ namespace Tk\DomTemplate;
 /**
  * One row of a repeat: a clone of the sample node with the full template API.
  *
- * Fill it in, then add it once with append(), prepend(), appendTo() or prependTo().
- * After that it is locked. Create rows with Template::repeat() or Template::each().
+ * Fill it in, then insert it once with insert(), insertBefore(), insertInto() or insertBeforeInto().
+ * After that it is locked. append() and prepend() are the usual var shortcuts. Create rows with Template::repeat() or Template::each().
  */
 final class Row extends Template
 {
-    private bool $added = false;
+    private bool $inserted = false;
 
     /**
      * @internal use Template::repeat()
@@ -44,56 +44,44 @@ final class Row extends Template
 
     public function render(): string
     {
-        throw new \LogicException(sprintf('Row `%s` renders with its template; add it with append()', $this->name));
+        throw new \LogicException(sprintf('Row `%s` renders with its template; insert it with insert()', $this->name));
     }
 
     /**
-     * Add the row where the sample is, after any rows already added from it
+     * Insert the row where the sample is, after any rows already inserted from it
      */
-    public function append(string $name = '', string|Template $html = ''): static
+    public function insert(): static
     {
-        if (func_num_args() === 1) {
-            throw new \ArgumentCountError('Row::append() takes no arguments to add the row, or a var name and HTML');
-        }
-        if (func_num_args() === 2) {
-            parent::append($name, $html);
-            return $this;
-        }
         $this->add(false);
         return $this;
     }
 
     /**
-     * Add the row before all rows already added from the same sample
+     * Insert the row before all rows already inserted from the same sample
      */
-    public function prepend(string $name = '', string|Template $html = ''): static
+    public function insertBefore(): static
     {
-        if (func_num_args() === 1) {
-            throw new \ArgumentCountError('Row::prepend() takes no arguments to add the row, or a var name and HTML');
-        }
-        if (func_num_args() === 2) {
-            parent::prepend($name, $html);
-            return $this;
-        }
         $this->add(true);
         return $this;
     }
 
     /**
-     * Add the row as the last child of every node with this var name.
+     * Insert the row as the last child of every node with this var name.
      * The name is looked up in the template the row belongs to, then outward.
      */
-    public function appendTo(string $name): void
+    public function insertInto(string $name): static
     {
         $this->addTo($name, false);
+        return $this;
     }
 
     /**
-     * Add the row as the first child of every node with this var name
+     * Insert the row as the first child of every node with this var name
      */
-    public function prependTo(string $name): void
+    public function insertBeforeInto(string $name): static
     {
         $this->addTo($name, true);
+        return $this;
     }
 
     /**
@@ -111,20 +99,20 @@ final class Row extends Template
     {
     }
 
-    public function isAdded(): bool
+    public function isInserted(): bool
     {
-        return $this->added;
+        return $this->inserted;
     }
 
     protected function isFinished(): bool
     {
-        return $this->added || $this->parentTemplate->isFinished();
+        return $this->inserted || $this->parentTemplate->isFinished();
     }
 
-    public function assertMutable(): void
+    protected function assertMutable(): void
     {
-        if ($this->added) {
-            throw new \LogicException(sprintf('Row `%s` in %s has already been added', $this->name, $this->label()));
+        if ($this->inserted) {
+            throw new \LogicException(sprintf('Row `%s` in %s has already been inserted', $this->name, $this->label()));
         }
         $this->parentTemplate->assertMutable();
     }
@@ -141,7 +129,7 @@ final class Row extends Template
     {
         $this->assertMutable();
         $this->cleanup(false);
-        $this->added = true;
+        $this->inserted = true;
         $node = $this->root;
         assert($node instanceof \Dom\Element);
         $node->removeAttribute('var');
@@ -166,7 +154,7 @@ final class Row extends Template
             }
         }
         if ($targets === null) {
-            $this->engine()->fail(sprintf('No var `%s` in %s for appendTo()', $name, $this->label()));
+            $this->engine()->fail(sprintf('No var `%s` in %s for insertInto()', $name, $this->label()));
             $targets = [];
         }
         $node = $this->finish();

@@ -30,7 +30,7 @@ The 8.x documentation is still at <https://domtemplate.tropotek.com/> (no longer
 | `var`, `choice` and `repeat` attributes | one `var` attribute: `name`, `name?`, `name[]` |
 | `setText()`, `setAttr()`, `addCss()` … | handles (`var('x')->text()->attr()`) and shortcuts (`text()`, `attr()`, `addClass()`) |
 | `setVisible()` | `show()` / `hide()`; hidden nodes are removed |
-| `getRepeat()` + `appendRepeat()` | `repeat()` + `Row::append()` / `appendTo()`, or `each()` |
+| `getRepeat()` + `appendRepeat()` | `repeat()` + `Row::insert()` / `insertInto()`, or `each()` |
 | `insertTemplate()`, `appendTemplate()` | `html()`, `append()` with a template; rendered lazily with the page |
 | `appendJs()` / `appendHeadJs()`, `appendCss()` / `appendHeadCss()` | `js()` / `css()` with `Place` |
 | `appendJsUrl()`, `appendCssUrl()` | `jsUrl()`, `cssUrl()` (once per page) |

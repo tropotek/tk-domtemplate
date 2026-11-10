@@ -2,7 +2,7 @@
 namespace Tk\DomTemplate\Tests;
 
 use Tk\DomTemplate\Engine;
-use Tk\DomTemplate\Modifier;
+use Tk\DomTemplate\ModifierList;
 use Tk\DomTemplate\Modifier\BaseModifier;
 use Tk\DomTemplate\Modifier\ClearComments;
 use Tk\DomTemplate\Modifier\Context;
@@ -12,7 +12,7 @@ class ClearCommentsTest extends TestCase
 {
     public function testEngineRunsModifierOnPageAndFragment(): void
     {
-        $e = new Engine(modifier: new Modifier([new ClearComments()]));
+        $e = new Engine(modifiers: new ModifierList([new ClearComments()]));
         $page = $e->load('<main var="c"><!-- page --></main>');
         $page->html('c', Template::load('<p>x<!-- child --></p>'));
         $this->assertSame('<main><p>x</p></main>', $page->render());
@@ -21,7 +21,7 @@ class ClearCommentsTest extends TestCase
 
     public function testFullPageCommentsRemoved(): void
     {
-        $e = new Engine(modifier: new Modifier([new ClearComments()]));
+        $e = new Engine(modifiers: new ModifierList([new ClearComments()]));
         $out = $e->load("<!doctype html>\n<html><head><!-- h --></head><body><!-- b --><p>x</p></body></html>")->render();
         $this->assertStringNotContainsString('<!--', $out);
     }
@@ -33,7 +33,7 @@ class ClearCommentsTest extends TestCase
             public function selector(): string { return 'p'; }
             public function element(\Dom\Element $el, Context $ctx): void { $this->n++; }
         };
-        $t = (new Engine(modifier: new Modifier([$count])))->load('<p>a</p>');
+        $t = (new Engine(modifiers: new ModifierList([$count])))->load('<p>a</p>');
         $t->render();
         $t->render();
         $this->assertSame(1, $count->n);
@@ -46,7 +46,7 @@ class ClearCommentsTest extends TestCase
             public function selector(): string { return 'p'; }
             public function element(\Dom\Element $el, Context $ctx): void { $this->n++; }
         };
-        $e = new Engine(modifier: new Modifier([$count]));
+        $e = new Engine(modifiers: new ModifierList([$count]));
         $page = $e->load('<div var="c"></div>');
         $page->html('c', $e->load('<p>child</p>'));
         $page->render();
@@ -61,7 +61,7 @@ class ClearCommentsTest extends TestCase
             public function selector(): string { return 'script'; }
             public function element(\Dom\Element $el, Context $ctx): void { $this->scripts++; $this->fragment = $ctx->fragment; }
         };
-        $page = (new Engine(modifier: new Modifier([$seen])))->load('<!doctype html><html><head></head><body></body></html>');
+        $page = (new Engine(modifiers: new ModifierList([$seen])))->load('<!doctype html><html><head></head><body></body></html>');
         $page->jsUrl('/a.js');
         $page->render();
         $this->assertSame([1, false], [$seen->scripts, $seen->fragment]);
@@ -77,7 +77,7 @@ class ClearCommentsTest extends TestCase
                 $el->append($ctx->trust($s));
             }
         };
-        $page = (new Engine(nonce: 'n', modifier: new Modifier([$adds])))->load('<main>x</main>');
+        $page = (new Engine(nonce: 'n', modifiers: new ModifierList([$adds])))->load('<main>x</main>');
         $this->assertSame('<main>x<script nonce="n">added();</script></main>', $page->render());
     }
 }

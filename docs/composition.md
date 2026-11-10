@@ -18,7 +18,7 @@ echo $page->render();
 - A template inside hidden or overwritten content is never built.
 - Inserting a template into itself, directly or through other templates, throws a `LogicException` before anything is built, so every template involved is unchanged.
 - Insert templates before rendering them. A template rendered on its own has its assets and modifiers in its output already, so inserting it throws a `LogicException`, and so does rendering a page whose child was rendered on its own after it was inserted. A child built as part of one page can be inserted into another.
-- Rows can't be inserted as templates; add them with `append()` or `appendTo()`.
+- Rows can't be inserted as templates; place them with `insert()` or `insertInto()`.
 - After the page renders, the inserted templates are locked too.
 - A child without its own [engine](engine.md) uses the engine of the template it was inserted into, looked up when needed, so templates nested several levels deep follow the page's engine.
 - After `replace('x', $template)`, attributes and classes set on `x` carry over to the template's elements, but `text()` and `html()` on `x` are reported: change the inserted template instead.

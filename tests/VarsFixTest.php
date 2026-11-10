@@ -48,7 +48,7 @@ class VarsFixTest extends TestCase
     public function testHandleKeepsWorkingOnTheReplacement(): void
     {
         $t = Template::load('<div><p var="a">x</p></div>');
-        $t->var('a')->replaceWith('<span>n</span>')->addClass('c');
+        $t->var('a')->replace('<span>n</span>')->addClass('c');
         $this->assertSame('<div><span class="c">n</span></div>', $t->render());
     }
 

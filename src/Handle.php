@@ -20,6 +20,20 @@ final class Handle
         private array $nodes,
     ) {}
 
+    /** Bound to the owner, so it can call Template's private helpers */
+    private ?\Closure $internal = null;
+
+    /**
+     * Call one of the owner's private helpers (slot(), replaceNode(), setVisible(),
+     * pruneDetached(), isSlot(), assertMutable()). They stay off Template's public API.
+     */
+    private function internal(string $method, mixed ...$args): mixed
+    {
+        $call = $this->internal ??= \Closure::bind(fn(string $m, array $a): mixed => $this->$m(...$a), $this->owner, Template::class)
+            ?? throw new \LogicException('Cannot bind to Template');
+        return $call($method, $args);
+    }
+
     public function name(): string
     {
         return $this->name;
@@ -31,7 +45,7 @@ final class Handle
      */
     public function text(string $text): static
     {
-        $this->owner->assertMutable();
+        $this->internal('assertMutable');
         foreach ($this->contentNodes() as $node) {
             $tag = strtolower($node->localName);
             if (in_array($tag, ['iframe', 'xmp', 'noembed', 'noframes', 'plaintext'], true)) {
@@ -44,7 +58,7 @@ final class Handle
                 default => $text,
             };
         }
-        $this->owner->pruneDetached($this->name);
+        $this->internal('pruneDetached', $this->name);
         return $this;
     }
 
@@ -54,15 +68,15 @@ final class Handle
      */
     public function html(string|Template $html): static
     {
-        $this->owner->assertMutable();
+        $this->internal('assertMutable');
         foreach ($this->contentNodes($html) as $node) {
             if ($html instanceof Template) {
-                $node->replaceChildren($this->owner->slot($html));
+                $node->replaceChildren($this->internal('slot', $html));
             } else {
                 $node->innerHTML = $html;
             }
         }
-        $this->owner->pruneDetached($this->name);
+        $this->internal('pruneDetached', $this->name);
         return $this;
     }
 
@@ -86,16 +100,16 @@ final class Handle
      * Replace each node itself with HTML. The name (and this handle) then refer to the
      * replacement elements, so show()/hide() and later changes apply to them.
      */
-    public function replaceWith(string|Template $html): static
+    public function replace(string|Template $html): static
     {
-        $this->owner->assertMutable();
+        $this->internal('assertMutable');
         $replaced = [];
         $gone = [];
         foreach ($this->nodes as $node) {
             foreach ($gone as $old) {
                 if ($old->contains($node)) {
                     // Nested inside a node of the same name replaced earlier in this loop
-                    $this->owner->replaceNode($this->name, $node, []);
+                    $this->internal('replaceNode', $this->name, $node, []);
                     continue 2;
                 }
             }
@@ -105,9 +119,9 @@ final class Handle
                 throw new \LogicException(sprintf("Can't replace `%s`: a row can't replace its own element", $this->name));
             }
             if ($html instanceof Template) {
-                $slot = $this->owner->slot($html, $this->name);
+                $slot = $this->internal('slot', $html, $this->name);
                 $node->replaceWith($slot);
-                $this->owner->replaceNode($this->name, $node, [$slot]);
+                $this->internal('replaceNode', $this->name, $node, [$slot]);
                 $replaced[] = $slot;
                 continue;
             }
@@ -120,7 +134,7 @@ final class Handle
                     $new[] = $n;
                 }
             }
-            $this->owner->replaceNode($this->name, $node, $new);
+            $this->internal('replaceNode', $this->name, $node, $new);
             array_push($replaced, ...$new);
         }
         $this->nodes = $replaced;
@@ -135,7 +149,7 @@ final class Handle
      */
     public function attr(string|array $name, string|int|float|bool|null $value = null): static
     {
-        $this->owner->assertMutable();
+        $this->internal('assertMutable');
         $attrs = is_array($name) ? $name : [$name => func_num_args() === 1 ? true : $value];
         foreach (array_keys($attrs) as $attr) {
             if (!is_string($attr) || !preg_match(self::ATTR_NAME, $attr)) {
@@ -164,7 +178,7 @@ final class Handle
      */
     public function addClass(string|array $class): static
     {
-        $this->owner->assertMutable();
+        $this->internal('assertMutable');
         $tokens = self::tokens($class);
         foreach ($this->nodes as $node) {
             if ($tokens) {
@@ -181,7 +195,7 @@ final class Handle
      */
     public function removeClass(string|array $class): static
     {
-        $this->owner->assertMutable();
+        $this->internal('assertMutable');
         $tokens = self::tokens($class);
         foreach ($this->nodes as $node) {
             if ($tokens) {
@@ -199,9 +213,9 @@ final class Handle
      */
     public function show(bool $visible = true): static
     {
-        $this->owner->assertMutable();
+        $this->internal('assertMutable');
         if ($this->nodes) {
-            $this->owner->setVisible($this->name, $visible);
+            $this->internal('setVisible', $this->name, $visible);
         }
         return $this;
     }
@@ -233,7 +247,7 @@ final class Handle
     }
 
     /**
-     * The nodes whose content can be changed. A placeholder left by replaceWith($template)
+     * The nodes whose content can be changed. A placeholder left by replace($template)
      * is skipped (its content would be lost), and so is a <template> element when inserting
      * a template (its content isn't part of the tree); both are reported.
      *
@@ -243,7 +257,7 @@ final class Handle
     {
         $nodes = [];
         foreach ($this->nodes as $node) {
-            if (Template::isSlot($node)) {
+            if ($this->internal('isSlot', $node)) {
                 $this->owner->engine()->fail(sprintf('`%s` in %s was replaced by a template; change that template instead', $this->name, $this->owner->label()));
             } elseif ($html instanceof Template && $node->localName === 'template') {
                 $this->owner->engine()->fail(sprintf("Can't insert a template into <template> `%s` in %s; insert its render() string instead", $this->name, $this->owner->label()));
@@ -256,10 +270,10 @@ final class Handle
 
     private function adjacent(\Dom\AdjacentPosition $where, string|Template $html): static
     {
-        $this->owner->assertMutable();
+        $this->internal('assertMutable');
         foreach ($this->contentNodes($html) as $node) {
             if ($html instanceof Template) {
-                $slot = $this->owner->slot($html);
+                $slot = $this->internal('slot', $html);
                 $where === \Dom\AdjacentPosition::BeforeEnd ? $node->append($slot) : $node->prepend($slot);
             } else {
                 $node->insertAdjacentHTML($where, $html);

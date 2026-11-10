@@ -2,7 +2,7 @@
 namespace Tk\DomTemplate\Tests;
 
 use Tk\DomTemplate\Html;
-use Tk\DomTemplate\Modifier;
+use Tk\DomTemplate\ModifierList;
 use Tk\DomTemplate\Modifier\BaseModifier;
 use Tk\DomTemplate\Modifier\Context;
 
@@ -19,7 +19,7 @@ class ModifierTest extends TestCase
             public function element(\Dom\Element $el, Context $ctx): void { $el->classList->add('internal'); }
         };
         $doc = \Dom\HTMLDocument::createFromString('<!doctype html><html><body><a href="page://home">h</a><a href="http://x">x</a></body></html>', LIBXML_NOERROR, 'UTF-8');
-        (new Modifier([$first, $second]))->process(new Context($doc, $doc, false));
+        (new ModifierList([$first, $second]))->process(new Context($doc, $doc, false));
         $this->assertStringContainsString('<a href="/home" class="internal">h</a><a href="http://x">x</a>', $doc->saveHtml());
     }
 
@@ -35,7 +35,7 @@ class ModifierTest extends TestCase
         };
         $doc = \Dom\HTMLDocument::createEmpty();
         $root = Html::parseFragment($doc, '<p>a<!-- c --></p><b>b</b>');
-        (new Modifier())->with($spy)->process(new Context($doc, $root, true));
+        (new ModifierList())->with($spy)->process(new Context($doc, $root, true));
         $this->assertSame([2, 1, true], [$spy->els, $spy->comments, $spy->done]);
     }
 
@@ -47,13 +47,13 @@ class ModifierTest extends TestCase
         };
         $doc = \Dom\HTMLDocument::createEmpty();
         $root = Html::parseFragment($doc, '<i>1</i><i>2</i><b>k</b>');
-        (new Modifier([$rm]))->process(new Context($doc, $root, true));
+        (new ModifierList([$rm]))->process(new Context($doc, $root, true));
         $this->assertSame('<b>k</b>', $root->innerHTML);
     }
 
     public function testWithReturnsANewList(): void
     {
-        $m = new Modifier();
+        $m = new ModifierList();
         $spy = new class extends BaseModifier { public function element(\Dom\Element $el, Context $ctx): void {} };
         $this->assertNotSame($m, $m->with($spy));
         $this->assertCount(0, $m->modifiers);
@@ -70,7 +70,7 @@ class ModifierTest extends TestCase
             public function comment(\Dom\Comment $c, Context $ctx): void { $this->seen[] = trim((string)$c->data); }
         };
         $doc = \Dom\HTMLDocument::createFromString('<!doctype html><html><head><!-- h --></head><body><!-- b --><p><!-- p --></p></body></html>', LIBXML_NOERROR, 'UTF-8');
-        (new Modifier([$spy]))->process(new Context($doc, $doc, false));
+        (new ModifierList([$spy]))->process(new Context($doc, $doc, false));
         $this->assertSame(['h', 'b', 'p'], $spy->seen);
     }
 }

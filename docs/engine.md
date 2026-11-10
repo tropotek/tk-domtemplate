@@ -9,7 +9,7 @@ $engine = new Engine(
     strict: $isDev,           // throw on template mistakes (true) or log them (false)
     logger: $psrLogger,       // PSR-3 logger for production; error_log() when null
     nonce: fn() => $request->cspNonce(), // CSP nonce, read at each render
-    modifier: $modifiers,     // final-pass modifiers
+    modifiers: $modifiers,    // final-pass modifiers (a ModifierList)
 );
 
 $page = $engine->file(__DIR__ . '/layout.html');

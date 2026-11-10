@@ -25,7 +25,7 @@ final readonly class Engine
          */
         public string|\Closure|null $nonce = null,
         /** Modifiers run over every top-level render, after assets are placed */
-        public ?Modifier $modifier = null,
+        public ?ModifierList $modifiers = null,
     ) {}
 
     /**

@@ -2,7 +2,7 @@
 namespace Tk\DomTemplate\Tests;
 
 use Tk\DomTemplate\Engine;
-use Tk\DomTemplate\Modifier;
+use Tk\DomTemplate\ModifierList;
 use Tk\DomTemplate\Modifier\BaseModifier;
 use Tk\DomTemplate\Modifier\Context;
 use Tk\DomTemplate\Template;
@@ -33,7 +33,7 @@ class ModifierFixTest extends TestCase
 
     public function testPerRenderStateDoesNotLeakAcrossRendersOnASharedEngine(): void
     {
-        $engine = new Engine(modifier: new Modifier([$this->toc()]));
+        $engine = new Engine(modifiers: new ModifierList([$this->toc()]));
         $this->assertSame('<nav>A,B</nav><h2>A</h2><h2>B</h2>', $engine->load('<nav></nav><h2>A</h2><h2>B</h2>')->render());
         $this->assertSame('<nav>C</nav><h2>C</h2>', $engine->load('<nav></nav><h2>C</h2>')->render());
     }
@@ -50,7 +50,7 @@ class ModifierFixTest extends TestCase
                 $el->innerHTML = (string)$this->engine?->load('<nav></nav><h2>Inner</h2>')->render();
             }
         };
-        $engine = new Engine(modifier: new Modifier([$this->toc(), $inner]));
+        $engine = new Engine(modifiers: new ModifierList([$this->toc(), $inner]));
         $inner->engine = $engine;
         $out = $engine->load('<nav></nav><h2>Outer</h2><aside></aside>')->render();
         $this->assertStringStartsWith('<nav>Outer</nav>', $out);

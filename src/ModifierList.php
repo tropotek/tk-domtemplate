@@ -11,7 +11,7 @@ use Tk\DomTemplate\Modifier\Context;
  * own selector, so a modifier only visits what it asks for. Immutable, so an Engine
  * holding one can be shared across requests.
  */
-final readonly class Modifier
+final readonly class ModifierList
 {
     /**
      * @param list<ModifierInterface> $modifiers

@@ -17,7 +17,7 @@ class RepeatTest extends TestCase
         foreach (['a', 'b'] as $n) {
             $r = $t->repeat('row');
             $r->text('n', $n);
-            $r->append();
+            $r->insert();
         }
         $this->assertSame('<ul><li><b>a</b></li><li><b>b</b></li><li>last</li></ul>', $t->render());
     }
@@ -27,13 +27,13 @@ class RepeatTest extends TestCase
         $t = Template::load('<ul><li var="row[]" var-x=""><b var="n"></b></li></ul>');
         $r = $t->repeat('row');
         $r->text('n', '2');
-        $r->append();
+        $r->insert();
         $r = $t->repeat('row');
         $r->text('n', '1');
-        $r->prepend();
+        $r->insertBefore();
         $r = $t->repeat('row');
         $r->text('n', '0');
-        $r->prepend();
+        $r->insertBefore();
         $this->assertSame('<ul><li var-x=""><b>0</b></li><li var-x=""><b>1</b></li><li var-x=""><b>2</b></li></ul>', $t->render());
     }
 
@@ -47,10 +47,10 @@ class RepeatTest extends TestCase
         $t = Template::load('<div><h1 var="name">page</h1><p var="row[]"><span var="name"></span><i var="flag?">!</i></p></div>');
         $r = $t->repeat('row');
         $r->text('name', 'r1')->show('flag');
-        $r->append();
+        $r->insert();
         $r = $t->repeat('row');
         $r->text('name', 'r2');
-        $r->append();
+        $r->insert();
         $this->assertSame('<div><h1>page</h1><p><span>r1</span><i>!</i></p><p><span>r2</span></p></div>', $t->render());
     }
 
@@ -59,7 +59,7 @@ class RepeatTest extends TestCase
         $t = Template::load('<select><option var="opt[]"></option></select>');
         $r = $t->repeat('opt');
         $r->text('opt', 'A')->attr('opt', 'value', 'a');
-        $r->append();
+        $r->insert();
         $this->assertSame('<select><option value="a">A</option></select>', $t->render());
     }
 
@@ -68,22 +68,22 @@ class RepeatTest extends TestCase
         $t = Template::load('<ul><li var="row[]">x</li></ul>');
         $r = $t->repeat('row');
         $r->hide('row');
-        $r->append();
+        $r->insert();
         $this->assertSame('<ul></ul>', $t->render());
     }
 
     public function testRowCannotBeChangedAfterAdding(): void
     {
         $r = Template::load('<ul><li var="row[]" var-n="">x</li></ul>')->repeat('row');
-        $r->append();
+        $r->insert();
         $this->expectException(\LogicException::class);
-        $r->append();
+        $r->insert();
     }
 
     public function testRowChangesAfterAddingThrow(): void
     {
         $r = Template::load('<ul><li var="row[]"><b var="n"></b></li></ul>')->repeat('row');
-        $r->append();
+        $r->insert();
         $this->expectException(\LogicException::class);
         $r->text('n', 'late');
     }
@@ -94,7 +94,7 @@ class RepeatTest extends TestCase
         $r = $t->repeat('row');
         $t->render();
         $this->expectException(\LogicException::class);
-        $r->append();
+        $r->insert();
     }
 
     public function testWrongKind(): void
@@ -115,7 +115,7 @@ class RepeatTest extends TestCase
     {
         $t = (new Engine(strict: false, logger: new SpyLogger()))->load('<ul><li var="row[]">x</li></ul>');
         $r = $t->repeat('nope');
-        $r->append();
+        $r->insert();
         $this->assertSame('<ul></ul>', $t->render());
     }
 
@@ -148,7 +148,7 @@ class RepeatTest extends TestCase
         for ($i = 0; $i < 1000; $i++) {
             $r = $t->repeat('row');
             $r->text('a', "a$i")->text('b', "b$i")->text('c', "c$i");
-            $r->append();
+            $r->insert();
         }
         $out = $t->render();
         $this->assertLessThan(1.0, (hrtime(true) - $start) / 1e9);

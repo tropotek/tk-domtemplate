@@ -47,7 +47,7 @@ class FromNodeTest extends TestCase
         $e = new Engine(strict: false);
         $src = $this->doc('<ul><li var="r[]">x</li></ul>');
         $t = Template::fromNode($src->querySelector('ul') ?? throw new \RuntimeException(), $e);
-        $t->repeat('r')->append();
+        $t->repeat('r')->insert();
         $this->assertSame($e, $t->engine());
         $this->assertSame('<ul><li>x</li></ul>', $t->render());
     }

@@ -53,7 +53,7 @@ PHP;
         $row = $page->repeat('r');
         $row->html('c', $child);
         $row->hide('r');
-        $row->append();
+        $row->insert();
         $this->assertSame('<ul></ul>', $page->render());
         $this->assertFalse($child->isRendered());
     }
@@ -68,7 +68,7 @@ PHP;
     public function testClassesMergeWithTheReplacementsOwn(): void
     {
         $page = Template::load('<div><p var="d">x</p></div>');
-        $page->var('d')->replaceWith(Template::load('<section class="card">c</section><b>2</b>'))->addClass('mt-2');
+        $page->var('d')->replace(Template::load('<section class="card">c</section><b>2</b>'))->addClass('mt-2');
         $this->assertSame('<div><section class="card mt-2">c</section><b class="mt-2">2</b></div>', $page->render());
     }
 }

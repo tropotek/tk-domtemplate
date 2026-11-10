@@ -47,7 +47,7 @@ class AssetTest extends TestCase
         foreach ([1, 2, 3] as $i) {
             $r = $page->repeat('r');
             $r->js('setup();', key: 'setup');
-            $r->append();
+            $r->insert();
         }
         $this->assertSame(1, substr_count($page->render(), 'setup();'));
     }
@@ -62,7 +62,7 @@ class AssetTest extends TestCase
     public function testRowAddedToSeveralTargetsCarriesItsInlineAssetToEach(): void
     {
         $page = Template::load('<div><ul var="l"></ul><ul var="l"></ul><li var="r[]">x</li></div>');
-        $page->repeat('r')->js('a();')->js('k();', key: 'k')->appendTo('l');
+        $page->repeat('r')->js('a();')->js('k();', key: 'k')->insertInto('l');
         $out = $page->render();
         $this->assertSame(2, substr_count($out, 'a();'));
         $this->assertSame(1, substr_count($out, 'k();'));
@@ -73,7 +73,7 @@ class AssetTest extends TestCase
         $page = $this->page();
         $page->html('c', '<ul><li var="r[]">x</li></ul>');
         $list = Template::load('<ul><li var="r[]">x</li></ul>');
-        $list->repeat('r')->cssUrl('/row.css')->append();
+        $list->repeat('r')->cssUrl('/row.css')->insert();
         $page->html('c', $list);
         $this->assertMatchesRegularExpression('#<head>.*/row\.css.*</head>#s', $page->render());
     }

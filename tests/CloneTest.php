@@ -48,11 +48,11 @@ class CloneTest extends TestCase
         $a = Template::load('<ul><li var="r[]"><b var="n"></b></li></ul>');
         $row = $a->repeat('r');
         $row->text('n', '2');
-        $row->append();
+        $row->insert();
         $b = clone $a;
         $first = $b->repeat('r');
         $first->text('n', '1');
-        $first->prepend();
+        $first->insertBefore();
         $this->assertSame('<ul><li><b>1</b></li><li><b>2</b></li></ul>', $b->render());
         $this->assertSame('<ul><li><b>2</b></li></ul>', $a->render());
     }

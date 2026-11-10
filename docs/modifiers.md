@@ -4,7 +4,7 @@ A modifier is a final pass over the rendered page or fragment: rewriting wiki li
 
 ```php
 use Tk\DomTemplate\Engine;
-use Tk\DomTemplate\Modifier;
+use Tk\DomTemplate\ModifierList;
 use Tk\DomTemplate\Modifier\BaseModifier;
 use Tk\DomTemplate\Modifier\ClearComments;
 use Tk\DomTemplate\Modifier\Context;
@@ -22,7 +22,7 @@ final class WikiLinks extends BaseModifier
     }
 }
 
-$engine = new Engine(modifier: new Modifier([new WikiLinks(), new ClearComments()]));
+$engine = new Engine(modifiers: new ModifierList([new WikiLinks(), new ClearComments()]));
 ```
 
 ## How they run

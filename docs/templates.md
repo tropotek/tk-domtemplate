@@ -50,7 +50,7 @@ For a single change, use the shortcut on the template:
 | `text($s)` | `$t->text('x', $s)` | set the text, escaped |
 | `html($h)` | `$t->html('x', $h)` | replace the contents with HTML or a template |
 | `append($h)` / `prepend($h)` | `$t->append('x', $h)` | add HTML or a template at the end / start |
-| `replaceWith($h)` | `$t->replace('x', $h)` | replace the node itself |
+| `replace($h)` | `$t->replace('x', $h)` | replace the node itself |
 | `attr($name, $value)` / `attr([...])` | `$t->attr('x', 'href', $u)` | set attributes |
 | `removeAttr($name)` | | remove an attribute |
 | `addClass($c)` / `removeClass($c)` | `$t->addClass('x', 'active')` | add or remove whole class names |

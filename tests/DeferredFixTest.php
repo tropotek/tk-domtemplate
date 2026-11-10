@@ -3,7 +3,7 @@ namespace Tk\DomTemplate\Tests;
 
 use Tk\DomTemplate\Builder;
 use Tk\DomTemplate\Engine;
-use Tk\DomTemplate\Modifier;
+use Tk\DomTemplate\ModifierList;
 use Tk\DomTemplate\Modifier\BaseModifier;
 use Tk\DomTemplate\Modifier\Context;
 use Tk\DomTemplate\Renderer\Renderer;
@@ -139,7 +139,7 @@ class DeferredFixTest extends TestCase
     {
         $t = Template::load('<div var="a"></div><ul><li var="r[]">x</li></ul>');
         $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('A row cannot be inserted as a template; add it with append()');
+        $this->expectExceptionMessage('A row cannot be inserted as a template; insert it with insert()');
         $t->html('a', $t->repeat('r'));
     }
 
@@ -242,7 +242,7 @@ class DeferredFixTest extends TestCase
                 $this->seen[] = 'comment:' . $comment->data;
             }
         };
-        $t = (new Engine(modifier: new Modifier([$mod])))->load('<div class="drop"><p class="in"></p><!--gone--></div><p class="out"></p><!--kept-->');
+        $t = (new Engine(modifiers: new ModifierList([$mod])))->load('<div class="drop"><p class="in"></p><!--gone--></div><p class="out"></p><!--kept-->');
         $this->assertSame('<p class="out"></p><!--kept-->', $t->render());
         $this->assertSame(['DIV.drop', 'P.out', 'comment:kept'], $mod->seen);
     }
@@ -257,7 +257,7 @@ class DeferredFixTest extends TestCase
                 throw new \RuntimeException('boom');
             }
         };
-        $t = (new Engine(modifier: new Modifier([$mod])))->load('<p>a</p>');
+        $t = (new Engine(modifiers: new ModifierList([$mod])))->load('<p>a</p>');
         try {
             $t->render();
             $this->fail('expected the modifier to throw');

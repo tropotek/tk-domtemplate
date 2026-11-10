@@ -210,7 +210,7 @@ class Template
 
     /**
      * The nodes still in the tree. Nodes inside content replaced with html() or
-     * replaceWith() are gone, so changing them is reported instead of doing nothing.
+     * replace() are gone, so changing them is reported instead of doing nothing.
      *
      * @param list<\Dom\Element> $nodes
      * @return list<\Dom\Element>
@@ -243,7 +243,7 @@ class Template
      */
     public function js(string $code, Place $place = Place::Inline, ?string $key = null, array $attrs = []): static
     {
-        return $this->addAsset(new Asset('js', $code, $place, $key, $attrs));
+        return $this->addAsset(new Asset(AssetType::Js, $code, $place, $key, $attrs));
     }
 
     /**
@@ -253,7 +253,7 @@ class Template
      */
     public function css(string $code, Place $place = Place::Inline, ?string $key = null, array $attrs = []): static
     {
-        return $this->addAsset(new Asset('css', $code, $place, $key, $attrs));
+        return $this->addAsset(new Asset(AssetType::Css, $code, $place, $key, $attrs));
     }
 
     /**
@@ -263,7 +263,7 @@ class Template
      */
     public function jsUrl(string $url, array $attrs = []): static
     {
-        return $this->addAsset(new Asset('jsUrl', $url, Place::Head, null, $attrs));
+        return $this->addAsset(new Asset(AssetType::JsUrl, $url, Place::Head, null, $attrs));
     }
 
     /**
@@ -273,7 +273,7 @@ class Template
      */
     public function cssUrl(string $url, array $attrs = []): static
     {
-        return $this->addAsset(new Asset('cssUrl', $url, Place::Head, null, $attrs));
+        return $this->addAsset(new Asset(AssetType::CssUrl, $url, Place::Head, null, $attrs));
     }
 
     /**
@@ -281,7 +281,7 @@ class Template
      */
     public function meta(string $name, string $content): static
     {
-        return $this->addAsset(new Asset('meta', $content, Place::Head, null, [], $name));
+        return $this->addAsset(new Asset(AssetType::Meta, $content, Place::Head, null, [], $name));
     }
 
     /**
@@ -289,7 +289,7 @@ class Template
      */
     public function title(string $title): static
     {
-        return $this->addAsset(new Asset('title', $title));
+        return $this->addAsset(new Asset(AssetType::Title, $title));
     }
 
     /**
@@ -302,7 +302,7 @@ class Template
             try {
                 $this->doc->createElement('i')->setAttribute((string)$attr, '');
             } catch (\DOMException) {
-                throw new TemplateException(sprintf('Invalid attribute name `%s` for %s() in %s', $attr, $asset->type, $this->label));
+                throw new TemplateException(sprintf('Invalid attribute name `%s` for %s() in %s', $attr, $asset->type->value, $this->label));
             }
         }
         $this->assets[] = new Asset($asset->type, $asset->value, $asset->place, $asset->key, $asset->attrs, $asset->name, hrtime(true));
@@ -310,7 +310,7 @@ class Template
     }
 
     /**
-     * A new row from a repeat sample. Fill it in, then add it with append() or appendTo().
+     * A new row from a repeat sample. Fill it in, then insert it with insert() or insertInto().
      */
     public function repeat(string $name): Row
     {
@@ -329,7 +329,7 @@ class Template
 
     /**
      * Add one row per item. The callback fills the row in; a row the callback didn't
-     * add itself (with appendTo() for example) is then appended in place.
+     * add itself (with insertInto() for example) is then appended in place.
      *
      * @param iterable<mixed> $items
      * @param callable $fn called as $fn(Row $row, mixed $item, int|string $key)
@@ -339,8 +339,8 @@ class Template
         foreach ($items as $key => $item) {
             $row = $this->repeat($name);
             $fn($row, $item, $key);
-            if (!$row->isAdded()) {
-                $row->append();
+            if (!$row->isInserted()) {
+                $row->insert();
             }
         }
         return $this;
@@ -367,7 +367,7 @@ class Template
         $row->pending = [];
         if ($nodes) {
             foreach ($row->assets as $asset) {
-                if ($asset->type !== 'title' && $asset->place === Place::Inline) {
+                if ($asset->isInline()) {
                     foreach ($nodes as $node) {
                         $this->inlineAt[] = [$node, $asset];
                     }
@@ -386,12 +386,12 @@ class Template
     /**
      * A placeholder for a template insert, resolved when the page is built
      *
-     * @internal used by Handle
+     * Reached by Handle only (see Handle::internal())
      */
-    public function slot(Template $child, ?string $replaces = null): \Dom\Element
+    private function slot(Template $child, ?string $replaces = null): \Dom\Element // @phpstan-ignore method.unused (called through Handle::internal())
     {
         if ($child instanceof Row) {
-            throw new \LogicException('A row cannot be inserted as a template; add it with append()');
+            throw new \LogicException('A row cannot be inserted as a template; insert it with insert()');
         }
         $child->assertInsertable();
         $this->inherit($child);
@@ -433,9 +433,8 @@ class Template
     /**
      * Insert a finished row: before the sample, or before the first row from it when prepending
      *
-     * @internal used by Row
      */
-    public function placeRow(\Dom\Element $sample, \Dom\Element $node, bool $prepend): void
+    protected function placeRow(\Dom\Element $sample, \Dom\Element $node, bool $prepend): void
     {
         $first = $this->firstRows[$sample] ?? null;
         if ($prepend && $first !== null) {
@@ -505,7 +504,7 @@ class Template
 
     public function replace(string $name, string|Template $html): static
     {
-        $this->var($name)->replaceWith($html);
+        $this->var($name)->replace($html);
         return $this;
     }
 
@@ -558,19 +557,19 @@ class Template
     }
 
     /**
-     * @internal used by Handle
+     * Reached by Handle only
      */
-    public function setVisible(string $name, bool $visible): void
+    private function setVisible(string $name, bool $visible): void // @phpstan-ignore method.unused (called through Handle::internal())
     {
         $this->scope->setVisible($name, $visible);
     }
 
     /**
-     * @internal used by Handle after replaceWith()
+     * Reached by Handle only, after replace()
      *
      * @param list<\Dom\Element> $new
      */
-    public function replaceNode(string $name, \Dom\Element $old, array $new): void
+    private function replaceNode(string $name, \Dom\Element $old, array $new): void // @phpstan-ignore method.unused (called through Handle::internal())
     {
         $this->scope->replaceNode($name, $old, $new);
     }
@@ -579,10 +578,8 @@ class Template
      * Called before every change: a rendered template is locked
      *
      * @throws \LogicException when the template has been rendered
-     *
-     * @internal
      */
-    public function assertMutable(): void
+    protected function assertMutable(): void
     {
         if ($this->isRendered()) {
             throw new \LogicException(sprintf('Template %s has already been rendered', $this->label));
@@ -607,7 +604,7 @@ class Template
             $this->build($ctx);
             $this->placeAssets($this->bubbled, $ctx);
             $this->dedupeKeys();
-            $this->engine()->modifier?->process(new Modifier\Context($this->doc, $this->root, $this->isFragment()));
+            $this->engine()->modifiers?->process(new Modifier\Context($this->doc, $this->root, $this->isFragment()));
             $this->applyNonce();
             $this->output = $this->root instanceof \Dom\Document ? $this->doc->saveHtml() : $this->root->innerHTML;
         }
@@ -670,9 +667,9 @@ class Template
     /**
      * True for a placeholder left by a template insert
      *
-     * @internal used by Handle
+     * Reached by Handle only
      */
-    public static function isSlot(\Dom\Element $el): bool
+    private static function isSlot(\Dom\Element $el): bool // @phpstan-ignore method.unused (called through Handle::internal())
     {
         return self::$slots !== null && isset(self::$slots[$el]);
     }
@@ -681,9 +678,9 @@ class Template
      * Forget this name's nodes that are no longer in the tree: a change to the name
      * overwrote its own nested nodes of the same name
      *
-     * @internal used by Handle
+     * Reached by Handle only
      */
-    public function pruneDetached(string $name): void
+    private function pruneDetached(string $name): void // @phpstan-ignore method.unused (called through Handle::internal())
     {
         foreach ($this->scope->nodes($name) as $node) {
             if (!$this->root->contains($node)) {
@@ -717,7 +714,7 @@ class Template
             }
             $this->rowAssets = [];
             $this->bubbled = [
-                ...array_values(array_filter($this->assets, fn(Asset $a) => $a->type === 'title' || $a->place !== Place::Inline)),
+                ...array_values(array_filter($this->assets, fn(Asset $a) => !$a->isInline())),
                 ...$fromRows,
                 ...$collected,
             ];
@@ -800,7 +797,7 @@ class Template
     {
         $end = $this->endNode();
         foreach ($this->assets as $asset) {
-            if ($asset->type !== 'title' && $asset->place === Place::Inline) {
+            if ($asset->isInline()) {
                 $end?->append($asset->toElement($this->doc));
             }
         }
@@ -840,10 +837,10 @@ class Template
         }
         usort($assets, fn(Asset $a, Asset $b) => $a->seq <=> $b->seq);
         foreach ($assets as $asset) {
-            if (in_array($asset->type, ['jsUrl', 'cssUrl'], true) && !$ctx->first($asset->type . ':' . $asset->value)) {
+            if (in_array($asset->type, [AssetType::JsUrl, AssetType::CssUrl], true) && !$ctx->first($asset->type->value . ':' . $asset->value)) {
                 continue;
             }
-            if ($asset->type === 'title') {
+            if ($asset->type === AssetType::Title) {
                 if ($head !== null) {
                     $title = $head->querySelector('title');
                     $title ? $title->textContent = $asset->value : $head->append($asset->toElement($this->doc));
@@ -851,7 +848,7 @@ class Template
                 continue;
             }
             $el = $asset->toElement($this->doc);
-            if ($asset->type === 'meta' && $head !== null) {
+            if ($asset->type === AssetType::Meta && $head !== null) {
                 $existing = null;
                 foreach ($head->querySelectorAll('meta[name]') as $meta) {
                     if (strcasecmp((string)$meta->getAttribute('name'), (string)$asset->name) === 0) {

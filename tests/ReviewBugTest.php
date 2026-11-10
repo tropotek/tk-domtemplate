@@ -43,7 +43,7 @@ class ReviewBugTest extends TestCase
         $sub = $row->repeat('sub');
         $sub->html('s', Template::load('<em>child</em>'));
         $sub->js('sub();');
-        $sub->appendTo('out');
+        $sub->insertInto('out');
         $this->assertSame('<div><i><b><em>child</em></b><script>sub();</script></i></div><ul></ul>', $t->render());
     }
 
@@ -92,7 +92,7 @@ class ReviewBugTest extends TestCase
     public function testContentChangeAfterReplacingWithATemplateFails(): void
     {
         $t = Template::load('<p var="a">x</p>');
-        $h = $t->var('a')->replaceWith(Template::load('<b>t</b>'));
+        $h = $t->var('a')->replace(Template::load('<b>t</b>'));
         $this->expectException(TemplateException::class);
         $this->expectExceptionMessage('`a` in (string) was replaced by a template; change that template instead');
         $h->text('lost');
@@ -101,7 +101,7 @@ class ReviewBugTest extends TestCase
     public function testAttrAfterReplacingWithATemplateStillCarriesOver(): void
     {
         $t = Template::load('<p var="a">x</p>');
-        $t->var('a')->replaceWith(Template::load('<b>t</b>'))->addClass('c');
+        $t->var('a')->replace(Template::load('<b>t</b>'))->addClass('c');
         $this->assertSame('<b class="c">t</b>', $t->render());
     }
 

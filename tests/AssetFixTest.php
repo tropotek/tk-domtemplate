@@ -18,7 +18,7 @@ class AssetFixTest extends TestCase
     public function testRowsInsideAHiddenContainerContributeNoAssets(): void
     {
         $page = $this->page('<div var="box?"><ul><li var="r[]">x</li></ul></div>');
-        $page->repeat('r')->cssUrl('/row.css')->js('rowEnd();', Place::End)->meta('robots', 'none')->title('RowTitle')->append();
+        $page->repeat('r')->cssUrl('/row.css')->js('rowEnd();', Place::End)->meta('robots', 'none')->title('RowTitle')->insert();
         $out = $page->render();
         foreach (['/row.css', 'rowEnd();', 'robots', 'RowTitle'] as $leak) {
             $this->assertStringNotContainsString($leak, $out);
@@ -30,15 +30,15 @@ class AssetFixTest extends TestCase
     {
         $page = $this->page('<ul><li var="r[]"><div var="inner?"><b var="n[]"></b></div></li></ul>');
         $row = $page->repeat('r');
-        $row->repeat('n')->cssUrl('/nested.css')->append();
-        $row->append();
+        $row->repeat('n')->cssUrl('/nested.css')->insert();
+        $row->insert();
         $this->assertStringNotContainsString('/nested.css', $page->render());
     }
 
     public function testRowsInAnOverwrittenContainerContributeNoAssets(): void
     {
         $page = $this->page('<div var="box"><ul><li var="r[]">x</li></ul></div>');
-        $page->repeat('r')->cssUrl('/gone.css')->append();
+        $page->repeat('r')->cssUrl('/gone.css')->insert();
         $page->html('box', 'replaced');
         $this->assertStringNotContainsString('/gone.css', $page->render());
     }
@@ -46,7 +46,7 @@ class AssetFixTest extends TestCase
     public function testVisibleRowAssetsStillBubble(): void
     {
         $page = $this->page('<ul><li var="r[]">x</li></ul>');
-        $page->repeat('r')->cssUrl('/row.css')->append();
+        $page->repeat('r')->cssUrl('/row.css')->insert();
         $this->assertMatchesRegularExpression('#<head>.*/row\.css.*</head>#s', $page->render());
     }
 
@@ -54,8 +54,8 @@ class AssetFixTest extends TestCase
     {
         $page = Template::load('<div><ul var="l"></ul><ul var="l"></ul><li var="r[]"><b var="n[]"></b></li></div>');
         $row = $page->repeat('r');
-        $row->repeat('n')->js('nested();')->append();
-        $row->appendTo('l');
+        $row->repeat('n')->js('nested();')->insert();
+        $row->insertInto('l');
         $this->assertSame(2, substr_count($page->render(), 'nested();'));
     }
 
