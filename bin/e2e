@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Browser tests for the example site, run in the official Playwright image.
+# The example site must be running: docker compose up -d
+#
+#   bin/e2e                                   # URL from .env (APP_HOST, HTTP_APP_PORT)
+#   BASE_URL=http://localhost:8080 bin/e2e
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+if [[ -f .env ]]; then
+    set -a; . ./.env; set +a
+fi
+host="${APP_HOST:-127.0.0.1}"
+[[ "$host" == "0.0.0.0" ]] && host=127.0.0.1
+export BASE_URL="${BASE_URL:-http://$host:${HTTP_APP_PORT:-8080}}"
+
+echo "==> Playwright against $BASE_URL"
+docker run --rm --network host -e BASE_URL -v "$PWD/tests/e2e:/e2e:ro" \
+    mcr.microsoft.com/playwright/python:v1.49.0-noble \
+    sh -c 'pip install -q --disable-pip-version-check playwright==1.49.0 2>/dev/null && for t in /e2e/*_test.py; do python "$t"; done'

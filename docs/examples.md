@@ -36,3 +36,14 @@ Edit `.env` to change them:
 
 Changes to `example/` and `src/` show up on the next page load. After changing `.env`, run
 `docker compose up -d` again.
+
+## Browser tests
+
+`bin/e2e` runs the browser tests in `tests/e2e/` with Playwright, in its official Docker image, against the running site.
+They click through the HTMX + Alpine page: the fragment swaps in, its own script runs, and its Alpine counter works.
+
+```bash
+docker compose up -d
+bin/e2e                                   # URL from .env
+BASE_URL=http://localhost:8080 bin/e2e    # or any URL
+```

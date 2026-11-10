@@ -94,6 +94,7 @@ With the container running:
 
 ```bash
 docker compose exec app composer check   # phpstan + PHPUnit
+bin/e2e                                  # browser tests of the example site (Playwright in Docker)
 ```
 
 To release, add a `Ver X.Y.Z [unreleased]:` section to `changelog.md`, then run `bin/release X.Y.Z`.
