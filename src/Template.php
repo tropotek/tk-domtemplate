@@ -35,6 +35,14 @@ class Template
     /** @var list<array{\Dom\Element, Asset}> inline assets of added rows, written at the end of each row element */
     protected array $inlineAt = [];
 
+    /**
+     * Head/End assets of added rows, with the row elements they came from: kept only
+     * while one of those elements is still in the page
+     *
+     * @var list<array{list<\Dom\Element>, Asset}>
+     */
+    protected array $rowAssets = [];
+
     /** @var list<Asset> assets handed up to the template this one is inserted into, kept for every later build */
     private array $bubbled = [];
 
@@ -100,6 +108,11 @@ class Template
             }
         }
         $this->inlineAt = $inlineAt;
+        $rowAssets = [];
+        foreach ($this->rowAssets as [$nodes, $asset]) {
+            $rowAssets[] = [array_values(array_filter(array_map(fn($n) => $map[$n] ?? null, $nodes))), $asset];
+        }
+        $this->rowAssets = $rowAssets;
         /** @var \WeakMap<\Dom\Element, \Dom\Element> $firstRows */
         $firstRows = new \WeakMap();
         foreach ($this->firstRows as $sample => $first) {
@@ -231,7 +244,7 @@ class Template
     private function addAsset(Asset $asset): static
     {
         $this->assertMutable();
-        $this->assets[] = $asset;
+        $this->assets[] = new Asset($asset->type, $asset->value, $asset->place, $asset->key, $asset->attrs, $asset->name, hrtime(true));
         return $this;
     }
 
@@ -279,9 +292,8 @@ class Template
     }
 
     /**
-     * Called when one of this template's rows is added
-     */
-    /**
+     * Called when one of this template's rows is added: take over its pending inserts and assets
+     *
      * @param list<\Dom\Element> $nodes the row elements that were inserted (none when hidden)
      */
     protected function adopt(Row $row, array $nodes): void
@@ -297,13 +309,15 @@ class Template
                         $this->inlineAt[] = [$node, $asset];
                     }
                 } else {
-                    $this->assets[] = $asset;
+                    $this->rowAssets[] = [$nodes, $asset];
                 }
             }
             array_push($this->inlineAt, ...$row->inlineAt);
+            array_push($this->rowAssets, ...$row->rowAssets);
         }
         $row->assets = [];
         $row->inlineAt = [];
+        $row->rowAssets = [];
     }
 
     /**
@@ -477,6 +491,7 @@ class Template
             $ctx = new BuildContext();
             $this->build($ctx);
             $this->placeAssets($this->bubbled, $ctx);
+            $this->dedupeKeys();
             $this->applyNonce();
             $this->output = $this->root instanceof \Dom\Document ? $this->doc->saveHtml() : $this->root->innerHTML;
         }
@@ -532,7 +547,21 @@ class Template
             $this->removeHidden();
             $collected = $this->resolvePending($ctx);
             $this->writeInline($ctx);
-            $this->bubbled = [...array_values(array_filter($this->assets, fn(Asset $a) => $a->type === 'title' || $a->place !== Place::Inline)), ...$collected];
+            $fromRows = [];
+            foreach ($this->rowAssets as [$nodes, $asset]) {
+                foreach ($nodes as $node) {
+                    if ($this->root->contains($node)) {
+                        $fromRows[] = $asset;
+                        break;
+                    }
+                }
+            }
+            $this->rowAssets = [];
+            $this->bubbled = [
+                ...array_values(array_filter($this->assets, fn(Asset $a) => $a->type === 'title' || $a->place !== Place::Inline)),
+                ...$fromRows,
+                ...$collected,
+            ];
             $this->stripMarkers(true);
             $this->built = true;
         } finally {
@@ -571,18 +600,18 @@ class Template
 
     /**
      * Write this template's own inline assets at its end, and added rows' inline assets
-     * at the end of each row. Keyed assets are written once per page.
+     * at the end of each row. Keyed assets are marked and reduced to one per page at render.
      */
     private function writeInline(BuildContext $ctx): void
     {
         $end = $this->endNode();
         foreach ($this->assets as $asset) {
-            if ($asset->type !== 'title' && $asset->place === Place::Inline && ($asset->key === null || $ctx->first('key:' . $asset->key))) {
+            if ($asset->type !== 'title' && $asset->place === Place::Inline) {
                 $end?->append($asset->toElement($this->doc));
             }
         }
         foreach ($this->inlineAt as [$node, $asset]) {
-            if ($this->root->contains($node) && ($asset->key === null || $ctx->first('key:' . $asset->key))) {
+            if ($this->root->contains($node)) {
                 $node->append($asset->toElement($this->doc));
             }
         }
@@ -598,7 +627,7 @@ class Template
     }
 
     /**
-     * Place the assets handed up to the top level: <head>, end of <body>, meta and title.
+     * Place the assets handed up to the top level, in call order: <head>, end of <body>, meta and title.
      * Without a <head> or <body> (a fragment) they are written inline and the title is dropped.
      *
      * @param list<Asset> $assets
@@ -608,10 +637,8 @@ class Template
         $head = $this->root instanceof \Dom\Document ? $this->doc->head : null;
         $body = $this->root instanceof \Dom\Document ? $this->doc->body : null;
         $end = $this->endNode();
+        usort($assets, fn(Asset $a, Asset $b) => $a->seq <=> $b->seq);
         foreach ($assets as $asset) {
-            if ($asset->key !== null && !$ctx->first('key:' . $asset->key)) {
-                continue;
-            }
             if (in_array($asset->type, ['jsUrl', 'cssUrl'], true) && !$ctx->first($asset->type . ':' . $asset->value)) {
                 continue;
             }
@@ -636,6 +663,23 @@ class Template
             }
             $target = $asset->place === Place::End ? $body : $head;
             ($target ?? $end)?->append($el);
+        }
+    }
+
+    /**
+     * Keep the first asset of each key in the page and drop the rest
+     */
+    private function dedupeKeys(): void
+    {
+        $seen = [];
+        foreach ($this->root->querySelectorAll('[' . Asset::KEY_ATTR . ']') as $el) {
+            $key = (string)$el->getAttribute(Asset::KEY_ATTR);
+            if (isset($seen[$key])) {
+                $el->remove();
+                continue;
+            }
+            $seen[$key] = true;
+            $el->removeAttribute(Asset::KEY_ATTR);
         }
     }
 

@@ -186,6 +186,26 @@ final class Row extends Template
                 $this->pending[] = [$copies[$i], $children[$slot], null];
             }
         }
+        // Nested rows' assets follow into the copy
+        /** @var \WeakMap<\Dom\Element, \Dom\Element> $map */
+        $map = new \WeakMap();
+        $old = [$node, ...iterator_to_array($node->getElementsByTagName('*'), false)];
+        $new = [$clone, ...iterator_to_array($clone->getElementsByTagName('*'), false)];
+        foreach ($old as $i => $el) {
+            $map[$el] = $new[$i];
+        }
+        foreach ($this->inlineAt as [$anchor, $asset]) {
+            if (isset($map[$anchor])) {
+                $this->inlineAt[] = [$map[$anchor], $asset];
+            }
+        }
+        foreach ($this->rowAssets as $i => [$nodes, $asset]) {
+            foreach ($nodes as $n) {
+                if (isset($map[$n])) {
+                    $this->rowAssets[$i][0][] = $map[$n];
+                }
+            }
+        }
         return $clone;
     }
 
