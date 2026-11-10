@@ -492,6 +492,7 @@ class Template
             $this->build($ctx);
             $this->placeAssets($this->bubbled, $ctx);
             $this->dedupeKeys();
+            $this->engine()->modifier?->process(new Modifier\Context($this->doc, $this->root, $this->isFragment()));
             $this->applyNonce();
             $this->output = $this->root instanceof \Dom\Document ? $this->doc->saveHtml() : $this->root->innerHTML;
         }
