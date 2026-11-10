@@ -16,11 +16,25 @@ final readonly class Engine
         public bool $strict = true,
         /** Where template mistakes are logged when not strict; error_log() when null */
         public ?LoggerInterface $logger = null,
-        /** CSP nonce added to every inline <script> and <style> in the rendered output */
-        public ?string $nonce = null,
+        /**
+         * CSP nonce for the scripts, styles and stylesheet links in templates and assets
+         * (not those in inserted HTML strings). A closure is called at each render, so a
+         * shared engine can use each request's nonce.
+         *
+         * @var string|(\Closure(): ?string)|null
+         */
+        public string|\Closure|null $nonce = null,
         /** Modifiers run over every top-level render, after assets are placed */
         public ?Modifier $modifier = null,
     ) {}
+
+    /**
+     * The nonce for the render in progress, or null for none
+     */
+    public function currentNonce(): ?string
+    {
+        return $this->nonce instanceof \Closure ? ($this->nonce)() : $this->nonce;
+    }
 
     public function load(string $html): Template
     {

@@ -8,7 +8,7 @@ use Tk\DomTemplate\Engine;
 $engine = new Engine(
     strict: $isDev,           // throw on template mistakes (true) or log them (false)
     logger: $psrLogger,       // PSR-3 logger for production; error_log() when null
-    nonce: $cspNonce,         // added to every inline <script> and <style>
+    nonce: fn() => $request->cspNonce(), // CSP nonce, read at each render
     modifier: $modifiers,     // final-pass modifiers
 );
 
@@ -19,6 +19,14 @@ $part = $engine->load('<p var="msg"></p>');
 - The engine is optional. Without one, `Template::load()` and `Template::file()` are strict, with no logger, nonce or modifiers.
 - A template inserted into a page uses the page's engine from the moment it is inserted, unless it has its own. Rows always use their template's engine.
 - The engine never changes after construction, so one instance can be shared across requests in a worker runtime such as FrankenPHP.
+
+## CSP nonce
+
+The nonce is added to the `<script>`, `<style>` and `<link rel="stylesheet">` elements written in template files and strings you load, and to those created by `js()`, `css()`, `jsUrl()` and `cssUrl()`. Scripts and styles inside HTML strings passed to `html()`, `append()`, `prepend()` or `replace()` don't get it, so injected markup is still blocked by the CSP. Add scripts with `js()` instead.
+
+A nonce is per request, so pass a closure when the engine is shared (or a [Builder](builder.md) holds it): it is called at each render. A plain string suits an engine made per request. A closure returning `null` adds no nonce.
+
+A nonce can't cover event-handler attributes (`onclick`), and `attr('href', $url)` doesn't block `javascript:` URLs; validate URLs from users yourself.
 
 ## Strict and lenient
 

@@ -34,11 +34,13 @@ final readonly class Asset
             case 'jsUrl':
                 $el = $doc->createElement('script');
                 $el->setAttribute('src', $this->value);
+                Html::trust($el);
                 break;
             case 'cssUrl':
                 $el = $doc->createElement('link');
                 $el->setAttribute('rel', 'stylesheet');
                 $el->setAttribute('href', $this->value);
+                Html::trust($el);
                 break;
             case 'meta':
                 $el = $doc->createElement('meta');
@@ -46,13 +48,12 @@ final readonly class Asset
                 $el->setAttribute('content', $this->value);
                 break;
             case 'js':
-                $el = $doc->createElement('script');
-                // A literal </script> would end the element early
-                $el->textContent = (string)preg_replace('#</(script)#i', '<\\/$1', $this->value);
+                $el = Html::trust($doc->createElement('script'));
+                $el->textContent = Html::scriptText($this->value);
                 break;
             case 'css':
-                $el = $doc->createElement('style');
-                $el->textContent = (string)preg_replace('#</(style)#i', '<\\/$1', $this->value);
+                $el = Html::trust($doc->createElement('style'));
+                $el->textContent = Html::styleText($this->value);
                 break;
             default:
                 $el = $doc->createElement('title');

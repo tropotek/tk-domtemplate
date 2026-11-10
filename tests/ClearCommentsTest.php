@@ -67,14 +67,14 @@ class ClearCommentsTest extends TestCase
         $this->assertSame([1, false], [$seen->scripts, $seen->fragment]);
     }
 
-    public function testScriptsAddedByAModifierGetTheNonce(): void
+    public function testTrustedScriptsAddedByAModifierGetTheNonce(): void
     {
         $adds = new class extends BaseModifier {
             public function selector(): string { return 'main'; }
             public function element(\Dom\Element $el, Context $ctx): void {
                 $s = $ctx->document->createElement('script');
                 $s->textContent = 'added();';
-                $el->append($s);
+                $el->append($ctx->trust($s));
             }
         };
         $page = (new Engine(nonce: 'n', modifier: new Modifier([$adds])))->load('<main>x</main>');

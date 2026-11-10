@@ -7,14 +7,14 @@ use Tk\DomTemplate\Template;
 
 class NonceTest extends TestCase
 {
-    public function testNonceOnInlineScriptsAndStylesOnly(): void
+    public function testNonceOnAuthoredAndAddedScriptsAndStyles(): void
     {
         $e = new Engine(nonce: 'abc');
         $page = $e->load('<div><script>authored();</script><script src="/x.js"></script><main var="c"></main></div>');
         $page->html('c', Template::load('<p>p</p>')->js('added();')->css('.a{}'));
         $out = $page->render();
-        $this->assertSame(3, substr_count($out, 'nonce="abc"'));
-        $this->assertStringContainsString('<script src="/x.js"></script>', $out);
+        $this->assertSame(4, substr_count($out, 'nonce="abc"'));
+        $this->assertStringContainsString('<script src="/x.js" nonce="abc"></script>', $out);
     }
 
     public function testInheritedByChildLoadedWithoutEngine(): void

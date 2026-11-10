@@ -34,5 +34,5 @@ $t->js('setupSelects();', key: 'select-init'); // written once per page
 
 ## Safety
 
-- `</script>` inside JavaScript and `</style>` inside CSS are escaped, so code can't end its element early.
-- With a CSP nonce set on the [engine](engine.md), every inline `<script>` and `<style>` in the output gets it.
+- In JavaScript, `<!--`, `<script` and `</script` are written with `\u003C` for `<` (the same value in strings, regexes and JSON), and `</style` in CSS becomes `<\/style`, so code can't end its element early.
+- With a CSP nonce set on the [engine](engine.md), assets and the scripts and styles written in templates get it; scripts in inserted HTML strings don't.

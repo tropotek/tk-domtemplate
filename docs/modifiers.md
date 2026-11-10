@@ -27,7 +27,7 @@ $engine = new Engine(modifier: new Modifier([new WikiLinks(), new ClearComments(
 
 ## How they run
 
-- Modifiers run once per render of a top-level template, after assets are placed and before the CSP nonce is added. Inserted child templates are not processed separately.
+- Modifiers run once per render of a top-level template, after assets are placed and before the CSP nonce is added. A `<script>`, `<style>` or stylesheet `<link>` a modifier creates gets the nonce only when passed through `$ctx->trust($el)`; don't trust elements built from page content. Inserted child templates are not processed separately.
 - They run one after another; each sees the previous one's output.
 - `element()` receives the nodes matching the modifier's `selector()`. The default `null` means **every** element, so set a selector when you can; comment-only modifiers can use `':not(*)'`.
 - `comment()` receives every comment, then `done()` is called once. A `BaseModifier` that doesn't override `comment()` skips the comment search.

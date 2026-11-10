@@ -26,13 +26,23 @@ final class Handle
     }
 
     /**
-     * Set the text content, escaped
+     * Set the text content, escaped. In <script> and <style> the sequences that could end
+     * the element are escaped instead; other raw-text elements (<iframe>, <xmp> …) are refused.
      */
     public function text(string $text): static
     {
         $this->owner->assertMutable();
         foreach ($this->nodes as $node) {
-            $node->textContent = $text;
+            $tag = strtolower($node->localName);
+            if (in_array($tag, ['iframe', 'xmp', 'noembed', 'noframes', 'plaintext'], true)) {
+                $this->owner->engine()->fail(sprintf("text() can't escape content for <%s> `%s` in %s", $tag, $this->name, $this->owner->label()));
+                continue;
+            }
+            $node->textContent = match ($tag) {
+                'script' => Html::scriptText($text),
+                'style' => Html::styleText($text),
+                default => $text,
+            };
         }
         return $this;
     }

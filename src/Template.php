@@ -162,6 +162,7 @@ class Template
         $doc = \Dom\HTMLDocument::createEmpty();
         $root = $doc->createElement(Html::contextFor($node->tagName));
         $root->append(Html::import($doc, $node));
+        Html::trustSource($root);
         return new static($doc, $root, $label, $engine); // @phpstan-ignore new.static (Row blocks it)
     }
 
@@ -172,10 +173,13 @@ class Template
         }
         if (Html::isFullDocument($html)) {
             $doc = \Dom\HTMLDocument::createFromString($html, LIBXML_NOERROR, 'UTF-8');
+            Html::trustSource($doc);
             return new static($doc, $doc, $label, $engine); // @phpstan-ignore new.static (Row blocks load()/file())
         }
         $doc = \Dom\HTMLDocument::createEmpty();
-        return new static($doc, Html::parseFragment($doc, $html), $label, $engine); // @phpstan-ignore new.static
+        $root = Html::parseFragment($doc, $html);
+        Html::trustSource($root);
+        return new static($doc, $root, $label, $engine); // @phpstan-ignore new.static
     }
 
     /**
@@ -842,16 +846,16 @@ class Template
     }
 
     /**
-     * Add the engine's CSP nonce to every inline <script> and <style> that lacks one
+     * Add the engine's CSP nonce to the trusted elements that lack one (see Html::trust()),
+     * and remove every trust marker
      */
     private function applyNonce(): void
     {
-        $nonce = $this->engine()->nonce;
-        if ($nonce === null) {
-            return;
-        }
-        foreach ($this->root->querySelectorAll('script:not([src]):not([nonce]), style:not([nonce])') as $el) {
-            $el->setAttribute('nonce', $nonce);
+        $nonce = $this->engine()->currentNonce();
+        foreach ($this->root->querySelectorAll('[' . Html::TRUST_ATTR . ']') as $el) {
+            if (Html::untrust($el) && $nonce !== null && !$el->hasAttribute('nonce')) {
+                $el->setAttribute('nonce', $nonce);
+            }
         }
     }
 

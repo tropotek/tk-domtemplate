@@ -25,6 +25,61 @@ final class Html
     ];
 
     /**
+     * Marks elements the CSP nonce may be added to: scripts, styles and stylesheet links
+     * from template source, assets, and elements a modifier trusts. The value is a
+     * per-process secret, so a marker in inserted HTML strings can't be forged.
+     */
+    public const string TRUST_ATTR = 'data-tk-trust';
+
+    private static ?string $secret = null;
+
+    /**
+     * Allow the nonce on this element. Returns the element.
+     */
+    public static function trust(\Dom\Element $el): \Dom\Element
+    {
+        $el->setAttribute(self::TRUST_ATTR, self::$secret ??= bin2hex(random_bytes(16)));
+        return $el;
+    }
+
+    /**
+     * Trust the scripts, styles and stylesheet links written in template source
+     */
+    public static function trustSource(\Dom\Element|\Dom\Document $root): void
+    {
+        foreach ($root->querySelectorAll('script, style, link[rel~="stylesheet"]') as $el) {
+            self::trust($el);
+        }
+    }
+
+    /**
+     * Remove the trust marker; true when it was genuine
+     */
+    public static function untrust(\Dom\Element $el): bool
+    {
+        $trusted = self::$secret !== null && $el->getAttribute(self::TRUST_ATTR) === self::$secret;
+        $el->removeAttribute(self::TRUST_ATTR);
+        return $trusted;
+    }
+
+    /**
+     * JavaScript (or JSON) safe inside <script>: `<!--`, `<script` and `</script` get `\u003C`
+     * for `<`, which means the same inside strings, regexes and JSON
+     */
+    public static function scriptText(string $code): string
+    {
+        return (string)preg_replace('#<(!--|/?script)#i', '\\u003C$1', $code);
+    }
+
+    /**
+     * CSS safe inside <style>: `</style` can't end the element
+     */
+    public static function styleText(string $css): string
+    {
+        return (string)preg_replace('#</(style)#i', '<\\/$1', $css);
+    }
+
+    /**
      * True when the markup is a whole page: it starts with a doctype or an <html> element,
      * ignoring leading whitespace and comments
      */

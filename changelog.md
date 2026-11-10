@@ -18,6 +18,8 @@ Ver 9.0.0 [unreleased]:
   - Removed: `toString()` (use `render()`), `reset()`, direct DOM access (`getDocument()`, `getElementById()` ...)
   - Changes after render now throw `LogicException` instead of being ignored
   - Inserting a template that was rendered on its own throws `LogicException`
+  - CSP nonce: only on template-source and asset scripts/styles/stylesheet links, never on HTML strings; `Engine` nonce may be a closure read at each render; modifiers opt in with `Context::trust()`
+  - `js()` and `text()` into `<script>` escape `<!--`, `<script` and `</script`; `text()` refuses `<iframe>`, `<xmp>` and other unescapable raw-text elements
   - Example site (FrankenPHP, `docker compose up`) and MkDocs site on GitHub Pages
   - 8.x maintenance continues on the `8.1` branch
 

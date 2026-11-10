@@ -25,6 +25,15 @@ final readonly class Context
     }
 
     /**
+     * Let the engine's CSP nonce be added to a <script>, <style> or <link> this modifier
+     * created. Elements copied from page content should not be trusted. Returns the element.
+     */
+    public function trust(\Dom\Element $el): \Dom\Element
+    {
+        return \Tk\DomTemplate\Html::trust($el);
+    }
+
+    /**
      * Data that $owner (usually the modifier itself) keeps for this render only
      *
      * @return \ArrayObject<string, mixed>
