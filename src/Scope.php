@@ -30,8 +30,10 @@ final class Scope
 
     /**
      * @param callable(string): void $fail reports a markup mistake; when it returns, the node is skipped
+     * @param bool $check run the checks that only report: nested repeat samples and <template>
+     *     content (false for rows, whose sample was checked when its template loaded)
      */
-    public static function build(\Dom\Element|\Dom\Document $root, string $label, callable $fail): self
+    public static function build(\Dom\Element|\Dom\Document $root, string $label, callable $fail, bool $check = true): self
     {
         $scope = new self();
 
@@ -48,19 +50,17 @@ final class Scope
             $scope->add($name, $el, $label, $fail);
         }
 
-        // Check each repeat sample now, so mistakes inside rows are reported on load, once
-        foreach ($scope->kinds as $name => $kind) {
-            if ($kind === Kind::Repeat) {
-                self::build($scope->nodes[$name][0], $label, $fail);
+        if ($check) {
+            // Check each repeat sample now, so mistakes inside rows are reported on load, once
+            foreach ($scope->kinds as $name => $kind) {
+                if ($kind === Kind::Repeat) {
+                    self::build($scope->nodes[$name][0], $label, $fail);
+                }
             }
-        }
-
-        foreach ($root->querySelectorAll('template') as $tpl) {
-            if ($scope->insideNestedRepeat($tpl, $root)) {
-                continue;
-            }
-            if (self::templateHasVar($tpl)) {
-                $fail(sprintf('var markers inside <template> are not supported in %s', $label));
+            foreach ($root->querySelectorAll('template') as $tpl) {
+                if (!$scope->insideNestedRepeat($tpl, $root) && self::templateHasVar($tpl)) {
+                    $fail(sprintf('var markers inside <template> are not supported in %s', $label));
+                }
             }
         }
 

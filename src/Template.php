@@ -49,7 +49,7 @@ class Template
     ) {
         $this->firstRows = new \WeakMap();
         $this->assets = new Assets();
-        $this->scope = Scope::build($root, $label, fn(string $message) => $this->reportMarkup($message));
+        $this->scope = Scope::build($root, $label, fn(string $message) => $this->reportMarkup($message), $this->checksMarkup());
     }
 
     /**
@@ -132,6 +132,14 @@ class Template
         $template = new static($doc, $root, $label, $engine); // @phpstan-ignore new.static (Row blocks load()/file())
         Html::checkCharset($root, $label, fn(string $message) => $template->reportMarkup($message));
         return $template;
+    }
+
+    /**
+     * Whether indexing runs the checks that only report (repeat samples, <template> content)
+     */
+    protected function checksMarkup(): bool
+    {
+        return true;
     }
 
     /**
@@ -676,15 +684,20 @@ class Template
             throw new \LogicException('Circular template insert: ' . implode(' → ', $labels));
         }
         $stack[] = $this;
-        $removed = $this->removedNodes();
+        /** @var \WeakMap<\Dom\Node, true> $removed */
+        $removed = new \WeakMap();
+        foreach ($this->removedNodes() as $node) {
+            $removed[$node] = true;
+        }
         foreach ($this->pending as [$slot, $child]) {
-            if (!$this->root->contains($slot)) {
-                continue;
-            }
-            foreach ($removed as $node) {
-                if ($node->contains($slot)) {
+            // One walk up from the slot: is it in the tree, and outside removed content?
+            for ($n = $slot; $n !== null && $n !== $this->root; $n = $n->parentNode) {
+                if (isset($removed[$n])) {
                     continue 2;
                 }
+            }
+            if ($n === null) {
+                continue;
             }
             $child->checkInserts($stack, $checked);
         }

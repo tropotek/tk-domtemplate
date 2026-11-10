@@ -99,6 +99,14 @@ final class Row extends Template
     {
     }
 
+    /**
+     * Skip the report-only checks for each row: the sample already passed them
+     */
+    protected function checksMarkup(): bool
+    {
+        return false;
+    }
+
     public function isInserted(): bool
     {
         return $this->inserted;
