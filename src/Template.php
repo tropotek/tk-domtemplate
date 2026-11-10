@@ -5,8 +5,6 @@ namespace Tk\DomTemplate;
  * An HTML template: a full page or a fragment, with var nodes PHP can change.
  *
  * A template renders once. After render() it is locked and further changes throw.
- *
- * @phpstan-consistent-constructor
  */
 class Template
 {
@@ -16,12 +14,16 @@ class Template
 
     private ?Engine $defaultEngine = null;
 
+    /** @var \WeakMap<\Dom\Element, \Dom\Element> the first row added from each sample */
+    private \WeakMap $firstRows;
+
     protected function __construct(
         protected \Dom\HTMLDocument $doc,
         protected \Dom\Element|\Dom\Document $root,
         private readonly string $label,
         private readonly ?Engine $engine,
     ) {
+        $this->firstRows = new \WeakMap();
         $this->scope = Scope::build($root, $label, fn(string $message) => $this->engine()->fail($message));
     }
 
@@ -54,10 +56,10 @@ class Template
         }
         if (Html::isFullDocument($html)) {
             $doc = \Dom\HTMLDocument::createFromString($html, LIBXML_NOERROR, 'UTF-8');
-            return new static($doc, $doc, $label, $engine);
+            return new static($doc, $doc, $label, $engine); // @phpstan-ignore new.static (Row blocks load()/file())
         }
         $doc = \Dom\HTMLDocument::createEmpty();
-        return new static($doc, Html::parseFragment($doc, $html), $label, $engine);
+        return new static($doc, Html::parseFragment($doc, $html), $label, $engine); // @phpstan-ignore new.static
     }
 
     /**
@@ -75,6 +77,55 @@ class Template
             return new Handle($this, $name, []);
         }
         return new Handle($this, $name, $this->scope->nodes($name));
+    }
+
+    /**
+     * A new row from a repeat sample. Fill it in, then add it with append() or appendTo().
+     */
+    public function repeat(string $name): Row
+    {
+        $kind = $this->scope->kind($name);
+        $sample = $this->scope->sample($name);
+        if ($kind === null) {
+            $this->engine()->fail(sprintf('No repeat `%s` in %s.%s', $name, $this->label, $this->suggest($name)));
+        } elseif ($sample === null) {
+            $this->engine()->fail(sprintf('`%s` is not a repeat in %s, use var()', $name, $this->label));
+        }
+        // In lenient mode a detached stand-in sample gives a row that is never inserted
+        return new Row($this, $sample ?? $this->doc->createElement('template'), $name);
+    }
+
+    /**
+     * The template a row belongs to; null for a top-level template
+     */
+    protected function parent(): ?Template
+    {
+        return null;
+    }
+
+    /**
+     * Called when one of this template's rows is added
+     */
+    protected function adopt(Row $row): void
+    {
+    }
+
+    /**
+     * Insert a finished row: before the sample, or before the first row from it when prepending
+     *
+     * @internal used by Row
+     */
+    public function placeRow(\Dom\Element $sample, \Dom\Element $node, bool $prepend): void
+    {
+        $first = $this->firstRows[$sample] ?? null;
+        if ($prepend && $first !== null) {
+            $first->before($node);
+        } else {
+            $sample->before($node);
+        }
+        if ($prepend || $first === null) {
+            $this->firstRows[$sample] = $node;
+        }
     }
 
     /**

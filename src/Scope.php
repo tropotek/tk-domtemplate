@@ -175,8 +175,12 @@ final class Scope
      */
     private function insideNestedRepeat(\Dom\Element $el, \Dom\Element|\Dom\Document $root): bool
     {
-        $repeat = $el->parentElement?->closest('[var$="[]"]');
-        return $repeat !== null && $repeat !== $root && $root->contains($repeat);
+        for ($p = $el->parentElement; $p !== null && $p !== $root; $p = $p->parentElement) {
+            if (str_ends_with(trim((string)$p->getAttribute('var')), '[]')) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static function describe(Kind $kind): string
