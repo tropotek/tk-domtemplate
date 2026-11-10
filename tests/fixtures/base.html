@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Base component library</title></head>
+<body>
+  <form data-tpl="form" data-opt-error-css="is-invalid" class="tk-form" method="post">
+    <div var="fields"></div>
+  </form>
+
+  <div class="mb-3" data-tpl="form.input">
+    <label var="label">Label</label>
+    <input var="element" class="form-control">
+  </div>
+
+  <div class="mb-3" data-tpl="form.select">
+    <label var="label">Label</label>
+    <select var="element" class="form-select"><option var="option[]"></option></select>
+  </div>
+
+  <div class="card" data-tpl="card">
+    <div class="card-body" var="body">
+      <div class="badge" data-tpl="card.badge">badge</div>
+    </div>
+  </div>
+
+  <table>
+    <tbody>
+      <tr data-tpl="table.row"><td var="cell">cell</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>
