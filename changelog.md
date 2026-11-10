@@ -15,6 +15,8 @@ Ver 9.0.0 [unreleased]:
   - Renderer base types kept; `__makeTemplate()` is now `makeTemplate()`
   - Alpine.js and HTMX markup (`@click`, `:class`, `hx-*`, `<template x-for>`) passes through untouched
   - Removed: `Parser`, `FormParser`, `Form\*`, `JsLast`, `Scss`, `UrlPath`, `PageBytes`
+  - Removed: `toString()` (use `render()`), `reset()`, direct DOM access (`getDocument()`, `getElementById()` ...)
+  - Changes after render now throw `LogicException` instead of being ignored
   - Example site (FrankenPHP, `docker compose up`) and MkDocs site on GitHub Pages
   - 8.x maintenance continues on the `8.1` branch
 

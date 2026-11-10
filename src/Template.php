@@ -339,6 +339,10 @@ class Template
      */
     public function slot(Template $child, ?string $replaces = null): \Dom\Element
     {
+        // The child uses this template's engine from now on, unless it has its own
+        if ($child->engine === null && $child->inheritedEngine === null && $child !== $this) {
+            $child->inheritedEngine = $this->engine();
+        }
         $slot = $this->doc->createElement(self::SLOT);
         $this->pending[] = [$slot, $child, $replaces];
         return $slot;
@@ -539,7 +543,7 @@ class Template
 
     /**
      * The engine this template uses: its own, else that of the template it was inserted
-     * into (set when that one is built), else the strict default
+     * into (from the moment it is inserted), else the strict default
      */
     public function engine(): Engine
     {

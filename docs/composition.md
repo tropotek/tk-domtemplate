@@ -18,7 +18,7 @@ echo $page->render();
 - A template inside hidden or overwritten content is never built.
 - Inserting a template into itself, directly or through other templates, throws a `LogicException`.
 - After the page renders, the inserted templates are locked too.
-- A child without its own [engine](engine.md) uses the page's engine.
+- A child without its own [engine](engine.md) uses the page's engine from the moment it is inserted.
 
 ## Cloning
 

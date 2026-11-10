@@ -3,6 +3,7 @@
 A modifier is a final pass over the rendered page or fragment: rewriting wiki links, building a table of contents, removing comments.
 
 ```php
+use Tk\DomTemplate\Engine;
 use Tk\DomTemplate\Modifier;
 use Tk\DomTemplate\Modifier\BaseModifier;
 use Tk\DomTemplate\Modifier\ClearComments;

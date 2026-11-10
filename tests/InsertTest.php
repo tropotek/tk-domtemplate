@@ -142,6 +142,17 @@ class InsertTest extends TestCase
         $this->assertSame($engine, $child->engine());
     }
 
+    public function testChildUsesPageEngineAsSoonAsItIsInserted(): void
+    {
+        $log = new SpyLogger();
+        $page = (new Engine(strict: false, logger: $log))->load('<main var="c"></main>');
+        $child = Template::load('<p var="t">x</p>');
+        $page->html('c', $child);
+        $child->text('nope', 'typo before render');
+        $this->assertSame('<main><p>x</p></main>', $page->render());
+        $this->assertCount(1, $log->lines);
+    }
+
     public function testChildOwnEngineWins(): void
     {
         $own = new Engine();

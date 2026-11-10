@@ -17,7 +17,7 @@ $part = $engine->load('<p var="msg"></p>');
 ```
 
 - The engine is optional. Without one, `Template::load()` and `Template::file()` are strict, with no logger, nonce or modifiers.
-- A template inserted into a page, and every row, uses the page's engine unless it has its own.
+- A template inserted into a page uses the page's engine from the moment it is inserted, unless it has its own. Rows always use their template's engine.
 - The engine never changes after construction, so one instance can be shared across requests in a worker runtime such as FrankenPHP.
 
 ## Strict and lenient

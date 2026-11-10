@@ -32,7 +32,13 @@ The 8.x documentation is still at <https://domtemplate.tropotek.com/> (no longer
 | `setVisible()` | `show()` / `hide()`; hidden nodes are removed |
 | `getRepeat()` + `appendRepeat()` | `repeat()` + `Row::append()` / `appendTo()`, or `each()` |
 | `insertTemplate()`, `appendTemplate()` | `html()`, `append()` with a template; rendered lazily with the page |
-| `appendJs()` / `appendHeadJs()`, `appendCss()` … | `js()` / `css()` with `Place`, `jsUrl()`, `cssUrl()`, `meta()`, `title()` |
+| `appendJs()` / `appendHeadJs()`, `appendCss()` / `appendHeadCss()` | `js()` / `css()` with `Place` |
+| `appendJsUrl()`, `appendCssUrl()` | `jsUrl()`, `cssUrl()` (once per page) |
+| `appendMetaTag()`, `setTitleText()` | `meta()`, `title()` |
+| `toString()` | `render()` or `(string)$template` |
+| `reset()` | removed: load the template again |
+| `getDocument()`, `getElementById()`, `getRootElement()` | removed: no direct DOM access; use a [modifier](modifiers.md) for low-level changes |
+| changes after rendering were ignored | they throw a `LogicException` |
 | `Builder` with `id="tpl-…"` sections | `Builder` with `data-tpl` names, layering and dotted fallback |
 | `Modifier` walking every node | `Modifier` list of selector-based `ModifierInterface` passes |
 | `Parser`, `FormParser`, `Form\*` | removed |
