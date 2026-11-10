@@ -42,6 +42,26 @@ final class Html
     }
 
     /**
+     * Deep-clone an element, including the content of any <template> elements.
+     * PHP's cloneNode() leaves template content behind, which would break Alpine's x-for and x-if.
+     */
+    public static function cloneDeep(\Dom\Element $el): \Dom\Element
+    {
+        $clone = $el->cloneNode(true);
+        assert($clone instanceof \Dom\Element);
+        $from = iterator_to_array($el->querySelectorAll('template'), false);
+        $to = iterator_to_array($clone->querySelectorAll('template'), false);
+        if ($el->tagName === 'TEMPLATE') {
+            array_unshift($from, $el);
+            array_unshift($to, $clone);
+        }
+        foreach ($from as $i => $template) {
+            $to[$i]->innerHTML = $template->innerHTML;
+        }
+        return $clone;
+    }
+
+    /**
      * Parse a fragment into a detached context element owned by $doc.
      * The context element's children are the parsed nodes; the element itself is never output.
      */

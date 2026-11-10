@@ -24,7 +24,7 @@ class Template
         private readonly ?Engine $engine,
     ) {
         $this->firstRows = new \WeakMap();
-        $this->scope = Scope::build($root, $label, fn(string $message) => $this->engine()->fail($message));
+        $this->scope = Scope::build($root, $label, fn(string $message) => $this->reportMarkup($message));
     }
 
     /**
@@ -60,6 +60,14 @@ class Template
         }
         $doc = \Dom\HTMLDocument::createEmpty();
         return new static($doc, Html::parseFragment($doc, $html), $label, $engine); // @phpstan-ignore new.static
+    }
+
+    /**
+     * Report a markup mistake found while indexing
+     */
+    protected function reportMarkup(string $message): void
+    {
+        $this->engine()->fail($message);
     }
 
     /**

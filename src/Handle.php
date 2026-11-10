@@ -70,7 +70,7 @@ final class Handle
         foreach ($this->nodes as $node) {
             $parent = $node->parentNode;
             if ($parent === null) {
-                continue;
+                throw new \LogicException(sprintf("Can't replace `%s`: a row can't replace its own element", $this->name));
             }
             $before = $node->previousSibling;
             $after = $node->nextSibling;

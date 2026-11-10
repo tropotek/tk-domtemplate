@@ -19,9 +19,7 @@ final class Row extends Template
         private readonly \Dom\Element $sample,
         private readonly string $name,
     ) {
-        $clone = $sample->cloneNode(true);
-        assert($clone instanceof \Dom\Element);
-        parent::__construct($parentTemplate->doc, $clone, $parentTemplate->label(), $parentTemplate->engine());
+        parent::__construct($parentTemplate->doc, Html::cloneDeep($sample), $parentTemplate->label(), null);
     }
 
     public static function load(string $html, ?Engine $engine = null): static
@@ -82,6 +80,21 @@ final class Row extends Template
         $this->addTo($name, true);
     }
 
+    /**
+     * Rows use their template's engine, whatever it is when they're used
+     */
+    public function engine(): Engine
+    {
+        return $this->parentTemplate->engine();
+    }
+
+    /**
+     * The sample was checked when its template loaded, so mistakes aren't reported again per row
+     */
+    protected function reportMarkup(string $message): void
+    {
+    }
+
     public function isAdded(): bool
     {
         return $this->added;
@@ -136,7 +149,7 @@ final class Row extends Template
         $node = $this->finish();
         if ($node !== null) {
             foreach ($targets as $i => $target) {
-                $insert = $i === 0 ? $node : $node->cloneNode(true);
+                $insert = $i === 0 ? $node : Html::cloneDeep($node);
                 $prepend ? $target->prepend($insert) : $target->append($insert);
             }
         }

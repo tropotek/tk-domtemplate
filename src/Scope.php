@@ -48,7 +48,17 @@ final class Scope
             $scope->add($name, $el, $label, $fail);
         }
 
+        // Check each repeat sample now, so mistakes inside rows are reported on load, once
+        foreach ($scope->kinds as $name => $kind) {
+            if ($kind === Kind::Repeat) {
+                self::build($scope->nodes[$name][0], $label, $fail);
+            }
+        }
+
         foreach ($root->querySelectorAll('template') as $tpl) {
+            if ($scope->insideNestedRepeat($tpl, $root)) {
+                continue;
+            }
             if (preg_match('/<[^>]*\svar\s*=/', $tpl->innerHTML)) {
                 $fail(sprintf('var markers inside <template> are not supported in %s', $label));
             }
