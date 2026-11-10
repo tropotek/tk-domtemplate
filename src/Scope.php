@@ -6,7 +6,11 @@ namespace Tk\DomTemplate;
  *
  * Nodes inside a repeat sample belong to that repeat's own scope, so they are
  * left out here. When the root itself is a repeat sample (a row's scope), the
- * root is indexed as a plain var under its name, so a row can change its own element.
+ * root is indexed as a plain var under its name, so a row can change its own
+ * element, unless the row already uses that name inside (a recursive menu).
+ *
+ * Var markers inside <template> content can't be reached in PHP's DOM, so they
+ * are reported as a mistake.
  */
 final class Scope
 {
@@ -15,6 +19,9 @@ final class Scope
 
     /** @var array<string, list<\Dom\Element>> */
     private array $nodes = [];
+
+    /** @var list<\Dom\Element> */
+    private array $rejected = [];
 
     private function __construct() {}
 
@@ -25,15 +32,6 @@ final class Scope
     {
         $scope = new self();
 
-        if ($root instanceof \Dom\Element && $root->hasAttribute('var')) {
-            try {
-                $name = Name::parse((string)$root->getAttribute('var'), $label);
-                $scope->add($name->kind === Kind::Repeat ? new Name($name->name, Kind::Var) : $name, $root, $label, $fail);
-            } catch (TemplateException $e) {
-                $fail($e->getMessage());
-            }
-        }
-
         foreach ($root->querySelectorAll('[var]') as $el) {
             if ($scope->insideNestedRepeat($el, $root)) {
                 continue;
@@ -41,13 +39,43 @@ final class Scope
             try {
                 $name = Name::parse((string)$el->getAttribute('var'), $label);
             } catch (TemplateException $e) {
-                $fail($e->getMessage());
+                $scope->reject($el, $e->getMessage(), $fail);
                 continue;
             }
             $scope->add($name, $el, $label, $fail);
         }
 
+        foreach ($root->querySelectorAll('template') as $tpl) {
+            if (preg_match('/<[^>]*\svar\s*=/', $tpl->innerHTML)) {
+                $fail(sprintf('var markers inside <template> are not supported in %s', $label));
+            }
+        }
+
+        // A row's own root: indexed as a plain var, unless the row already uses that name inside
+        if ($root instanceof \Dom\Element && $root->hasAttribute('var')) {
+            try {
+                $name = Name::parse((string)$root->getAttribute('var'), $label);
+                if (!isset($scope->kinds[$name->name])) {
+                    $scope->kinds[$name->name] = Kind::Var;
+                    $scope->nodes[$name->name] = [$root];
+                }
+            } catch (TemplateException $e) {
+                $fail($e->getMessage());
+            }
+        }
+
         return $scope;
+    }
+
+    /**
+     * Nodes that failed to index but must still be removed at render:
+     * their marker asked for an optional or repeat node, so they fail closed
+     *
+     * @return list<\Dom\Element>
+     */
+    public function rejected(): array
+    {
+        return $this->rejected;
     }
 
     public function kind(string $name): ?Kind
@@ -83,16 +111,28 @@ final class Scope
     {
         $known = $this->kinds[$name->name] ?? null;
         if ($known !== null && $known !== $name->kind) {
-            $fail(sprintf('`%s` is used as both %s and %s in %s',
-                $name->name, self::describe($known), self::describe($name->kind), $label));
+            $this->reject($el, sprintf('`%s` is used as both %s and %s in %s',
+                $name->name, self::describe($known), self::describe($name->kind), $label), $fail);
             return;
         }
         if ($known === Kind::Repeat) {
-            $fail(sprintf('Repeat `%s` has more than one sample in %s', $name->name, $label));
+            $this->reject($el, sprintf('Repeat `%s` has more than one sample in %s', $name->name, $label), $fail);
             return;
         }
         $this->kinds[$name->name] = $name->kind;
         $this->nodes[$name->name][] = $el;
+    }
+
+    /**
+     * @param callable(string): void $fail
+     */
+    private function reject(\Dom\Element $el, string $message, callable $fail): void
+    {
+        $value = trim((string)$el->getAttribute('var'));
+        if (str_ends_with($value, '?') || str_ends_with($value, '[]')) {
+            $this->rejected[] = $el;
+        }
+        $fail($message);
     }
 
     /**

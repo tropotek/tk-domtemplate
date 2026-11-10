@@ -47,7 +47,7 @@ final class Html
      */
     public static function parseFragment(\Dom\HTMLDocument $doc, string $html): \Dom\Element
     {
-        $tag = preg_match('/^\s*<([a-zA-Z][a-zA-Z0-9-]*)/', $html, $m) ? $m[1] : '';
+        $tag = preg_match('/^(?:\s|<!--.*?-->)*<([a-zA-Z][a-zA-Z0-9-]*)/s', $html, $m) ? $m[1] : '';
         $context = $doc->createElement(self::contextFor($tag));
         $context->innerHTML = $html;
         return $context;

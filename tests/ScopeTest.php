@@ -56,9 +56,13 @@ class ScopeTest extends TestCase
         $this->scope('<ul><li var="r[]">a</li><li var="r[]">b</li></ul>');
     }
 
-    public function testTemplateElementContentIsNotIndexed(): void
+    public function testTemplateElementContentIsNotIndexedButReported(): void
     {
-        $this->assertNull($this->scope('<div><template x-for="i in l"><p var="inside">x</p></template></div>')->kind('inside'));
+        $msgs = [];
+        $root = Html::parseFragment(\Dom\HTMLDocument::createEmpty(), '<div><template x-for="i in l"><p var="inside">x</p></template></div>');
+        $s = Scope::build($root, 'test', function (string $m) use (&$msgs): void { $msgs[] = $m; });
+        $this->assertNull($s->kind('inside'));
+        $this->assertSame(['var markers inside <template> are not supported in test'], $msgs);
     }
 
     public function testLenientSkipsTheConflictingNode(): void

@@ -49,6 +49,9 @@ class Template
 
     protected static function parse(string $html, string $label, ?Engine $engine): static
     {
+        if (str_starts_with($html, "\xEF\xBB\xBF")) {
+            $html = substr($html, 3);
+        }
         if (Html::isFullDocument($html)) {
             $doc = \Dom\HTMLDocument::createFromString($html, LIBXML_NOERROR, 'UTF-8');
             return new static($doc, $doc, $label, $engine);
@@ -111,6 +114,9 @@ class Template
                     $node->remove();
                 }
             }
+        }
+        foreach ($this->scope->rejected() as $node) {
+            $node->remove();
         }
         foreach ($this->root->querySelectorAll('[var]') as $el) {
             $el->removeAttribute('var');
