@@ -8,6 +8,9 @@ namespace Tk\DomTemplate;
  */
 final class Handle
 {
+    /** Characters HTML allows in an attribute name (Alpine's @click and :class included) */
+    private const string ATTR_NAME = '/^[^\s"\'>\/=\x00-\x1F\x7F]+$/';
+
     /**
      * @param list<\Dom\Element> $nodes
      */
@@ -57,15 +60,31 @@ final class Handle
     }
 
     /**
-     * Replace each node itself with HTML. The handle then holds no nodes.
+     * Replace each node itself with HTML. The name (and this handle) then refer to the
+     * replacement elements, so show()/hide() and later changes apply to them.
      */
     public function replaceWith(string $html): static
     {
         $this->owner->assertMutable();
+        $replaced = [];
         foreach ($this->nodes as $node) {
+            $parent = $node->parentNode;
+            if ($parent === null) {
+                continue;
+            }
+            $before = $node->previousSibling;
+            $after = $node->nextSibling;
             $node->outerHTML = $html;
+            $new = [];
+            for ($n = $before ? $before->nextSibling : $parent->firstChild; $n !== null && $n !== $after; $n = $n->nextSibling) {
+                if ($n instanceof \Dom\Element) {
+                    $new[] = $n;
+                }
+            }
+            $this->owner->replaceNode($this->name, $node, $new);
+            array_push($replaced, ...$new);
         }
-        $this->nodes = [];
+        $this->nodes = $replaced;
         return $this;
     }
 
@@ -79,12 +98,17 @@ final class Handle
     {
         $this->owner->assertMutable();
         $attrs = is_array($name) ? $name : [$name => $value];
+        foreach (array_keys($attrs) as $attr) {
+            if (!is_string($attr) || !preg_match(self::ATTR_NAME, $attr)) {
+                throw new TemplateException(sprintf('Invalid attribute name `%s` for var `%s`', $attr, $this->name));
+            }
+        }
         foreach ($this->nodes as $node) {
             foreach ($attrs as $attr => $val) {
                 if ($val === null || $val === false) {
-                    $node->removeAttribute($attr);
+                    $node->removeAttribute((string)$attr);
                 } else {
-                    $node->setAttribute($attr, $val === true ? '' : (string)$val);
+                    self::setAttribute($node, (string)$attr, $val === true ? '' : (string)$val);
                 }
             }
         }
@@ -176,6 +200,28 @@ final class Handle
             $node->insertAdjacentHTML($where, $html);
         }
         return $this;
+    }
+
+    /**
+     * setAttribute() rejects names the HTML parser accepts, such as Alpine's @click.
+     * Those are created by parsing them, then attached as attribute nodes.
+     */
+    private static function setAttribute(\Dom\Element $node, string $name, string $value): void
+    {
+        try {
+            $node->setAttribute($name, $value);
+        } catch (\DOMException) {
+            $scratch = ($node->ownerDocument ?? throw new TemplateException('Node has no document'))->createElement('div');
+            $scratch->innerHTML = '<i ' . $name . '=""></i>';
+            $holder = $scratch->firstElementChild;
+            $attr = $holder?->getAttributeNode($name);
+            if ($holder === null || $attr === null) {
+                throw new TemplateException(sprintf('Invalid attribute name `%s`', $name));
+            }
+            $holder->removeAttributeNode($attr);
+            $attr->value = $value;
+            $node->setAttributeNode($attr);
+        }
     }
 
     /**

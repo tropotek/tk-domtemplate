@@ -186,6 +186,16 @@ class Template
     }
 
     /**
+     * @internal used by Handle after replaceWith()
+     *
+     * @param list<\Dom\Element> $new
+     */
+    public function replaceNode(string $name, \Dom\Element $old, array $new): void
+    {
+        $this->scope->replaceNode($name, $old, $new);
+    }
+
+    /**
      * Called before every change: a rendered template is locked
      *
      * @throws \LogicException when the template has been rendered
@@ -250,12 +260,16 @@ class Template
         foreach ($this->scope->names() as $name) {
             if ($this->scope->kind($name) === Kind::Repeat || !$this->scope->isVisible($name)) {
                 foreach ($this->scope->nodes($name) as $node) {
-                    $node->remove();
+                    if ($node->parentNode !== null) {
+                        $node->remove();
+                    }
                 }
             }
         }
         foreach ($this->scope->rejected() as $node) {
-            $node->remove();
+            if ($node->parentNode !== null) {
+                $node->remove();
+            }
         }
         foreach ($this->root->querySelectorAll('[var]') as $el) {
             $el->removeAttribute('var');

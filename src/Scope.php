@@ -103,6 +103,25 @@ final class Scope
     }
 
     /**
+     * After a node is replaced, the name points at its replacement nodes instead,
+     * keeping the name's visibility
+     *
+     * @param list<\Dom\Element> $new
+     */
+    public function replaceNode(string $name, \Dom\Element $old, array $new): void
+    {
+        $nodes = [];
+        foreach ($this->nodes[$name] ?? [] as $node) {
+            if ($node === $old) {
+                array_push($nodes, ...$new);
+            } else {
+                $nodes[] = $node;
+            }
+        }
+        $this->nodes[$name] = $nodes;
+    }
+
+    /**
      * Plain vars start visible and optional nodes start hidden, until set
      */
     public function isVisible(string $name): bool
