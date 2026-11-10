@@ -28,4 +28,4 @@ $content->text('total', '42');
 $content->hide('draft');
 $content->show('note');
 
-renderPage('Vars', $content->render(), ['var.php', 'templates/var.html']);
+renderPage('Vars', $content, ['var.php', 'templates/var.html']);

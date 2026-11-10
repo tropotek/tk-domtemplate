@@ -11,4 +11,4 @@ $content->each('card', array_slice(PAGES, 1, null, true), function (Row $card, s
     $card->text('title', $label)->attr('card', 'href', $file);
 });
 
-renderPage('PHP DomTemplate', $content->render(), ['index.php', 'templates/index.html', '_init.php', 'templates/layout.html']);
+renderPage('PHP DomTemplate', $content, ['index.php', 'templates/index.html', '_init.php', 'templates/layout.html']);

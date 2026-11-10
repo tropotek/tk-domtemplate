@@ -27,4 +27,4 @@ $content->show('hasUsers', count($users) > 0);
 // The same pattern with no rows falls back to an optional empty-state node
 $content->show('noTasks');
 
-renderPage('Repeats', $content->render(), ['repeat.php', 'templates/repeat.html']);
+renderPage('Repeats', $content, ['repeat.php', 'templates/repeat.html']);

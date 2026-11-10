@@ -2,8 +2,8 @@
 /**
  * Shared setup for the example pages.
  *
- * Each page builds its own content, then calls renderPage() to put it into the
- * Bootstrap layout (templates/layout.html).
+ * Each page builds its own content template, then calls renderPage() to insert
+ * it into the Bootstrap layout (templates/layout.html).
  */
 declare(strict_types=1);
 
@@ -21,7 +21,7 @@ const PAGES = [
 /**
  * @param string[] $sources files (relative to example/) to show under the page
  */
-function renderPage(string $title, string $contentHtml, array $sources = []): void
+function renderPage(string $title, Template $content, array $sources = []): void
 {
     $page = Template::file(__DIR__ . '/templates/layout.html');
     $page->text('title', $title . ' - DomTemplate examples');
@@ -36,8 +36,8 @@ function renderPage(string $title, string $contentHtml, array $sources = []): vo
             ->addClass($file === $current ? 'active' : []);
     });
 
-    // Phase 4 replaces this string with an inserted template
-    $page->html('content', $contentHtml);
+    // The page's content template is rendered when the layout renders
+    $page->html('content', $content);
 
     // The source behind the page
     $page->each('source', array_values($sources), function (Row $row, string $file, int $i) {
