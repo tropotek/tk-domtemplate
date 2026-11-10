@@ -23,23 +23,30 @@ The 8.x documentation is still at <https://domtemplate.tropotek.com/> (no longer
 
 ## What changes in v9
 
-Changes already on `main`:
+| 8.x | 9.x |
+| --- | --- |
+| Namespace `Dom\` | `Tk\DomTemplate\` (PHP 8.4 owns `Dom\`) |
+| PHP 8.3+ | PHP 8.5+ |
+| `var`, `choice` and `repeat` attributes | one `var` attribute: `name`, `name?`, `name[]` |
+| `setText()`, `setAttr()`, `addCss()` … | handles (`var('x')->text()->attr()`) and shortcuts (`text()`, `attr()`, `addClass()`) |
+| `setVisible()` | `show()` / `hide()`; hidden nodes are removed |
+| `getRepeat()` + `appendRepeat()` | `repeat()` + `Row::append()` / `appendTo()`, or `each()` |
+| `insertTemplate()`, `appendTemplate()` | `html()`, `append()` with a template; rendered lazily with the page |
+| `appendJs()` / `appendHeadJs()`, `appendCss()` … | `js()` / `css()` with `Place`, `jsUrl()`, `cssUrl()`, `meta()`, `title()` |
+| `Builder` with `id="tpl-…"` sections | `Builder` with `data-tpl` names, layering and dotted fallback |
+| `Modifier` walking every node | `Modifier` list of selector-based `ModifierInterface` passes |
+| `Parser`, `FormParser`, `Form\*` | removed |
+| `JsLast`, `Scss`, `UrlPath`, `PageBytes` modifiers | removed |
+| `__makeTemplate()` on renderers | `makeTemplate()` |
+| silent failures | throw in development, log in production ([Engine](engine.md)) |
 
-| | 8.x | 9.x |
-| --- | --- | --- |
-| Namespace | `Dom\` | `Tk\DomTemplate\` |
-| PHP | 8.3+ | 8.4+ |
-| Source folder | `Dom/` | `src/` |
+## Moving a project to v9
 
-The namespace moved because PHP 8.4 added its own `Dom\` classes (`Dom\HTMLDocument`, `Dom\Element`, ...).
+v9 is meant for new projects. Moving an existing one means:
 
-The rest of the rewrite is still being designed. Expect changes to how vars, repeats and head assets
-are set, and to the bundled parsers and modifiers. This page will list each change as it lands.
+1. Requiring PHP 8.5 and `"ttek/tk-domtemplate": "9.0.x-dev"`.
+2. Rewriting template markup: `choice="x"` becomes `var="x?"`, `repeat="x"` becomes `var="x[]"`.
+3. Rewriting every render method against the new API.
+4. Porting any custom modifiers to `ModifierInterface`.
 
-## Moving a project to v9 today
-
-1. Change the constraint to `"9.0.x-dev"` and run `composer update ttek/tk-domtemplate`.
-2. Replace `Dom\` with `Tk\DomTemplate\` in `use` statements and fully qualified class names.
-3. Check that the project runs on PHP 8.4.
-
-Later v9 changes will need more work than this.
+Plan it as a project of its own.

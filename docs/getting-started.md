@@ -2,8 +2,8 @@
 
 ## Requirements
 
-- PHP 8.4 or newer
-- The `dom`, `libxml`, `mbstring` and `tidy` extensions
+- PHP 8.5 or newer
+- The `dom` extension
 
 ## Install
 
@@ -17,7 +17,7 @@ composer require ttek/tk-domtemplate
 
 ## Your first template
 
-Write the page as plain HTML. Mark the nodes PHP will change with `var`, `choice` or `repeat` attributes:
+Write the page as plain HTML and name the nodes PHP will change:
 
 ```html title="templates/hello.html"
 <!doctype html>
@@ -28,9 +28,9 @@ Write the page as plain HTML. Mark the nodes PHP will change with `var`, `choice
 </head>
 <body>
   <h1 var="heading">Default heading</h1>
-  <p choice="loggedIn">You are logged in.</p>
+  <p var="loggedIn?">You are logged in.</p>
   <ul>
-    <li repeat="fruit" var="fruitName">Fruit</li>
+    <li var="fruit[]">Fruit</li>
   </ul>
 </body>
 </html>
@@ -42,39 +42,33 @@ Then load it and fill it in:
 <?php
 require __DIR__ . '/vendor/autoload.php';
 
+use Tk\DomTemplate\Row;
 use Tk\DomTemplate\Template;
 
-$template = Template::loadFile(__DIR__ . '/templates/hello.html');
+$t = Template::file(__DIR__ . '/templates/hello.html');
 
-$template->setTitleText('Hello World');
-$template->setText('heading', 'Hello World');
-$template->setVisible('loggedIn');
+$t->title('Hello World');
+$t->text('heading', 'Hello World');
+$t->show('loggedIn');
+$t->each('fruit', ['Apple', 'Banana', 'Cherry'], fn(Row $row, string $fruit) => $row->text('fruit', $fruit));
+$t->cssUrl('/css/site.css');
 
-foreach (['Apple', 'Banana', 'Cherry'] as $fruit) {
-    $row = $template->getRepeat('fruit');
-    $row->setText('fruitName', $fruit);
-    $row->appendRepeat();
-}
-
-$template->appendCssUrl('/css/site.css');
-
-echo $template->toString();
+echo $t->render();
 ```
 
-The output has the `var`, `choice` and `repeat` attributes removed, the choice shown, one `<li>` per fruit,
-and the stylesheet link added to `<head>`.
+The output has the `var` markers removed, the optional paragraph kept, one `<li>` per fruit, and the stylesheet linked in `<head>`.
 
 ## How it works
 
-1. **Load:** `Template::load()` or `Template::loadFile()` parses the HTML and indexes every marked node.
-2. **Change:** call methods such as `setText()`, `setAttr()` or `setVisible()` on the template.
-3. **Render:** `toString()` (or `getDocument()`) parses the template once. Choices that weren't made
-   visible are removed, and head assets are written to `<head>`.
+1. **Load:** `Template::load()` or `Template::file()` parses the HTML5 and indexes every named node.
+2. **Change:** call `text()`, `attr()`, `show()`, `repeat()` and the rest.
+3. **Render:** `render()` builds the page once. Hidden nodes and repeat samples are removed, inserted templates are rendered, and assets are placed.
 
 !!! warning
-    A template is locked after it renders. Further changes are ignored, so make all changes first.
+    A template is locked after it renders: a later change throws a `LogicException`. Make every change first.
 
 ## Next steps
 
-- [Templates guide](domTemplate.md) for the full API.
+- [Templates](templates.md) for the full API, then [Repeats](repeats.md) and [Inserting templates](composition.md).
+- [Engine](engine.md) for production settings: lenient errors, logging and a CSP nonce.
 - [Example site](examples.md) to see each feature running.

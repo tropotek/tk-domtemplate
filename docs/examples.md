@@ -5,10 +5,11 @@ the PHP and HTML behind it at the bottom. The site's layout and navigation are a
 
 | Page | Shows |
 | --- | --- |
-| Vars | `setText()`, `setHtml()`, append/prepend, attributes, CSS classes, shared var names |
-| Choices & repeats | table rows, per-row choices, empty states |
-| Forms | `FormParser`: select options, multi-selects, refilling submitted values, validation errors |
-| Head assets | meta tags, head CSS/JS, inline CSS/JS, sub-templates |
+| Vars | `text()` vs `html()`, append/prepend, attributes, classes, shared names, `hide()` and `?` nodes |
+| Repeats | a table built with `each()`, per-row optional badges, nested repeats, empty states |
+| Assets | inline, head and end scripts, URLs, a keyed script added by every row, a standalone fragment |
+| Builder | components from a library file, dotted fallback, `data-opt-*` settings |
+| HTMX + Alpine | an Alpine toggle, and a fragment loaded with `hx-get` that brings its own script |
 
 ## Run it
 

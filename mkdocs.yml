@@ -45,13 +45,15 @@ nav:
   - Getting started: getting-started.md
   - Example site: examples.md
   - Guides:
-      - Templates: domTemplate.md
-      - Forms: domForm.md
-      - Renderers: domRenderer.md
-      - Parsers: domParser.md
-      - Modifiers: domModifier.md
-      - Builder: domBuilder.md
-      - Symfony integration: symfony.md
+      - Templates: templates.md
+      - Repeats: repeats.md
+      - Inserting templates: composition.md
+      - Assets: assets.md
+      - Engine: engine.md
+      - Modifiers: modifiers.md
+      - Builder: builder.md
+      - Renderers: renderers.md
+      - Alpine and HTMX: alpine-htmx.md
   - Upgrading from 8.x: upgrading.md
 
 markdown_extensions:
