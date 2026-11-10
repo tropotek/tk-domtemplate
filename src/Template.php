@@ -650,6 +650,13 @@ class Template
         $head = $this->root instanceof \Dom\Document ? $this->doc->head : null;
         $body = $this->root instanceof \Dom\Document ? $this->doc->body : null;
         $end = $this->endNode();
+        // URLs the page already links count as written
+        foreach ($this->root->querySelectorAll('link[rel="stylesheet"][href]') as $link) {
+            $ctx->first('cssUrl:' . $link->getAttribute('href'));
+        }
+        foreach ($this->root->querySelectorAll('script[src]') as $script) {
+            $ctx->first('jsUrl:' . $script->getAttribute('src'));
+        }
         usort($assets, fn(Asset $a, Asset $b) => $a->seq <=> $b->seq);
         foreach ($assets as $asset) {
             if (in_array($asset->type, ['jsUrl', 'cssUrl'], true) && !$ctx->first($asset->type . ':' . $asset->value)) {

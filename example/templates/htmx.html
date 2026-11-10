@@ -1,0 +1,15 @@
+<div>
+  <p>
+    Alpine and HTMX attributes pass through DomTemplate untouched. The button below asks
+    <code>fragment.php</code> for an HTML fragment rendered by a template. The fragment carries its own script
+    (added with <code>js()</code>) and an Alpine counter, and both work after the swap.
+  </p>
+
+  <div x-data="{ open: false }" class="mb-4">
+    <button class="btn btn-outline-secondary btn-sm" @click="open = !open" :aria-expanded="open">Toggle with Alpine</button>
+    <p class="mt-2 mb-0" x-show="open" x-cloak>Shown by Alpine's <code>x-show</code>.</p>
+  </div>
+
+  <button class="btn btn-primary" hx-get="fragment.php" hx-target="#fragment" hx-swap="innerHTML">Load a fragment</button>
+  <div id="fragment" class="mt-3 p-3 border rounded text-body-secondary">The fragment appears here.</div>
+</div>

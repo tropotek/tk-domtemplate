@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Example component library</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+</head>
+<body class="container py-4">
+  <h1 class="h4">Example component library</h1>
+  <p>Each element with a <code>data-tpl</code> attribute is a component. This file is a normal page so it can be viewed directly.</p>
+
+  <div class="col" data-tpl="card">
+    <div class="card h-100">
+      <div class="card-body">
+        <h2 class="h6 card-title" var="title">Card title</h2>
+        <p class="card-text mb-0" var="body">Card body</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col" data-tpl="card.highlight">
+    <div class="card h-100 border-primary">
+      <div class="card-header text-bg-primary" var="title">Highlighted card</div>
+      <div class="card-body"><p class="card-text mb-0" var="body">Card body</p></div>
+    </div>
+  </div>
+
+  <div class="alert" role="alert" data-tpl="alert" data-opt-level="warning" var="message">Alert</div>
+
+  <ul class="list-group mt-4" data-tpl="list">
+    <li class="list-group-item" var="item[]">Item</li>
+  </ul>
+</body>
+</html>

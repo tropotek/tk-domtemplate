@@ -16,6 +16,9 @@ const PAGES = [
     'index.php'  => 'Home',
     'var.php'    => 'Vars',
     'repeat.php' => 'Repeats',
+    'assets.php' => 'Assets',
+    'builder.php' => 'Builder',
+    'htmx.php'   => 'HTMX + Alpine',
 ];
 
 /**

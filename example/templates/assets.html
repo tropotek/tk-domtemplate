@@ -1,0 +1,26 @@
+<div>
+  <p>
+    Any template can ask for scripts and styles. <code>js()</code> and <code>css()</code> are written
+    <strong>inline</strong> by default, at the end of the template that added them, so they travel with that
+    markup into pages and HTMX fragments. <code>Place::Head</code> and <code>Place::End</code> move them to the
+    page's <code>&lt;head&gt;</code> or the end of its <code>&lt;body&gt;</code>.
+    View the page source to see where each one landed.
+  </p>
+
+  <div class="demo-box ps-3 my-4">
+    <p class="mb-1">This box is styled by <code>css(…, Place::Head)</code>.</p>
+    <p class="mb-1 text-body-secondary" id="inlineTarget">Waiting for the inline script…</p>
+    <p class="mb-1 text-body-secondary" id="endTarget">Waiting for the end script…</p>
+    <p class="mb-0 text-body-secondary" id="keyedTarget">Waiting for the keyed script…</p>
+  </div>
+
+  <h2 class="h5">Keyed assets</h2>
+  <p>Each row below adds the same script with <code>key: 'rowSetup'</code>; the page gets it once.</p>
+  <ul class="list-group mb-4">
+    <li class="list-group-item" var="row[]">Row</li>
+  </ul>
+
+  <h2 class="h5">A standalone fragment</h2>
+  <p>With no <code>&lt;head&gt;</code> to move to, a fragment keeps its assets inline and drops the title:</p>
+  <pre class="bg-body-tertiary p-3 rounded"><code var="fragment"></code></pre>
+</div>

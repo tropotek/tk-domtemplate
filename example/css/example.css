@@ -6,3 +6,4 @@ pre code {
   max-height: 32rem;
   overflow: auto;
 }
+[x-cloak] { display: none !important; }

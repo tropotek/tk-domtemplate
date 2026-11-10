@@ -118,4 +118,14 @@ class AssetFixTest extends TestCase
         $this->assertStringContainsString('/r1.css', $out);
         $this->assertStringContainsString('/r2.css', $out);
     }
+
+    public function testUrlsAlreadyInThePageAreNotAddedAgain(): void
+    {
+        $page = Template::load('<!doctype html><html><head><link rel="stylesheet" href="/site.css"></head><body><main var="c"></main><script src="/app.js"></script></body></html>');
+        $page->html('c', Template::load('<p>x</p>')->cssUrl('/site.css')->jsUrl('/app.js')->cssUrl('/new.css'));
+        $out = $page->render();
+        $this->assertSame(1, substr_count($out, 'href="/site.css"'));
+        $this->assertSame(1, substr_count($out, 'src="/app.js"'));
+        $this->assertStringContainsString('href="/new.css"', $out);
+    }
 }
