@@ -65,11 +65,14 @@ final class Html
         return $copy;
     }
 
-    private static function copyTemplates(\Dom\Element $from, \Dom\Element $to): void
+    /**
+     * Copy <template> content between two trees of the same shape
+     */
+    public static function copyTemplates(\Dom\Element|\Dom\Document $from, \Dom\Element|\Dom\Document $to): void
     {
         $src = iterator_to_array($from->querySelectorAll('template'), false);
         $dst = iterator_to_array($to->querySelectorAll('template'), false);
-        if ($from->tagName === 'TEMPLATE') {
+        if ($from instanceof \Dom\Element && $to instanceof \Dom\Element && $from->tagName === 'TEMPLATE') {
             array_unshift($src, $from);
             array_unshift($dst, $to);
         }

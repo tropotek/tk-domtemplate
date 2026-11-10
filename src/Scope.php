@@ -132,6 +132,21 @@ final class Scope
     }
 
     /**
+     * A copy of this scope over a cloned tree, with every node swapped for its copy
+     *
+     * @param \WeakMap<\Dom\Element, \Dom\Element> $map
+     */
+    public function remap(\WeakMap $map): self
+    {
+        $copy = clone $this;
+        foreach ($copy->nodes as $name => $nodes) {
+            $copy->nodes[$name] = array_values(array_filter(array_map(fn($n) => $map[$n] ?? null, $nodes)));
+        }
+        $copy->rejected = array_values(array_filter(array_map(fn($n) => $map[$n] ?? null, $copy->rejected)));
+        return $copy;
+    }
+
+    /**
      * Plain vars start visible and optional nodes start hidden, until set
      */
     public function isVisible(string $name): bool

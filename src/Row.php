@@ -22,6 +22,11 @@ final class Row extends Template
         parent::__construct($parentTemplate->doc, Html::cloneDeep($sample), $parentTemplate->label(), null);
     }
 
+    public function __clone()
+    {
+        throw new \LogicException('Rows cannot be cloned; create another with Template::repeat()');
+    }
+
     public static function load(string $html, ?Engine $engine = null): static
     {
         throw new \LogicException('Rows are created with Template::repeat()');

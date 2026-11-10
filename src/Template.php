@@ -43,6 +43,55 @@ class Template
     }
 
     /**
+     * An independent copy of an unrendered template. Child templates waiting to be
+     * inserted are shared, not copied.
+     *
+     * @throws \LogicException when the template has been rendered
+     */
+    public function __clone()
+    {
+        if ($this->built) {
+            throw new \LogicException(sprintf('Template %s has been rendered and cannot be cloned', $this->label));
+        }
+        if ($this->root instanceof \Dom\Document) {
+            $doc = $this->doc->cloneNode(true);
+            assert($doc instanceof \Dom\HTMLDocument);
+            Html::copyTemplates($this->doc, $doc);
+            $old = iterator_to_array($this->doc->getElementsByTagName('*'), false);
+            $new = iterator_to_array($doc->getElementsByTagName('*'), false);
+            $this->doc = $doc;
+            $this->root = $doc;
+        } else {
+            $root = Html::cloneDeep($this->root);
+            $old = [$this->root, ...iterator_to_array($this->root->getElementsByTagName('*'), false)];
+            $new = [$root, ...iterator_to_array($root->getElementsByTagName('*'), false)];
+            $this->root = $root;
+        }
+        /** @var \WeakMap<\Dom\Element, \Dom\Element> $map */
+        $map = new \WeakMap();
+        foreach ($old as $i => $el) {
+            $map[$el] = $new[$i];
+        }
+        $this->scope = $this->scope->remap($map);
+        $pending = [];
+        foreach ($this->pending as [$slot, $child, $replaces]) {
+            if (isset($map[$slot])) {
+                $pending[] = [$map[$slot], $child, $replaces];
+            }
+        }
+        $this->pending = $pending;
+        /** @var \WeakMap<\Dom\Element, \Dom\Element> $firstRows */
+        $firstRows = new \WeakMap();
+        foreach ($this->firstRows as $sample => $first) {
+            if (isset($map[$sample], $map[$first])) {
+                $firstRows[$map[$sample]] = $map[$first];
+            }
+        }
+        $this->firstRows = $firstRows;
+        $this->output = null;
+    }
+
+    /**
      * Load a template from a string of HTML, a full page or a fragment
      */
     public static function load(string $html, ?Engine $engine = null): static
