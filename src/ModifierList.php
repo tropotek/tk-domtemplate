@@ -13,12 +13,17 @@ use Tk\DomTemplate\Modifier\Context;
  */
 final readonly class ModifierList
 {
+    /** @var list<bool> per modifier: whether it handles comments, worked out once */
+    private array $comments;
+
     /**
      * @param list<ModifierInterface> $modifiers
      */
     public function __construct(
         public array $modifiers = [],
-    ) {}
+    ) {
+        $this->comments = array_map(self::wantsComments(...), $modifiers);
+    }
 
     /**
      * A new list with $modifier added at the end
@@ -31,7 +36,7 @@ final readonly class ModifierList
     public function process(Context $ctx): void
     {
         $xpath = null;
-        foreach ($this->modifiers as $modifier) {
+        foreach ($this->modifiers as $i => $modifier) {
             // The lists are static, so modifiers may remove nodes as they go;
             // nodes removed earlier in the pass (with an ancestor) are skipped
             foreach ($ctx->root->querySelectorAll($modifier->selector() ?? '*') as $el) {
@@ -39,7 +44,7 @@ final readonly class ModifierList
                     $modifier->element($el, $ctx);
                 }
             }
-            if (self::wantsComments($modifier)) {
+            if ($this->comments[$i]) {
                 $xpath ??= new \Dom\XPath($ctx->document);
                 foreach ($xpath->query('.//comment()', $ctx->root) as $comment) {
                     if ($comment instanceof \Dom\Comment && $ctx->root->contains($comment)) {

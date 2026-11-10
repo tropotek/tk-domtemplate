@@ -11,7 +11,7 @@ class Template
     protected Scope $scope;
 
     /** Tag of the placeholder a template insert leaves until the page is built */
-    protected const string SLOT = 'tk-slot';
+    private const string SLOT = 'tk-slot';
 
     private ?string $output = null;
 
@@ -36,22 +36,7 @@ class Template
      */
     protected array $pending = [];
 
-    /** @var list<Asset> assets this template (or a row added to it) asked for */
-    protected array $assets = [];
-
-    /** @var list<array{\Dom\Element, Asset}> inline assets of added rows, written at the end of each row element */
-    protected array $inlineAt = [];
-
-    /**
-     * Head/End assets of added rows, with the row elements they came from: kept only
-     * while one of those elements is still in the page
-     *
-     * @var list<array{list<\Dom\Element>, Asset}>
-     */
-    protected array $rowAssets = [];
-
-    /** @var list<Asset> assets handed up to the template this one is inserted into, kept for every later build */
-    private array $bubbled = [];
+    protected Assets $assets;
 
     /** @var \WeakMap<\Dom\Element, \Dom\Element> the first row added from each sample */
     private \WeakMap $firstRows;
@@ -63,6 +48,7 @@ class Template
         private readonly ?Engine $engine,
     ) {
         $this->firstRows = new \WeakMap();
+        $this->assets = new Assets();
         $this->scope = Scope::build($root, $label, fn(string $message) => $this->reportMarkup($message));
     }
 
@@ -78,27 +64,14 @@ class Template
             throw new \LogicException(sprintf('Template %s has been rendered and cannot be cloned', $this->label));
         }
         if ($this->root instanceof \Dom\Document) {
-            // Import into an empty document: cloneNode() on a whole HTMLDocument crashes
-            // PHP 8.5 once <template> content is copied into it
-            $doc = \Dom\HTMLDocument::createEmpty();
-            foreach ($this->doc->childNodes as $node) {
-                $doc->append($doc->importNode($node, true));
-            }
-            Html::copyTemplates($this->doc, $doc);
-            $old = iterator_to_array($this->doc->getElementsByTagName('*'), false);
-            $new = iterator_to_array($doc->getElementsByTagName('*'), false);
+            $doc = Html::copyDocument($this->doc);
+            $map = Html::mapElements($this->doc, $doc);
             $this->doc = $doc;
             $this->root = $doc;
         } else {
             $root = Html::cloneDeep($this->root);
-            $old = [$this->root, ...iterator_to_array($this->root->getElementsByTagName('*'), false)];
-            $new = [$root, ...iterator_to_array($root->getElementsByTagName('*'), false)];
+            $map = Html::mapElements($this->root, $root);
             $this->root = $root;
-        }
-        /** @var \WeakMap<\Dom\Element, \Dom\Element> $map */
-        $map = new \WeakMap();
-        foreach ($old as $i => $el) {
-            $map[$el] = $new[$i];
         }
         self::copySlotMarks($map);
         $this->scope = $this->scope->remap($map);
@@ -109,18 +82,7 @@ class Template
             }
         }
         $this->pending = $pending;
-        $inlineAt = [];
-        foreach ($this->inlineAt as [$node, $asset]) {
-            if (isset($map[$node])) {
-                $inlineAt[] = [$map[$node], $asset];
-            }
-        }
-        $this->inlineAt = $inlineAt;
-        $rowAssets = [];
-        foreach ($this->rowAssets as [$nodes, $asset]) {
-            $rowAssets[] = [array_values(array_filter(array_map(fn($n) => $map[$n] ?? null, $nodes))), $asset];
-        }
-        $this->rowAssets = $rowAssets;
+        $this->assets = $this->assets->remap($map);
         /** @var \WeakMap<\Dom\Element, \Dom\Element> $firstRows */
         $firstRows = new \WeakMap();
         foreach ($this->firstRows as $sample => $first) {
@@ -147,11 +109,7 @@ class Template
      */
     public static function file(string $path, ?Engine $engine = null): static
     {
-        $html = is_file($path) && is_readable($path) ? file_get_contents($path) : false;
-        if ($html === false) {
-            throw new TemplateException('Cannot read template file: ' . $path);
-        }
-        return static::parse($html, $path, $engine);
+        return static::parse(Html::readFile($path), $path, $engine);
     }
 
     /**
@@ -169,18 +127,11 @@ class Template
 
     protected static function parse(string $html, string $label, ?Engine $engine): static
     {
-        if (str_starts_with($html, "\xEF\xBB\xBF")) {
-            $html = substr($html, 3);
-        }
-        if (Html::isFullDocument($html)) {
-            $doc = \Dom\HTMLDocument::createFromString($html, LIBXML_NOERROR, 'UTF-8');
-            Html::trustSource($doc);
-            return new static($doc, $doc, $label, $engine); // @phpstan-ignore new.static (Row blocks load()/file())
-        }
-        $doc = \Dom\HTMLDocument::createEmpty();
-        $root = Html::parseFragment($doc, $html);
+        [$doc, $root] = Html::parse($html);
         Html::trustSource($root);
-        return new static($doc, $root, $label, $engine); // @phpstan-ignore new.static
+        $template = new static($doc, $root, $label, $engine); // @phpstan-ignore new.static (Row blocks load()/file())
+        Html::checkCharset($root, $label, fn(string $message) => $template->reportMarkup($message));
+        return $template;
     }
 
     /**
@@ -315,7 +266,9 @@ class Template
             }
             $named[$attr] = $val;
         }
-        $this->assets[] = new Asset($type, $value, $place, $key, $named, $name, hrtime(true), $metaAttr);
+        $named = array_map(fn($v) => is_string($v) ? Html::utf8($v) : $v, $named);
+        $name = $name === null ? null : Html::utf8($name);
+        $this->assets->add(new Asset($type, Html::utf8($value), $place, $key === null ? null : Html::utf8($key), $named, $name, hrtime(true), $metaAttr));
         return $this;
     }
 
@@ -375,22 +328,7 @@ class Template
             $this->pending[] = [$slot, $child, null];
         }
         $row->pending = [];
-        if ($nodes) {
-            foreach ($row->assets as $asset) {
-                if ($asset->isInline()) {
-                    foreach ($nodes as $node) {
-                        $this->inlineAt[] = [$node, $asset];
-                    }
-                } else {
-                    $this->rowAssets[] = [$nodes, $asset];
-                }
-            }
-            array_push($this->inlineAt, ...$row->inlineAt);
-            array_push($this->rowAssets, ...$row->rowAssets);
-        }
-        $row->assets = [];
-        $row->inlineAt = [];
-        $row->rowAssets = [];
+        $this->assets->adopt($row->assets, $nodes);
     }
 
     /**
@@ -612,10 +550,10 @@ class Template
             $this->rendering = true;
             $ctx = new BuildContext();
             $this->build($ctx);
-            $this->placeAssets($this->bubbled, $ctx);
-            $this->dedupeKeys();
+            Assets::place($this->assets->bubbled(), $this->doc, $this->root, $this->endNode(), $ctx);
+            Assets::dedupeKeys($this->root);
             $this->engine()->modifiers?->process(new Modifier\Context($this->doc, $this->root, $this->isFragment()));
-            $this->applyNonce();
+            Assets::applyNonce($this->root, $this->engine()->currentNonce());
             $this->output = $this->root instanceof \Dom\Document ? $this->doc->saveHtml() : $this->root->innerHTML;
         }
         return $this->output;
@@ -707,32 +645,13 @@ class Template
         if ($this->built) {
             return;
         }
-        $ctx->enter($this);
-        try {
-            // Hidden content first, so templates inside it are never built
-            $this->removeHidden();
-            $collected = $this->resolvePending($ctx);
-            $this->writeInline($ctx);
-            $fromRows = [];
-            foreach ($this->rowAssets as [$nodes, $asset]) {
-                foreach ($nodes as $node) {
-                    if ($this->root->contains($node)) {
-                        $fromRows[] = $asset;
-                        break;
-                    }
-                }
-            }
-            $this->rowAssets = [];
-            $this->bubbled = [
-                ...array_values(array_filter($this->assets, fn(Asset $a) => !$a->isInline())),
-                ...$fromRows,
-                ...$collected,
-            ];
-            $this->stripMarkers(true);
-            $this->built = true;
-        } finally {
-            $ctx->leave();
-        }
+        // Hidden content first, so templates inside it are never built.
+        // render() has already ruled out circular inserts (checkInserts()).
+        $this->removeHidden();
+        $collected = $this->resolvePending($ctx);
+        $this->assets->build($this->doc, $this->root, $this->endNode(), $collected);
+        $this->stripMarkers(true);
+        $this->built = true;
     }
 
     /**
@@ -787,7 +706,7 @@ class Template
             }
             $this->inherit($child);
             $child->build($ctx);
-            array_push($collected, ...$child->bubbled);
+            array_push($collected, ...$child->assets->bubbled());
             $nodes = array_map(fn(\Dom\Node $n) => Html::import($this->doc, $n), $child->contentNodes());
             self::carryAttributes($slot, $nodes);
             $slot->replaceWith(...$nodes);
@@ -800,109 +719,11 @@ class Template
     }
 
     /**
-     * Write this template's own inline assets at its end, and added rows' inline assets
-     * at the end of each row. Keyed assets are marked and reduced to one per page at render.
-     */
-    private function writeInline(BuildContext $ctx): void
-    {
-        $end = $this->endNode();
-        foreach ($this->assets as $asset) {
-            if ($asset->isInline()) {
-                $end?->append($asset->toElement($this->doc));
-            }
-        }
-        foreach ($this->inlineAt as [$node, $asset]) {
-            if ($this->root->contains($node)) {
-                $node->append($asset->toElement($this->doc));
-            }
-        }
-        $this->inlineAt = [];
-    }
-
-    /**
      * Where inline content goes: the end of a fragment, or of a full page's <body>
      */
     private function endNode(): \Dom\Element|null
     {
         return $this->root instanceof \Dom\Document ? ($this->doc->body ?? $this->doc->documentElement) : $this->root;
-    }
-
-    /**
-     * Place the assets handed up to the top level, in call order: <head>, end of <body>, meta and title.
-     * Without a <head> or <body> (a fragment) they are written inline and the title is dropped.
-     *
-     * @param list<Asset> $assets
-     */
-    private function placeAssets(array $assets, BuildContext $ctx): void
-    {
-        $head = $this->root instanceof \Dom\Document ? $this->doc->head : null;
-        $body = $this->root instanceof \Dom\Document ? $this->doc->body : null;
-        $end = $this->endNode();
-        // URLs the page already links count as written
-        foreach ($this->root->querySelectorAll('link[rel="stylesheet"][href]') as $link) {
-            $ctx->first('cssUrl:' . $link->getAttribute('href'));
-        }
-        foreach ($this->root->querySelectorAll('script[src]') as $script) {
-            $ctx->first('jsUrl:' . $script->getAttribute('src'));
-        }
-        usort($assets, fn(Asset $a, Asset $b) => $a->seq <=> $b->seq);
-        foreach ($assets as $asset) {
-            if (in_array($asset->type, [AssetType::JsUrl, AssetType::CssUrl], true) && !$ctx->first($asset->type->value . ':' . $asset->value)) {
-                continue;
-            }
-            if ($asset->type === AssetType::Title) {
-                if ($head !== null) {
-                    $title = $head->querySelector('title');
-                    $title ? $title->textContent = $asset->value : $head->append($asset->toElement($this->doc));
-                }
-                continue;
-            }
-            $el = $asset->toElement($this->doc);
-            if ($asset->type === AssetType::Meta && $head !== null) {
-                $existing = null;
-                foreach ($head->querySelectorAll('meta[' . $asset->metaAttr . ']') as $meta) {
-                    if (strcasecmp((string)$meta->getAttribute($asset->metaAttr), (string)$asset->name) === 0) {
-                        $existing = $meta;
-                        break;
-                    }
-                }
-                $existing ? $existing->replaceWith($el) : $head->append($el);
-                continue;
-            }
-            $target = $asset->place === Place::End ? $body : $head;
-            ($target ?? $end)?->append($el);
-        }
-    }
-
-    /**
-     * Keep the first asset of each key in the page and drop the rest
-     */
-    private function dedupeKeys(): void
-    {
-        $seen = [];
-        foreach ($this->root->querySelectorAll('[' . Asset::KEY_ATTR . ']') as $el) {
-            $key = (string)$el->getAttribute(Asset::KEY_ATTR);
-            if (isset($seen[$key])) {
-                $el->remove();
-                continue;
-            }
-            $seen[$key] = true;
-            $el->removeAttribute(Asset::KEY_ATTR);
-        }
-    }
-
-    /**
-     * Add the engine's CSP nonce to the trusted elements that lack one (see Html::trust()),
-     * and remove every trust marker
-     */
-    private function applyNonce(): void
-    {
-        $nonce = $this->engine()->currentNonce();
-        foreach ($this->root->querySelectorAll('[' . Html::TRUST_ATTR . ']') as $el) {
-            if (Html::untrust($el) && $nonce !== null && !$el->hasAttribute('nonce')) {
-                $el->setAttribute('nonce', $nonce);
-            }
-        }
     }
 
     /**

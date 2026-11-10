@@ -34,19 +34,9 @@ final class Builder
             throw new TemplateException('Builder::load() needs at least one file');
         }
         foreach ($paths as $path) {
-            $html = is_file($path) && is_readable($path) ? file_get_contents($path) : false;
-            if ($html === false) {
-                throw new TemplateException('Cannot read template file: ' . $path);
-            }
             $file = basename($path);
             $this->files[] = $file;
-            if (Html::isFullDocument($html)) {
-                $doc = \Dom\HTMLDocument::createFromString($html, LIBXML_NOERROR, 'UTF-8');
-                $root = $doc;
-            } else {
-                $doc = \Dom\HTMLDocument::createEmpty();
-                $root = Html::parseFragment($doc, $html);
-            }
+            [, $root] = Html::parse(Html::readFile($path));
             $inFile = [];
             foreach ($root->querySelectorAll('[' . self::NAME_ATTR . ']') as $el) {
                 $name = trim((string)$el->getAttribute(self::NAME_ATTR));

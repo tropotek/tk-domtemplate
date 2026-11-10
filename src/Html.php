@@ -129,6 +129,117 @@ final class Html
     }
 
     /**
+     * The string as valid UTF-8: invalid byte sequences become U+FFFD, as the parser
+     * does for template source. Output is always UTF-8.
+     */
+    public static function utf8(string $s): string
+    {
+        if (preg_match('//u', $s)) {
+            return $s;
+        }
+        return htmlspecialchars_decode(htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'), ENT_QUOTES);
+    }
+
+    /**
+     * Report a <meta> that declares a charset other than UTF-8, then make it UTF-8 (when
+     * the report doesn't throw). Templates are always read and written as UTF-8, so
+     * another declared charset would make browsers decode the page wrongly.
+     *
+     * @param callable(string): void $fail
+     */
+    public static function checkCharset(\Dom\Element|\Dom\Document $root, string $label, callable $fail): void
+    {
+        foreach ($root->querySelectorAll('meta[charset], meta[http-equiv][content]') as $meta) {
+            if ($meta->hasAttribute('charset')) {
+                $charset = trim((string)$meta->getAttribute('charset'));
+            } elseif (strcasecmp((string)$meta->getAttribute('http-equiv'), 'content-type') === 0
+                && preg_match('/charset\s*=\s*["\']?([^\s;"\']+)/i', (string)$meta->getAttribute('content'), $m)) {
+                $charset = $m[1];
+            } else {
+                continue;
+            }
+            if (in_array(strtolower($charset), ['utf-8', 'utf8'], true)) {
+                continue;
+            }
+            $fail(sprintf('%s declares charset %s; templates are read and written as UTF-8', $label, $charset));
+            if ($meta->hasAttribute('charset')) {
+                $meta->setAttribute('charset', 'utf-8');
+            } else {
+                $meta->setAttribute('content', 'text/html; charset=utf-8');
+            }
+        }
+    }
+
+    /**
+     * Read a template file
+     *
+     * @throws TemplateException when it can't be read
+     */
+    public static function readFile(string $path): string
+    {
+        $html = is_file($path) && is_readable($path) ? file_get_contents($path) : false;
+        if ($html === false) {
+            throw new TemplateException('Cannot read template file: ' . $path);
+        }
+        return $html;
+    }
+
+    /**
+     * Parse a whole page or a fragment (a leading UTF-8 BOM is dropped). The root is the
+     * document for a page, or the detached context element holding a fragment.
+     *
+     * @return array{\Dom\HTMLDocument, \Dom\Element|\Dom\Document}
+     */
+    public static function parse(string $html): array
+    {
+        if (str_starts_with($html, "\xEF\xBB\xBF")) {
+            $html = substr($html, 3);
+        }
+        if (self::isFullDocument($html)) {
+            $doc = \Dom\HTMLDocument::createFromString($html, LIBXML_NOERROR, 'UTF-8');
+            return [$doc, $doc];
+        }
+        $doc = \Dom\HTMLDocument::createEmpty();
+        return [$doc, self::parseFragment($doc, $html)];
+    }
+
+    /**
+     * Copy a whole document. It is imported into an empty one: cloneNode() on a whole
+     * HTMLDocument crashes PHP 8.5 once <template> content is copied into it.
+     */
+    public static function copyDocument(\Dom\HTMLDocument $from): \Dom\HTMLDocument
+    {
+        $doc = \Dom\HTMLDocument::createEmpty();
+        foreach ($from->childNodes as $node) {
+            $doc->append($doc->importNode($node, true));
+        }
+        self::copyTemplates($from, $doc);
+        return $doc;
+    }
+
+    /**
+     * Each element of a tree mapped to its copy in a tree of the same shape
+     * (the roots included when they are elements)
+     *
+     * @return \WeakMap<\Dom\Element, \Dom\Element>
+     */
+    public static function mapElements(\Dom\Element|\Dom\Document $old, \Dom\Element|\Dom\Document $new): \WeakMap
+    {
+        $from = iterator_to_array($old->getElementsByTagName('*'), false);
+        $to = iterator_to_array($new->getElementsByTagName('*'), false);
+        if ($old instanceof \Dom\Element && $new instanceof \Dom\Element) {
+            array_unshift($from, $old);
+            array_unshift($to, $new);
+        }
+        /** @var \WeakMap<\Dom\Element, \Dom\Element> $map */
+        $map = new \WeakMap();
+        foreach ($from as $i => $el) {
+            $map[$el] = $to[$i];
+        }
+        return $map;
+    }
+
+    /**
      * Deep-clone an element, including the content of any <template> elements.
      * PHP's cloneNode() leaves template content behind, which would break Alpine's x-for and x-if.
      */

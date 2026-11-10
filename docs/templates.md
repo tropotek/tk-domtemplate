@@ -101,5 +101,7 @@ Templates are parsed and written by PHP's HTML5 parser, `Dom\HTMLDocument`, so a
 - Single-quoted attribute values are written with double quotes, escaping as needed.
 - Attribute names are lowercased.
 - Broken HTML never throws; it is repaired the way browsers repair it.
+- Named entities such as `&copy;` are written as the character itself; only `&amp;`, `&lt;`, `&gt;`, `&quot;` and `&nbsp;` stay as entities.
+- Templates are read and written as UTF-8, so serve pages as UTF-8. A `<meta charset>` naming another charset is reported as a mistake (and rewritten to UTF-8 when lenient). Invalid UTF-8 in template source or in values passed to `text()`, `attr()` and the asset methods becomes `�` (U+FFFD).
 
 DomTemplate reserves the `data-tk-key` attribute for its own use. `<tk-slot>` elements written in your HTML are kept.

@@ -178,37 +178,15 @@ final class Row extends Template
     private function cloneWithInserts(\Dom\Element $node): \Dom\Element
     {
         $clone = Html::cloneDeep($node);
-        $children = new \WeakMap();
+        $map = Html::mapElements($node, $clone);
+        self::copySlotMarks($map);
         foreach ($this->pending as [$slot, $child]) {
-            $children[$slot] = $child;
-        }
-        $copies = iterator_to_array($clone->querySelectorAll(self::SLOT), false);
-        foreach (iterator_to_array($node->querySelectorAll(self::SLOT), false) as $i => $slot) {
-            if (isset($children[$slot], $copies[$i])) {
-                $this->pending[] = [$copies[$i], $children[$slot], null];
+            if (isset($map[$slot])) {
+                $this->pending[] = [$map[$slot], $child, null];
             }
         }
         // Nested rows' assets follow into the copy
-        /** @var \WeakMap<\Dom\Element, \Dom\Element> $map */
-        $map = new \WeakMap();
-        $old = [$node, ...iterator_to_array($node->getElementsByTagName('*'), false)];
-        $new = [$clone, ...iterator_to_array($clone->getElementsByTagName('*'), false)];
-        foreach ($old as $i => $el) {
-            $map[$el] = $new[$i];
-        }
-        self::copySlotMarks($map);
-        foreach ($this->inlineAt as [$anchor, $asset]) {
-            if (isset($map[$anchor])) {
-                $this->inlineAt[] = [$map[$anchor], $asset];
-            }
-        }
-        foreach ($this->rowAssets as $i => [$nodes, $asset]) {
-            foreach ($nodes as $n) {
-                if (isset($map[$n])) {
-                    $this->rowAssets[$i][0][] = $map[$n];
-                }
-            }
-        }
+        $this->assets->follow($map);
         return $clone;
     }
 

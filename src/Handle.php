@@ -43,6 +43,7 @@ final class Handle
     public function text(string $text): static
     {
         $this->internal('assertMutable');
+        $text = Html::utf8($text);
         foreach ($this->contentNodes() as $node) {
             $tag = strtolower($node->localName);
             if (in_array($tag, ['iframe', 'xmp', 'noembed', 'noframes', 'plaintext'], true)) {
@@ -158,7 +159,7 @@ final class Handle
                 if ($val === null || $val === false) {
                     $node->removeAttribute((string)$attr);
                 } else {
-                    Html::setAttribute($node, (string)$attr, $val === true ? '' : (string)$val);
+                    Html::setAttribute($node, (string)$attr, $val === true ? '' : Html::utf8((string)$val));
                 }
             }
         }
