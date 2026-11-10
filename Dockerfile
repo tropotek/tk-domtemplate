@@ -1,14 +1,11 @@
 # Dev/demo container: FrankenPHP serving the example/ site.
-FROM dunglas/frankenphp:php8.4
+FROM dunglas/frankenphp:php8.5
 
 WORKDIR /app
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git unzip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# dom, libxml and mbstring ship with the base image; tidy is required by composer.json
-RUN install-php-extensions tidy
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 

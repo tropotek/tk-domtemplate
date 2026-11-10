@@ -1,16 +1,7 @@
 parameters:
-  level: 7
+  level: 8
   tmpDir: _notes/phpstan
-#  checkGenericClassInNonGenericObjectType: false
   treatPhpDocTypesAsCertain: false
-#  bootstrapFiles:
-#    - _prepend.php
-  excludePaths:
-    - _notes
-    - docs
-    - site (?)
   paths:
     - src
-  ignoreErrors:
-    - identifier: class.notFound
-#    - identifier: missingType.iterableValue
+    - tests

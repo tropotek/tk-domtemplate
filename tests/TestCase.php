@@ -1,39 +1,19 @@
 <?php
 namespace Tk\DomTemplate\Tests;
 
-use Tk\DomTemplate\Parser;
-use Tk\DomTemplate\Template;
-
 abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
-    protected function tearDown(): void
+    /**
+     * Compare HTML ignoring whitespace between tags and collapsing other runs of whitespace
+     */
+    protected function assertHtml(string $expected, string $actual): void
     {
-        // Parser is a shared singleton, so don't let registered parsers leak between tests
-        Parser::instance()->clear();
+        $this->assertSame($this->normalise($expected), $this->normalise($actual));
     }
 
-    /**
-     * Render a template and return an XPath over the output
-     */
-    protected function render(Template $template): \DOMXPath
+    private function normalise(string $html): string
     {
-        $doc = new \DOMDocument();
-        libxml_use_internal_errors(true);
-        $doc->loadHTML('<?xml encoding="UTF-8">' . $template->toString());
-        libxml_clear_errors();
-        return new \DOMXPath($doc);
-    }
-
-    /**
-     * Text of every node matching an XPath query
-     * @return string[]
-     */
-    protected function texts(\DOMXPath $xp, string $query): array
-    {
-        $out = [];
-        foreach ($xp->query($query) ?: [] as $node) {
-            $out[] = trim($node->textContent);
-        }
-        return $out;
+        $html = (string)preg_replace('/>\s+</', '><', trim($html));
+        return (string)preg_replace('/\s+/', ' ', $html);
     }
 }

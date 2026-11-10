@@ -1,16 +1,15 @@
-<?php
-require __DIR__ . '/_init.php';
-
-use Tk\DomTemplate\Template;
-
-$content = Template::loadFile(__DIR__ . '/templates/index.html');
-
-// Build the example cards from the page list (skipping Home itself)
-foreach (array_slice(PAGES, 1, null, true) as $file => $label) {
-    $card = $content->getRepeat('card');
-    $card->setText('cardTitle', $label);
-    $card->setAttr('cardLink', 'href', $file);
-    $card->appendRepeat();
-}
-
-renderPage('PHP DomTemplate', $content, ['index.php', 'templates/index.html', '_init.php', 'templates/layout.html']);
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DomTemplate examples</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+</head>
+<body>
+  <main class="container py-5">
+    <h1 class="h2">DomTemplate examples</h1>
+    <p class="lead">The example site is being rebuilt for v9. Pages return as each feature lands.</p>
+  </main>
+</body>
+</html>
