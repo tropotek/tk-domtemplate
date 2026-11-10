@@ -61,6 +61,88 @@ class Template
     }
 
     /**
+     * A handle on every node with this var name
+     */
+    public function var(string $name): Handle
+    {
+        return new Handle($this, $name, $this->scope->nodes($name));
+    }
+
+    /**
+     * True when the template has a node with this name, of any kind
+     */
+    public function has(string $name): bool
+    {
+        return $this->scope->kind($name) !== null;
+    }
+
+    public function text(string $name, string $text): static
+    {
+        $this->var($name)->text($text);
+        return $this;
+    }
+
+    public function html(string $name, string $html): static
+    {
+        $this->var($name)->html($html);
+        return $this;
+    }
+
+    public function append(string $name, string $html): static
+    {
+        $this->var($name)->append($html);
+        return $this;
+    }
+
+    public function prepend(string $name, string $html): static
+    {
+        $this->var($name)->prepend($html);
+        return $this;
+    }
+
+    public function replace(string $name, string $html): static
+    {
+        $this->var($name)->replaceWith($html);
+        return $this;
+    }
+
+    /**
+     * @param string|array<string, string|int|float|bool|null> $attr
+     */
+    public function attr(string $name, string|array $attr, string|int|float|bool|null $value = null): static
+    {
+        $this->var($name)->attr($attr, $value);
+        return $this;
+    }
+
+    /**
+     * @param string|list<string> $class
+     */
+    public function addClass(string $name, string|array $class): static
+    {
+        $this->var($name)->addClass($class);
+        return $this;
+    }
+
+    /**
+     * @param string|list<string> $class
+     */
+    public function removeClass(string $name, string|array $class): static
+    {
+        $this->var($name)->removeClass($class);
+        return $this;
+    }
+
+    /**
+     * Called before every change
+     *
+     * @internal
+     */
+    public function assertMutable(): void
+    {
+    }
+
+    /**
      * Render the template. The first call builds and locks it; later calls return the same string.
      */
     public function render(): string
