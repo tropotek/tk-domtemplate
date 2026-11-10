@@ -10,13 +10,13 @@ class CompositionFixTest extends TestCase
 {
     public function testCloneFullPageWithAttributesInTemplateContent(): void
     {
-        $code = <<<'PHP'
-require '/app/vendor/autoload.php';
+        $autoload = var_export(dirname(__DIR__) . '/vendor/autoload.php', true);
+        $code = "require $autoload;" . <<<'PHP'
 $c = Tk\DomTemplate\Template::load('<!doctype html><html><body><template x-for="i in l"><li class="i" :key="i"></li></template></body></html>');
 echo (clone $c)->render();
 PHP;
         // Run in a separate process: the bug was a segfault
-        exec('php -r ' . escapeshellarg($code) . ' 2>&1', $out, $status);
+        exec(escapeshellarg(PHP_BINARY) . ' -r ' . escapeshellarg($code) . ' 2>&1', $out, $status);
         $this->assertSame(0, $status, implode("\n", $out));
         $this->assertStringContainsString('<template x-for="i in l"><li class="i" :key="i"></li></template>', implode("\n", $out));
     }
