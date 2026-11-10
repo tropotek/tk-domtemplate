@@ -65,7 +65,33 @@ class Template
      */
     public function var(string $name): Handle
     {
+        $kind = $this->scope->kind($name);
+        if ($kind === null) {
+            $this->engine()->fail(sprintf('No var `%s` in %s.%s', $name, $this->label, $this->suggest($name)));
+            return new Handle($this, $name, []);
+        }
+        if ($kind === Kind::Repeat) {
+            $this->engine()->fail(sprintf('`%s` is a repeat in %s, use repeat()', $name, $this->label));
+            return new Handle($this, $name, []);
+        }
         return new Handle($this, $name, $this->scope->nodes($name));
+    }
+
+    /**
+     * " Did you mean `x`?" for the closest known name within 2 edits, or ''
+     */
+    private function suggest(string $name): string
+    {
+        $best = null;
+        $bestDistance = 3;
+        foreach ($this->scope->names() as $known) {
+            $distance = levenshtein($name, $known);
+            if ($distance < $bestDistance) {
+                $best = $known;
+                $bestDistance = $distance;
+            }
+        }
+        return $best === null ? '' : sprintf(' Did you mean `%s`?', $best);
     }
 
     /**
@@ -160,12 +186,17 @@ class Template
     }
 
     /**
-     * Called before every change
+     * Called before every change: a rendered template is locked
+     *
+     * @throws \LogicException when the template has been rendered
      *
      * @internal
      */
     public function assertMutable(): void
     {
+        if ($this->isRendered()) {
+            throw new \LogicException(sprintf('Template %s has already been rendered', $this->label));
+        }
     }
 
     /**
