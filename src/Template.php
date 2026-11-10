@@ -96,6 +96,25 @@ class Template
     }
 
     /**
+     * Add one row per item. The callback fills the row in; a row the callback didn't
+     * add itself (with appendTo() for example) is then appended in place.
+     *
+     * @param iterable<mixed> $items
+     * @param callable $fn called as $fn(Row $row, mixed $item, int|string $key)
+     */
+    public function each(string $name, iterable $items, callable $fn): static
+    {
+        foreach ($items as $key => $item) {
+            $row = $this->repeat($name);
+            $fn($row, $item, $key);
+            if (!$row->isAdded()) {
+                $row->append();
+            }
+        }
+        return $this;
+    }
+
+    /**
      * The template a row belongs to; null for a top-level template
      */
     protected function parent(): ?Template

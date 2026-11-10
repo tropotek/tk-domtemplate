@@ -65,6 +65,23 @@ final class Row extends Template
         return $this;
     }
 
+    /**
+     * Add the row as the last child of every node with this var name.
+     * The name is looked up in the template the row belongs to, then outward.
+     */
+    public function appendTo(string $name): void
+    {
+        $this->addTo($name, false);
+    }
+
+    /**
+     * Add the row as the first child of every node with this var name
+     */
+    public function prependTo(string $name): void
+    {
+        $this->addTo($name, true);
+    }
+
     public function isAdded(): bool
     {
         return $this->added;
@@ -99,6 +116,31 @@ final class Row extends Template
             return null;
         }
         return $node;
+    }
+
+    private function addTo(string $name, bool $prepend): void
+    {
+        $this->assertMutable();
+        $targets = null;
+        for ($t = $this->parentTemplate; $t !== null; $t = $t->parent()) {
+            $kind = $t->scope->kind($name);
+            if ($kind !== null && $kind !== Kind::Repeat) {
+                $targets = $t->scope->nodes($name);
+                break;
+            }
+        }
+        if ($targets === null) {
+            $this->engine()->fail(sprintf('No var `%s` in %s for appendTo()', $name, $this->label()));
+            $targets = [];
+        }
+        $node = $this->finish();
+        if ($node !== null) {
+            foreach ($targets as $i => $target) {
+                $insert = $i === 0 ? $node : $node->cloneNode(true);
+                $prepend ? $target->prepend($insert) : $target->append($insert);
+            }
+        }
+        $this->parentTemplate->adopt($this);
     }
 
     private function add(bool $prepend): void
