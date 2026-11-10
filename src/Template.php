@@ -29,6 +29,15 @@ class Template
      */
     protected array $pending = [];
 
+    /** @var list<Asset> assets this template (or a row added to it) asked for */
+    protected array $assets = [];
+
+    /** @var list<array{\Dom\Element, Asset}> inline assets of added rows, written at the end of each row element */
+    protected array $inlineAt = [];
+
+    /** @var list<Asset> assets handed up to the template this one is inserted into, kept for every later build */
+    private array $bubbled = [];
+
     /** @var \WeakMap<\Dom\Element, \Dom\Element> the first row added from each sample */
     private \WeakMap $firstRows;
 
@@ -84,6 +93,13 @@ class Template
             }
         }
         $this->pending = $pending;
+        $inlineAt = [];
+        foreach ($this->inlineAt as [$node, $asset]) {
+            if (isset($map[$node])) {
+                $inlineAt[] = [$map[$node], $asset];
+            }
+        }
+        $this->inlineAt = $inlineAt;
         /** @var \WeakMap<\Dom\Element, \Dom\Element> $firstRows */
         $firstRows = new \WeakMap();
         foreach ($this->firstRows as $sample => $first) {
@@ -156,6 +172,70 @@ class Template
     }
 
     /**
+     * Add JavaScript. Inline (the default) writes it at the end of this template.
+     *
+     * @param array<string, string|bool|null> $attrs
+     * @param ?string $key assets with the same key are written once per page
+     */
+    public function js(string $code, Place $place = Place::Inline, ?string $key = null, array $attrs = []): static
+    {
+        return $this->addAsset(new Asset('js', $code, $place, $key, $attrs));
+    }
+
+    /**
+     * Add CSS. Inline (the default) writes it at the end of this template.
+     *
+     * @param array<string, string|bool|null> $attrs
+     */
+    public function css(string $code, Place $place = Place::Inline, ?string $key = null, array $attrs = []): static
+    {
+        return $this->addAsset(new Asset('css', $code, $place, $key, $attrs));
+    }
+
+    /**
+     * Add a script URL to the page <head>, once per page
+     *
+     * @param array<string, string|bool|null> $attrs
+     */
+    public function jsUrl(string $url, array $attrs = []): static
+    {
+        return $this->addAsset(new Asset('jsUrl', $url, Place::Head, null, $attrs));
+    }
+
+    /**
+     * Add a stylesheet URL to the page <head>, once per page
+     *
+     * @param array<string, string|bool|null> $attrs
+     */
+    public function cssUrl(string $url, array $attrs = []): static
+    {
+        return $this->addAsset(new Asset('cssUrl', $url, Place::Head, null, $attrs));
+    }
+
+    /**
+     * Set a <meta name> tag in the page <head>; the last value set wins
+     */
+    public function meta(string $name, string $content): static
+    {
+        return $this->addAsset(new Asset('meta', $content, Place::Head, null, [], $name));
+    }
+
+    /**
+     * Set the page <title>. Ignored in a fragment.
+     */
+    public function title(string $title): static
+    {
+        return $this->addAsset(new Asset('title', $title));
+    }
+
+    private function addAsset(Asset $asset): static
+    {
+        $this->assertMutable();
+        $this->assets[] = $asset;
+        return $this;
+    }
+
+    /**
      * A new row from a repeat sample. Fill it in, then add it with append() or appendTo().
      */
     public function repeat(string $name): Row
@@ -201,12 +281,29 @@ class Template
     /**
      * Called when one of this template's rows is added
      */
-    protected function adopt(Row $row): void
+    /**
+     * @param list<\Dom\Element> $nodes the row elements that were inserted (none when hidden)
+     */
+    protected function adopt(Row $row, array $nodes): void
     {
         foreach ($row->pending as [$slot, $child]) {
             $this->pending[] = [$slot, $child, null];
         }
         $row->pending = [];
+        if ($nodes) {
+            foreach ($row->assets as $asset) {
+                if ($asset->type !== 'title' && $asset->place === Place::Inline) {
+                    foreach ($nodes as $node) {
+                        $this->inlineAt[] = [$node, $asset];
+                    }
+                } else {
+                    $this->assets[] = $asset;
+                }
+            }
+            array_push($this->inlineAt, ...$row->inlineAt);
+        }
+        $row->assets = [];
+        $row->inlineAt = [];
     }
 
     /**
@@ -377,7 +474,9 @@ class Template
     public function render(): string
     {
         if ($this->output === null) {
-            $this->build(new BuildContext());
+            $ctx = new BuildContext();
+            $this->build($ctx);
+            $this->placeAssets($this->bubbled, $ctx);
             $this->output = $this->root instanceof \Dom\Document ? $this->doc->saveHtml() : $this->root->innerHTML;
         }
         return $this->output;
@@ -430,7 +529,9 @@ class Template
         try {
             // Hidden content first, so templates inside it are never built
             $this->removeHidden();
-            $this->resolvePending($ctx);
+            $collected = $this->resolvePending($ctx);
+            $this->writeInline($ctx);
+            $this->bubbled = [...array_values(array_filter($this->assets, fn(Asset $a) => $a->type === 'title' || $a->place !== Place::Inline)), ...$collected];
             $this->stripMarkers(true);
             $this->built = true;
         } finally {
@@ -439,10 +540,14 @@ class Template
     }
 
     /**
-     * Replace each placeholder with the built nodes of its child template
+     * Replace each placeholder with the built nodes of its child template.
+     * Returns the assets the children handed up.
+     *
+     * @return list<Asset>
      */
-    private function resolvePending(BuildContext $ctx): void
+    private function resolvePending(BuildContext $ctx): array
     {
+        $collected = [];
         foreach ($this->pending as [$slot, $child, $replaces]) {
             if (!$this->root->contains($slot)) {
                 continue;
@@ -451,6 +556,7 @@ class Template
                 $child->inheritedEngine = $this->engine();
             }
             $child->build($ctx);
+            array_push($collected, ...$child->bubbled);
             $nodes = array_map(fn(\Dom\Node $n) => Html::import($this->doc, $n), $child->contentNodes());
             self::carryAttributes($slot, $nodes);
             $slot->replaceWith(...$nodes);
@@ -459,6 +565,77 @@ class Template
             }
         }
         $this->pending = [];
+        return $collected;
+    }
+
+    /**
+     * Write this template's own inline assets at its end, and added rows' inline assets
+     * at the end of each row. Keyed assets are written once per page.
+     */
+    private function writeInline(BuildContext $ctx): void
+    {
+        $end = $this->endNode();
+        foreach ($this->assets as $asset) {
+            if ($asset->type !== 'title' && $asset->place === Place::Inline && ($asset->key === null || $ctx->first('key:' . $asset->key))) {
+                $end?->append($asset->toElement($this->doc));
+            }
+        }
+        foreach ($this->inlineAt as [$node, $asset]) {
+            if ($this->root->contains($node) && ($asset->key === null || $ctx->first('key:' . $asset->key))) {
+                $node->append($asset->toElement($this->doc));
+            }
+        }
+        $this->inlineAt = [];
+    }
+
+    /**
+     * Where inline content goes: the end of a fragment, or of a full page's <body>
+     */
+    private function endNode(): \Dom\Element|null
+    {
+        return $this->root instanceof \Dom\Document ? ($this->doc->body ?? $this->doc->documentElement) : $this->root;
+    }
+
+    /**
+     * Place the assets handed up to the top level: <head>, end of <body>, meta and title.
+     * Without a <head> or <body> (a fragment) they are written inline and the title is dropped.
+     *
+     * @param list<Asset> $assets
+     */
+    private function placeAssets(array $assets, BuildContext $ctx): void
+    {
+        $head = $this->root instanceof \Dom\Document ? $this->doc->head : null;
+        $body = $this->root instanceof \Dom\Document ? $this->doc->body : null;
+        $end = $this->endNode();
+        foreach ($assets as $asset) {
+            if ($asset->key !== null && !$ctx->first('key:' . $asset->key)) {
+                continue;
+            }
+            if (in_array($asset->type, ['jsUrl', 'cssUrl'], true) && !$ctx->first($asset->type . ':' . $asset->value)) {
+                continue;
+            }
+            if ($asset->type === 'title') {
+                if ($head !== null) {
+                    $title = $head->querySelector('title');
+                    $title ? $title->textContent = $asset->value : $head->append($asset->toElement($this->doc));
+                }
+                continue;
+            }
+            $el = $asset->toElement($this->doc);
+            if ($asset->type === 'meta' && $head !== null) {
+                $existing = null;
+                foreach ($head->querySelectorAll('meta[name]') as $meta) {
+                    if ($meta->getAttribute('name') === $asset->name) {
+                        $existing = $meta;
+                        break;
+                    }
+                }
+                $existing ? $existing->replaceWith($el) : $head->append($el);
+                continue;
+            }
+            $target = $asset->place === Place::End ? $body : $head;
+            ($target ?? $end)?->append($el);
+        }
     }
 
     /**

@@ -158,13 +158,15 @@ final class Row extends Template
             $targets = [];
         }
         $node = $this->finish();
+        $inserted = [];
         if ($node !== null) {
             foreach ($targets as $i => $target) {
                 $insert = $i === 0 ? $node : $this->cloneWithInserts($node);
                 $prepend ? $target->prepend($insert) : $target->append($insert);
+                $inserted[] = $insert;
             }
         }
-        $this->parentTemplate->adopt($this);
+        $this->parentTemplate->adopt($this, $inserted);
     }
 
     /**
@@ -193,6 +195,6 @@ final class Row extends Template
         if ($node !== null) {
             $this->parentTemplate->placeRow($this->sample, $node, $prepend);
         }
-        $this->parentTemplate->adopt($this);
+        $this->parentTemplate->adopt($this, $node ? [$node] : []);
     }
 }
