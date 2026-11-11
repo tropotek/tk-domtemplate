@@ -57,7 +57,7 @@ For a single change, use the shortcut on the template:
 | `show($bool)` / `hide()` | `$t->show('x', $cond)` / `$t->hide('x')` | keep or remove at render |
 | `getText()`, `getAttr($name)`, `count()` | | read |
 
-- `text()` is the only escaped path. Everything else inserts HTML. On a `<script>` or `<style>` node, `text()` escapes the sequences that could end the element (so JSON in `<script type="application/json">` is safe); on `<iframe>`, `<xmp>`, `<noembed>`, `<noframes>` and `<plaintext>` it is refused.
+- `text()` is the only escaped path. Everything else inserts HTML. On a JavaScript or JSON `<script>` (no type, a JS or JSON type, `module`, `importmap`) or a `<style>`, `text()` escapes the sequences that could end the element, so JSON in `<script type="application/json">` is safe. On other script types (`text/x-template` …) the text is written as is, and text containing `<!--` or `</script` is refused; on `<iframe>`, `<xmp>`, `<noembed>`, `<noframes>` and `<plaintext>` it is refused.
 - HTML is parsed in the context of the target node, so `html('tbody', '<tr>…</tr>')` keeps the rows.
 - `attr()` values: `true`, or no value (`attr('disabled')`), sets an empty attribute (`disabled=""`); `false` or `null` removes it. Alpine names such as `@click` and `:class` work.
 - `removeClass('btn')` removes only the `btn` class, not `btn-primary`.

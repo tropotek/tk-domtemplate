@@ -52,7 +52,7 @@ class CloneTest extends TestCase
         $b = clone $a;
         $first = $b->repeat('r');
         $first->text('n', '1');
-        $first->insertBefore();
+        $first->insertFirst();
         $this->assertSame('<ul><li><b>1</b></li><li><b>2</b></li></ul>', $b->render());
         $this->assertSame('<ul><li><b>2</b></li></ul>', $a->render());
     }

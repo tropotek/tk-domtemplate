@@ -25,8 +25,15 @@ class Template
 
     private ?Engine $defaultEngine = null;
 
-    /** The template this one was first inserted into: its engine is used when this one has none */
-    private ?Template $insertedInto = null;
+    /**
+     * The template this one is inserted into: its engine is used when this one has none.
+     * Held weakly, so a child reused across requests doesn't keep an old page alive.
+     *
+     * @var ?\WeakReference<Template>
+     */
+    private ?\WeakReference $insertedInto = null;
+
+    private ?HandleOps $ops = null;
 
     /**
      * Template inserts waiting for the build: placeholder, child, and the var name to
@@ -74,6 +81,7 @@ class Template
             $this->root = $root;
         }
         self::copySlotMarks($map);
+        $this->ops = null;
         $this->scope = $this->scope->remap($map);
         $pending = [];
         foreach ($this->pending as [$slot, $child, $replaces]) {
@@ -158,13 +166,13 @@ class Template
         $kind = $this->scope->kind($name);
         if ($kind === null) {
             $this->engine()->fail(sprintf('No var `%s` in %s.%s', $name, $this->label, $this->suggest($name)));
-            return new Handle($this, $name, []);
+            return new Handle($this, $name, [], $this->ops());
         }
         if ($kind === Kind::Repeat) {
             $this->engine()->fail(sprintf('`%s` is a repeat in %s, use repeat()', $name, $this->label));
-            return new Handle($this, $name, []);
+            return new Handle($this, $name, [], $this->ops());
         }
-        return new Handle($this, $name, $this->liveNodes($name, $this->scope->nodes($name)));
+        return new Handle($this, $name, $this->liveNodes($name, $this->scope->nodes($name)), $this->ops());
     }
 
     /**
@@ -267,7 +275,10 @@ class Template
         $named = [];
         foreach ($attrs as $attr => $val) {
             if (is_int($attr)) {
-                [$attr, $val] = [(string)$val, true];
+                if (!is_string($val)) {
+                    throw new TemplateException(sprintf('Invalid attribute `%s` for %s() in %s: a list entry must be an attribute name', var_export($val, true), $type->value, $this->label));
+                }
+                [$attr, $val] = [$val, true];
             }
             if (!Html::isAttrName($attr)) {
                 throw new TemplateException(sprintf('Invalid attribute name `%s` for %s() in %s', $attr, $type->value, $this->label));
@@ -342,9 +353,9 @@ class Template
     /**
      * A placeholder for a template insert, resolved when the page is built
      *
-     * Reached by Handle only (see Handle::internal())
+     * Reached by Handle only (see HandleOps)
      */
-    private function slot(Template $child, ?string $replaces = null): \Dom\Element // @phpstan-ignore method.unused (called through Handle::internal())
+    private function slot(Template $child, ?string $replaces = null): \Dom\Element
     {
         if ($child instanceof Row) {
             throw new \LogicException('A row cannot be inserted as a template; insert it with insert()');
@@ -515,7 +526,7 @@ class Template
     /**
      * Reached by Handle only
      */
-    private function setVisible(string $name, bool $visible): void // @phpstan-ignore method.unused (called through Handle::internal())
+    private function setVisible(string $name, bool $visible): void
     {
         $this->scope->setVisible($name, $visible);
     }
@@ -525,7 +536,7 @@ class Template
      *
      * @param list<\Dom\Element> $new
      */
-    private function replaceNode(string $name, \Dom\Element $old, array $new): void // @phpstan-ignore method.unused (called through Handle::internal())
+    private function replaceNode(string $name, \Dom\Element $old, array $new): void
     {
         $this->scope->replaceNode($name, $old, $new);
     }
@@ -560,8 +571,10 @@ class Template
             $this->build($ctx);
             Assets::place($this->assets->bubbled(), $this->doc, $this->root, $this->endNode(), $ctx);
             Assets::dedupeKeys($this->root);
-            $this->engine()->modifiers?->process(new Modifier\Context($this->doc, $this->root, $this->isFragment()));
-            Assets::applyNonce($this->root, $this->engine()->currentNonce());
+            // Trust markers are taken out before modifiers run, so they never see the secret
+            $trusted = Assets::takeTrusted($this->root);
+            $this->engine()->modifiers?->process(new Modifier\Context($this->doc, $this->root, $this->isFragment(), $trusted));
+            Assets::applyNonce($this->root, $trusted, $this->engine()->currentNonce());
             $this->output = $this->root instanceof \Dom\Document ? $this->doc->saveHtml() : $this->root->innerHTML;
         }
         return $this->output;
@@ -599,7 +612,30 @@ class Template
      */
     public function engine(): Engine
     {
-        return $this->engine ?? $this->insertedInto?->engine() ?? ($this->defaultEngine ??= new Engine());
+        return $this->ownEngine() ?? ($this->defaultEngine ??= new Engine());
+    }
+
+    /**
+     * Its own engine, or that of the templates it is inserted into, without the default
+     */
+    private function ownEngine(): ?Engine
+    {
+        return $this->engine ?? $this->insertedInto?->get()?->ownEngine();
+    }
+
+    /**
+     * The callables Handle uses to reach this template's private helpers
+     */
+    private function ops(): HandleOps
+    {
+        return $this->ops ??= new HandleOps(
+            $this->assertMutable(...),
+            $this->slot(...),
+            $this->replaceNode(...),
+            $this->setVisible(...),
+            $this->pruneDetached(...),
+            self::isSlot(...),
+        );
     }
 
     /**
@@ -609,15 +645,16 @@ class Template
      */
     private function inherit(Template $child): void
     {
-        if ($child->engine !== null || $child->insertedInto !== null) {
+        // Keep the current parent unless it leads to no engine (an engine-less wrapper)
+        if ($child->engine !== null || ($child->insertedInto?->get() !== null && $child->ownEngine() !== null)) {
             return;
         }
-        for ($t = $this; $t !== null; $t = $t->insertedInto) {
+        for ($t = $this; $t !== null; $t = $t->insertedInto?->get()) {
             if ($t === $child) {
                 return;
             }
         }
-        $child->insertedInto = $this;
+        $child->insertedInto = \WeakReference::create($this);
     }
 
     /**
@@ -625,7 +662,7 @@ class Template
      *
      * Reached by Handle only
      */
-    private static function isSlot(\Dom\Element $el): bool // @phpstan-ignore method.unused (called through Handle::internal())
+    private static function isSlot(\Dom\Element $el): bool
     {
         return self::$slots !== null && isset(self::$slots[$el]);
     }
@@ -636,7 +673,7 @@ class Template
      *
      * Reached by Handle only
      */
-    private function pruneDetached(string $name): void // @phpstan-ignore method.unused (called through Handle::internal())
+    private function pruneDetached(string $name): void
     {
         foreach ($this->scope->nodes($name) as $node) {
             if (!$this->root->contains($node)) {

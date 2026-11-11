@@ -30,5 +30,5 @@ final class UserCard extends Renderer
 | `Renderer` | abstract base using the trait |
 
 - `getTemplate()` calls `makeTemplate()` on first use. Override it, or call `setTemplate()`.
-- Cloning a `Renderer` clones its template. A rendered template can't be copied, so a clone made after rendering starts without one and calls `makeTemplate()` again on first use. A class that only uses `RendererTrait` shares its template between clones unless it adds its own `__clone()`.
+- Cloning a `Renderer` clones its template. A rendered template can't be copied, so a clone made after rendering starts without one and calls `makeTemplate()` again on first use (a template given with `setTemplate()` and no `makeTemplate()` leaves the clone with none). A class that only uses `RendererTrait` shares its template between clones unless it adds its own `__clone()`.
 - Nothing is final; override what you need.

@@ -146,7 +146,7 @@ class SecurityTest extends TestCase
     public function testJsEscapesKeepTheStringValue(): void
     {
         $out = Template::load('<div></div>')->js('x = "<!--<SCRIPT></script>";')->render();
-        $this->assertStringContainsString('x = "\u003C!--\u003CSCRIPT>\u003C/script>";', $out);
+        $this->assertStringContainsString('x = "\u003C!--<SCRIPT><\/script>";', $out);
     }
 
     // text() on raw-text elements
@@ -157,7 +157,7 @@ class SecurityTest extends TestCase
         $t->text('d', '{"a":"</script><img src=x onerror=alert(1)>"}');
         $doc = $this->browse($t->render());
         $this->assertNull($doc->querySelector('img'));
-        $this->assertSame('{"a":"\u003C/script><img src=x onerror=alert(1)>"}', $doc->querySelector('script')?->textContent);
+        $this->assertSame('{"a":"<\/script><img src=x onerror=alert(1)>"}', $doc->querySelector('script')?->textContent);
     }
 
     public function testTextIntoStyleCannotCloseIt(): void

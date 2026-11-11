@@ -16,12 +16,22 @@ final readonly class Context
     /** @var \WeakMap<object, \ArrayObject<string, mixed>> */
     private \WeakMap $stores;
 
+    /** @var \ArrayObject<int, \Dom\Element> elements the CSP nonce is added to after the modifiers */
+    private \ArrayObject $trusted;
+
+    /**
+     * @param ?\ArrayObject<int, \Dom\Element> $trusted
+     */
     public function __construct(
         public \Dom\HTMLDocument $document,
         public \Dom\Element|\Dom\Document $root,
         public bool $fragment,
+        ?\ArrayObject $trusted = null,
     ) {
         $this->stores = new \WeakMap();
+        /** @var \ArrayObject<int, \Dom\Element> $none */
+        $none = new \ArrayObject();
+        $this->trusted = $trusted ?? $none;
     }
 
     /**
@@ -30,7 +40,8 @@ final readonly class Context
      */
     public function trust(\Dom\Element $el): \Dom\Element
     {
-        return \Tk\DomTemplate\Html::trust($el);
+        $this->trusted[] = $el;
+        return $el;
     }
 
     /**

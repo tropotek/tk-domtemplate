@@ -75,7 +75,7 @@ final readonly class Asset
         }
         if ($this->key !== null) {
             // Marks keyed assets so the page keeps only the first of each (see Template::dedupeKeys())
-            $el->setAttribute(self::KEY_ATTR, $this->type->value . ':' . $this->key);
+            $el->setAttribute(self::KEY_ATTR, Html::secret() . '|' . $this->type->value . ':' . $this->key);
         }
         return $el;
     }

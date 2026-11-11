@@ -196,30 +196,59 @@ final class Assets
     }
 
     /**
-     * Keep the first asset of each key in the page and drop the rest
+     * Keep the first asset of each key in the page and drop the rest. Markers without the
+     * process secret (written in inserted HTML) are removed and otherwise ignored.
      */
     public static function dedupeKeys(\Dom\Element|\Dom\Document $root): void
     {
+        $prefix = Html::secret() . '|';
         $seen = [];
         foreach ($root->querySelectorAll('[' . Asset::KEY_ATTR . ']') as $el) {
             $key = (string)$el->getAttribute(Asset::KEY_ATTR);
+            $el->removeAttribute(Asset::KEY_ATTR);
+            if (!str_starts_with($key, $prefix)) {
+                continue;
+            }
             if (isset($seen[$key])) {
                 $el->remove();
                 continue;
             }
             $seen[$key] = true;
-            $el->removeAttribute(Asset::KEY_ATTR);
         }
     }
 
     /**
-     * Add the CSP nonce to the trusted elements that lack one (see Html::trust()),
-     * and remove every trust marker
+     * Remove every trust marker and return the elements whose marker was genuine (see
+     * Html::trust()). Runs before modifiers, so they never see the secret.
+     *
+     * Held strongly: PHP recreates DOM wrapper objects on demand, so a WeakMap would lose them.
+     *
+     * @return \ArrayObject<int, \Dom\Element>
      */
-    public static function applyNonce(\Dom\Element|\Dom\Document $root, ?string $nonce): void
+    public static function takeTrusted(\Dom\Element|\Dom\Document $root): \ArrayObject
     {
+        /** @var \ArrayObject<int, \Dom\Element> $trusted */
+        $trusted = new \ArrayObject();
         foreach ($root->querySelectorAll('[' . Html::TRUST_ATTR . ']') as $el) {
-            if (Html::untrust($el) && $nonce !== null && !$el->hasAttribute('nonce')) {
+            if (Html::untrust($el)) {
+                $trusted[] = $el;
+            }
+        }
+        return $trusted;
+    }
+
+    /**
+     * Add the CSP nonce to the trusted elements still in the page that lack one
+     *
+     * @param \ArrayObject<int, \Dom\Element> $trusted
+     */
+    public static function applyNonce(\Dom\Element|\Dom\Document $root, \ArrayObject $trusted, ?string $nonce): void
+    {
+        if ($nonce === null) {
+            return;
+        }
+        foreach ($trusted as $el) {
+            if (!$el->hasAttribute('nonce') && $root->contains($el)) {
                 $el->setAttribute('nonce', $nonce);
             }
         }

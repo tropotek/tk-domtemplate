@@ -32,14 +32,14 @@ $t->each('user', $users, fn(Row $row, User $user) => $row->text('name', $user->n
 
 - A row has the full template API, scoped to the row: vars inside it never clash with vars elsewhere on the page.
 - A row can change its own element by the repeat's name (`$row->attr('user', 'id', …)`).
-- `insert()` puts the row where the sample is, after earlier rows. `insertBefore()` puts it before them. `insertInto('x')` and `insertBeforeInto('x')` put it at the end or start of every `x` node.
+- `insert()` puts the row where the sample is, after earlier rows. `insertFirst()` puts it before them. `insertInto('x')` and `insertFirstInto('x')` put it at the end or start of every `x` node.
 - On a row, `append()` and `prepend()` are the usual var shortcuts (`$row->append('tags', '<b>new</b>')`), not placement.
 - Once added, a row is locked.
 - `each()` appends each row unless the callback already added it.
 
 ## Rows somewhere else
 
-`insertInto()` and `insertBeforeInto()` add a row inside another var. The name is looked up in the template the row belongs to, then outward. Every node with that name gets a copy.
+`insertInto()` and `insertFirstInto()` add a row inside another var. The name is looked up in the template the row belongs to, then outward. Every node with that name gets a copy.
 
 ```html
 <ul var="nav">

@@ -10,26 +10,14 @@ final class Handle
 {
     /**
      * @param list<\Dom\Element> $nodes
+     * @internal use Template::var()
      */
     public function __construct(
         private readonly Template $owner,
         private readonly string $name,
         private array $nodes,
+        private readonly HandleOps $ops,
     ) {}
-
-    /** Bound to the owner, so it can call Template's private helpers */
-    private ?\Closure $internal = null;
-
-    /**
-     * Call one of the owner's private helpers (slot(), replaceNode(), setVisible(),
-     * pruneDetached(), isSlot(), assertMutable()). They stay off Template's public API.
-     */
-    private function internal(string $method, mixed ...$args): mixed
-    {
-        $call = $this->internal ??= \Closure::bind(fn(string $m, array $a): mixed => $this->$m(...$a), $this->owner, Template::class)
-            ?? throw new \LogicException('Cannot bind to Template');
-        return $call($method, $args);
-    }
 
     public function name(): string
     {
@@ -42,12 +30,23 @@ final class Handle
      */
     public function text(string $text): static
     {
-        $this->internal('assertMutable');
+        ($this->ops->assertMutable)();
         $text = Html::utf8($text);
         foreach ($this->contentNodes() as $node) {
             $tag = strtolower($node->localName);
             if (in_array($tag, ['iframe', 'xmp', 'noembed', 'noframes', 'plaintext'], true)) {
                 $this->owner->engine()->fail(sprintf("text() can't escape content for <%s> `%s` in %s", $tag, $this->name, $this->owner->label()));
+                continue;
+            }
+            if ($tag === 'script' && !self::isScriptData($node)) {
+                // A template or other non-JS type: its text is kept as written, so it
+                // can't hold the sequences that would end the element early
+                if (Html::breaksScript($text)) {
+                    $this->owner->engine()->fail(sprintf("text() can't safely write `<!--` or `</script` into <script type=\"%s\"> `%s` in %s",
+                        $node->getAttribute('type'), $this->name, $this->owner->label()));
+                    continue;
+                }
+                $node->textContent = $text;
                 continue;
             }
             $node->textContent = match ($tag) {
@@ -56,7 +55,7 @@ final class Handle
                 default => $text,
             };
         }
-        $this->internal('pruneDetached', $this->name);
+        ($this->ops->pruneDetached)($this->name);
         return $this;
     }
 
@@ -66,15 +65,15 @@ final class Handle
      */
     public function html(string|Template $html): static
     {
-        $this->internal('assertMutable');
+        ($this->ops->assertMutable)();
         foreach ($this->contentNodes($html) as $node) {
             if ($html instanceof Template) {
-                $node->replaceChildren($this->internal('slot', $html));
+                $node->replaceChildren(($this->ops->slot)($html));
             } else {
                 $node->innerHTML = $html;
             }
         }
-        $this->internal('pruneDetached', $this->name);
+        ($this->ops->pruneDetached)($this->name);
         return $this;
     }
 
@@ -100,14 +99,14 @@ final class Handle
      */
     public function replace(string|Template $html): static
     {
-        $this->internal('assertMutable');
+        ($this->ops->assertMutable)();
         $replaced = [];
         $gone = [];
         foreach ($this->nodes as $node) {
             foreach ($gone as $old) {
                 if ($old->contains($node)) {
                     // Nested inside a node of the same name replaced earlier in this loop
-                    $this->internal('replaceNode', $this->name, $node, []);
+                    ($this->ops->replaceNode)($this->name, $node, []);
                     continue 2;
                 }
             }
@@ -117,9 +116,9 @@ final class Handle
                 throw new \LogicException(sprintf("Can't replace `%s`: a row can't replace its own element", $this->name));
             }
             if ($html instanceof Template) {
-                $slot = $this->internal('slot', $html, $this->name);
+                $slot = ($this->ops->slot)($html, $this->name);
                 $node->replaceWith($slot);
-                $this->internal('replaceNode', $this->name, $node, [$slot]);
+                ($this->ops->replaceNode)($this->name, $node, [$slot]);
                 $replaced[] = $slot;
                 continue;
             }
@@ -132,7 +131,7 @@ final class Handle
                     $new[] = $n;
                 }
             }
-            $this->internal('replaceNode', $this->name, $node, $new);
+            ($this->ops->replaceNode)($this->name, $node, $new);
             array_push($replaced, ...$new);
         }
         $this->nodes = $replaced;
@@ -147,7 +146,7 @@ final class Handle
      */
     public function attr(string|array $name, string|int|float|bool|null $value = null): static
     {
-        $this->internal('assertMutable');
+        ($this->ops->assertMutable)();
         $attrs = is_array($name) ? $name : [$name => func_num_args() === 1 ? true : $value];
         foreach (array_keys($attrs) as $attr) {
             if (!is_string($attr) || !Html::isAttrName($attr)) {
@@ -176,7 +175,7 @@ final class Handle
      */
     public function addClass(string|array $class): static
     {
-        $this->internal('assertMutable');
+        ($this->ops->assertMutable)();
         $tokens = self::tokens($class);
         foreach ($this->nodes as $node) {
             if ($tokens) {
@@ -193,7 +192,7 @@ final class Handle
      */
     public function removeClass(string|array $class): static
     {
-        $this->internal('assertMutable');
+        ($this->ops->assertMutable)();
         $tokens = self::tokens($class);
         foreach ($this->nodes as $node) {
             if ($tokens) {
@@ -211,9 +210,9 @@ final class Handle
      */
     public function show(bool $visible = true): static
     {
-        $this->internal('assertMutable');
+        ($this->ops->assertMutable)();
         if ($this->nodes) {
-            $this->internal('setVisible', $this->name, $visible);
+            ($this->ops->setVisible)($this->name, $visible);
         }
         return $this;
     }
@@ -236,6 +235,9 @@ final class Handle
 
     public function getAttr(string $name): ?string
     {
+        if (in_array(strtolower($name), [Html::TRUST_ATTR, Asset::KEY_ATTR], true)) {
+            return null;
+        }
         return isset($this->nodes[0]) ? $this->nodes[0]->getAttribute($name) : null;
     }
 
@@ -255,7 +257,7 @@ final class Handle
     {
         $nodes = [];
         foreach ($this->nodes as $node) {
-            if ($this->internal('isSlot', $node)) {
+            if (($this->ops->isSlot)($node)) {
                 $this->owner->engine()->fail(sprintf('`%s` in %s was replaced by a template; change that template instead', $this->name, $this->owner->label()));
             } elseif ($html instanceof Template && $node->localName === 'template') {
                 $this->owner->engine()->fail(sprintf("Can't insert a template into <template> `%s` in %s; insert its render() string instead", $this->name, $this->owner->label()));
@@ -268,11 +270,14 @@ final class Handle
 
     private function adjacent(\Dom\AdjacentPosition $where, string|Template $html): static
     {
-        $this->internal('assertMutable');
+        ($this->ops->assertMutable)();
         foreach ($this->contentNodes($html) as $node) {
             if ($html instanceof Template) {
-                $slot = $this->internal('slot', $html);
+                $slot = ($this->ops->slot)($html);
                 $where === \Dom\AdjacentPosition::BeforeEnd ? $node->append($slot) : $node->prepend($slot);
+            } elseif ($node->localName === 'template') {
+                // A <template>'s content isn't part of the tree, so it is re-set as a whole
+                $node->innerHTML = $where === \Dom\AdjacentPosition::BeforeEnd ? $node->innerHTML . $html : $html . $node->innerHTML;
             } else {
                 $node->insertAdjacentHTML($where, $html);
             }
@@ -289,10 +294,21 @@ final class Handle
         $parts = is_array($class) ? $class : [$class];
         $tokens = [];
         foreach ($parts as $part) {
-            foreach (preg_split('/\s+/', trim($part), -1, PREG_SPLIT_NO_EMPTY) ?: [] as $token) {
+            foreach (preg_split('/\s+/', trim(Html::utf8($part)), -1, PREG_SPLIT_NO_EMPTY) ?: [] as $token) {
                 $tokens[] = $token;
             }
         }
         return $tokens;
+    }
+
+    /**
+     * True for a <script> whose content is JavaScript or JSON (no type, a JS or JSON type,
+     * module, importmap, speculationrules): its text can be escaped without changing its value
+     */
+    private static function isScriptData(\Dom\Element $node): bool
+    {
+        $type = strtolower(trim((string)$node->getAttribute('type')));
+        return $type === '' || in_array($type, ['module', 'importmap', 'speculationrules'], true)
+            || str_contains($type, 'javascript') || str_contains($type, 'ecmascript') || str_contains($type, 'json');
     }
 }

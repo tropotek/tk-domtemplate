@@ -57,7 +57,7 @@ class RepeatTargetTest extends TestCase
     public function testPrependToAndEveryTargetNode(): void
     {
         $t = Template::load('<div><ul var="l"><li>end</li></ul><ul var="l"><li>end</li></ul><li var="r[]">r</li></div>');
-        $t->repeat('r')->insertBeforeInto('l');
+        $t->repeat('r')->insertFirstInto('l');
         $this->assertSame('<div><ul><li>r</li><li>end</li></ul><ul><li>r</li><li>end</li></ul></div>', $t->render());
     }
 

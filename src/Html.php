@@ -7,6 +7,8 @@ namespace Tk\DomTemplate;
  * HTML5 parses a fragment relative to a context element, and drops nodes that
  * aren't allowed there: a bare <tr> or <option> parsed inside a <div> is lost.
  * Fragments are therefore parsed inside a context element chosen from their first tag.
+ *
+ * @internal modifiers trust elements with Modifier\Context::trust()
  */
 final class Html
 {
@@ -34,11 +36,20 @@ final class Html
     private static ?string $secret = null;
 
     /**
+     * A per-process random value. Markers the library writes into the tree carry it, so
+     * the same attributes in inserted HTML strings are recognised as forged.
+     */
+    public static function secret(): string
+    {
+        return self::$secret ??= bin2hex(random_bytes(16));
+    }
+
+    /**
      * Allow the nonce on this element. Returns the element.
      */
     public static function trust(\Dom\Element $el): \Dom\Element
     {
-        $el->setAttribute(self::TRUST_ATTR, self::$secret ??= bin2hex(random_bytes(16)));
+        $el->setAttribute(self::TRUST_ATTR, self::secret());
         return $el;
     }
 
@@ -57,18 +68,28 @@ final class Html
      */
     public static function untrust(\Dom\Element $el): bool
     {
-        $trusted = self::$secret !== null && $el->getAttribute(self::TRUST_ATTR) === self::$secret;
+        $trusted = self::$secret !== null && hash_equals(self::$secret, (string)$el->getAttribute(self::TRUST_ATTR));
         $el->removeAttribute(self::TRUST_ATTR);
         return $trusted;
     }
 
     /**
-     * JavaScript (or JSON) safe inside <script>: `<!--`, `<script` and `</script` get `\u003C`
-     * for `<`, which means the same inside strings, regexes and JSON
+     * JavaScript (or JSON) safe inside <script>: `<!--` becomes `\u003C!--` and `</script`
+     * becomes `<\/script`. Both mean the same inside strings, regexes and JSON, where these
+     * sequences occur; code outside strings (`i<scripts.length`) is left alone.
      */
     public static function scriptText(string $code): string
     {
-        return (string)preg_replace('#<(!--|/?script)#i', '\\u003C$1', $code);
+        $code = (string)preg_replace('#<!--#', '\\u003C!--', $code);
+        return (string)preg_replace('#</(script)(?=[\s/>])#i', '<\\/$1', $code);
+    }
+
+    /**
+     * True when text in a <script> would end it early or hide its end (`</script`, `<!--`)
+     */
+    public static function breaksScript(string $text): bool
+    {
+        return (bool)preg_match('#<!--|</script(?=[\s/>])#i', $text);
     }
 
     /**
@@ -79,8 +100,8 @@ final class Html
         return (string)preg_replace('#</(style)#i', '<\\/$1', $css);
     }
 
-    /** Characters HTML allows in an attribute name (Alpine's @click and :class included) */
-    private const string ATTR_NAME = '/^[^\s"\'>\/=\x00-\x1F\x7F]+$/';
+    /** Characters HTML allows in an attribute name (Alpine's @click and :class included), as valid UTF-8 */
+    private const string ATTR_NAME = '/^[^\s"\'>\/=\x00-\x1F\x7F]+$/u';
 
     public static function isAttrName(string $name): bool
     {
@@ -134,10 +155,11 @@ final class Html
      */
     public static function utf8(string $s): string
     {
-        if (preg_match('//u', $s)) {
-            return $s;
+        if (!preg_match('//u', $s)) {
+            $s = htmlspecialchars_decode(htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'), ENT_QUOTES);
         }
-        return htmlspecialchars_decode(htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'), ENT_QUOTES);
+        // The DOM stops at a NUL, which would silently cut the text short
+        return str_replace("\0", "\u{FFFD}", $s);
     }
 
     /**
@@ -158,7 +180,7 @@ final class Html
             } else {
                 continue;
             }
-            if (in_array(strtolower($charset), ['utf-8', 'utf8'], true)) {
+            if ($charset === '' || in_array(strtolower($charset), ['utf-8', 'utf8'], true)) {
                 continue;
             }
             $fail(sprintf('%s declares charset %s; templates are read and written as UTF-8', $label, $charset));

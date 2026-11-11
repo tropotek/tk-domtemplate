@@ -4,7 +4,7 @@ namespace Tk\DomTemplate;
 /**
  * One row of a repeat: a clone of the sample node with the full template API.
  *
- * Fill it in, then insert it once with insert(), insertBefore(), insertInto() or insertBeforeInto().
+ * Fill it in, then insert it once with insert(), insertFirst(), insertInto() or insertFirstInto().
  * After that it is locked. append() and prepend() are the usual var shortcuts. Create rows with Template::repeat() or Template::each().
  */
 final class Row extends Template
@@ -59,7 +59,7 @@ final class Row extends Template
     /**
      * Insert the row before all rows already inserted from the same sample
      */
-    public function insertBefore(): static
+    public function insertFirst(): static
     {
         $this->add(true);
         return $this;
@@ -78,7 +78,7 @@ final class Row extends Template
     /**
      * Insert the row as the first child of every node with this var name
      */
-    public function insertBeforeInto(string $name): static
+    public function insertFirstInto(string $name): static
     {
         $this->addTo($name, true);
         return $this;

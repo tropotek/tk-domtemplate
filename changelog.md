@@ -6,7 +6,7 @@ Ver 9.0.0 [unreleased]:
   - BREAKING: namespace `Tk\DomTemplate\`, source in `src/`, PHP 8.5+, `ext-dom` and `psr/log` only
   - BREAKING: one `var` attribute replaces `var`/`choice`/`repeat`: `name`, `name?` (optional), `name[]` (repeat)
   - New API: handles (`var()`) and shortcuts (`text()`, `html()`, `replace()`, `attr()`, `addClass()`, `show()`, `hide()` ...)
-  - Repeats: `repeat()`, `each()`, `Row::insert()`, `insertBefore()`, `insertInto()`, `insertBeforeInto()`; nesting
+  - Repeats: `repeat()`, `each()`, `Row::insert()`, `insertFirst()`, `insertInto()`, `insertFirstInto()`; nesting
   - Templates inserted into templates render lazily with the page; templates can be cloned
   - Assets: `js()`, `css()` with `Place`, `jsUrl()`, `cssUrl()`, `meta()`, `title()`; keyed de-duplication; CSP nonce
   - Optional `Engine`: strict (throw) or lenient (log) template mistakes, PSR-3 logger, nonce, modifiers
@@ -20,7 +20,8 @@ Ver 9.0.0 [unreleased]:
   - Inserting a template that was rendered on its own throws `LogicException`
   - CSP nonce: only on template-source and asset scripts/styles/stylesheet links, never on HTML strings; `Engine` nonce may be a closure read at each render; modifiers opt in with `Context::trust()`
   - `meta()` takes `attr:` (`property`, `http-equiv`, `itemprop`); asset attrs accept bare names and Alpine names
-  - Output is always valid UTF-8; a non-UTF-8 `<meta charset>` is reported
+  - Output is always valid UTF-8 (NUL becomes U+FFFD); a non-UTF-8 `<meta charset>` is reported
+  - Internal markers (`data-tk-trust`, `data-tk-key`) carry a per-process secret, are never shown to modifiers or `getAttr()`, and can't be forged from inserted HTML
   - Engine inheritance reaches templates nested several levels deep; asset keys are separate per type
   - `js()` and `text()` into `<script>` escape `<!--`, `<script` and `</script`; `text()` refuses `<iframe>`, `<xmp>` and other unescapable raw-text elements
   - Example site (FrankenPHP, `docker compose up`) and MkDocs site on GitHub Pages

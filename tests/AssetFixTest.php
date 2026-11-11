@@ -87,7 +87,7 @@ class AssetFixTest extends TestCase
         $this->assertNull($doc->querySelector('img'), 'script text must not create elements');
         $this->assertNull($doc->querySelector('b'), 'style text must not create elements');
         $this->assertCount(1, $doc->querySelectorAll('script'));
-        $this->assertStringContainsString('\u003C/script>', $out);
+        $this->assertStringContainsString('<\/script>', $out);
         $this->assertStringContainsString('<\/STYLE>', $out);
     }
 

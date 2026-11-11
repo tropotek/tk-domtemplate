@@ -30,10 +30,10 @@ class RepeatTest extends TestCase
         $r->insert();
         $r = $t->repeat('row');
         $r->text('n', '1');
-        $r->insertBefore();
+        $r->insertFirst();
         $r = $t->repeat('row');
         $r->text('n', '0');
-        $r->insertBefore();
+        $r->insertFirst();
         $this->assertSame('<ul><li var-x=""><b>0</b></li><li var-x=""><b>1</b></li><li var-x=""><b>2</b></li></ul>', $t->render());
     }
 
